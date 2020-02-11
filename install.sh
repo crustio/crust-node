@@ -4,9 +4,9 @@
 
 # Some configuration
 crust_main_install_dir="/opt/crust"
-crust_chain_main_install_dir="/opt/crust/crust"
-crust_tee_main_install_dir="/opt/crust/crust-tee"
-crust_api_main_install_dir="/opt/crust/crust-api"
+crust_chain_main_install_dir="$crust_main_install_dir/crust"
+crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
+crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 
 crust_resource_dir="resource"
 crust_bin="$crust_resource_dir/crust"
