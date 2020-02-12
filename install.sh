@@ -7,8 +7,10 @@ crust_main_install_dir="/opt/crust"
 crust_chain_main_install_dir="$crust_main_install_dir/crust"
 crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
 crust_api_main_install_dir="$crust_main_install_dir/crust-api"
+crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
 crust_resource_dir="resource"
+version_file="VERSION"
 crust_bin="$crust_resource_dir/crust"
 crust_subkey="$crust_resource_dir/subkey"
 crust_api_package="$crust_resource_dir/crust-api.tar"
@@ -68,8 +70,8 @@ fi
 
 verbose INFO "Unzip crust TEE package" h
 tar -xvf "$crust_tee_package" -C "$crust_resource_dir/" &>/dev/null
-verbose INFO " SUCCESS" t
-# ./$crust_tee_resource_dir/install.sh
+verbose INFO " SUCCESS\n" t
+./$crust_tee_resource_dir/install.sh
 rm -rf $crust_tee_resource_dir
 
 # Install crust chain
@@ -114,7 +116,24 @@ rm -rf $crust_api_resource_dir
 
 # Install crust client
 verbose INFO "---------- Installing crust client ----------" n
-verbose INFO "Move crust client to /usr/bin" h
+if [ -d "$crust_client_main_install_dir" ]; then
+  verbose INFO "Uninstall old crust client" h
+  rm -rf $crust_client_main_install_dir
+  if [ -f "$crust_client_aim" ]; then
+    rm $crust_client_aim
+  fi
+  verbose INFO " SUCCESS" t
+fi
+
+verbose INFO "Create client directory $crust_client_main_install_dir" h
+mkdir $crust_client_main_install_dir
+verbose INFO " SUCCESS" t
+
+verbose INFO "Move crust-client files to aim folder: $crust_client_main_install_dir" h
+cp $version_file $crust_client_main_install_dir
+verbose INFO " SUCCESS" t
+
+verbose INFO "Move crust-client runnable stcript to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
 verbose INFO " SUCCESS\n" t
 
