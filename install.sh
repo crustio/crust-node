@@ -11,8 +11,8 @@ crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
 crust_resource_dir="resource"
 version_file="VERSION"
-crust_bin="$crust_resource_dir/crust"
-crust_subkey="$crust_resource_dir/subkey"
+crust_chain_package="$crust_resource_dir/crust.tar"
+crust_chain_resource_dir="$crust_resource_dir/crust"
 crust_api_package="$crust_resource_dir/crust-api.tar"
 crust_api_resource_dir="$crust_resource_dir/crust-api"
 crust_tee_package="$crust_resource_dir/crust-tee.tar"
@@ -41,13 +41,8 @@ if [ ! -d "$crust_resource_dir" ]; then
   exit 1
 fi
 
-if [ ! -f "$crust_bin" ]; then
-  verbose ERROR "Crust bin dosen't exist!"
-  exit 1
-fi
-
-if [ ! -f "$crust_subkey" ]; then
-  verbose ERROR "Crust subkey dosen't exist!"
+if [ ! -f "$crust_chain_package" ]; then
+  verbose ERROR "Crust chain package dosen't exist!"
   exit 1
 fi
 
@@ -71,27 +66,29 @@ fi
 verbose INFO "Unzip crust TEE package" h
 tar -xvf "$crust_tee_package" -C "$crust_resource_dir/" &>/dev/null
 verbose INFO " SUCCESS\n" t
-./$crust_tee_resource_dir/install.sh
+#./$crust_tee_resource_dir/install.sh
 rm -rf $crust_tee_resource_dir
 
 # Install crust chain
 verbose INFO "---------- Installing crust chain ----------" n
-if [ ! -d "$crust_chain_main_install_dir" ]; then
-  verbose INFO "Create $crust_chain_main_install_dir folder" h
-  mkdir $crust_chain_main_install_dir
-  verbose INFO " SUCCESS" t
+if [ -d "$crust_chain_resource_dir" ]; then
+  rm -rf $crust_chain_resource_dir
 fi
 
-if [ ! -d "$crust_chain_main_install_dir/bin" ]; then
-  verbose INFO "Create $crust_chain_main_install_dir/bin folder" h
-  mkdir $crust_chain_main_install_dir/bin
+verbose INFO "Unzip crust chain package" h
+tar -xvf "$crust_chain_package" -C "$crust_resource_dir/" &>/dev/null
+verbose INFO " SUCCESS" t
+
+if [ -d "$crust_chain_main_install_dir" ]; then
+  verbose INFO "Uninstall old crust chain" h
+  rm -rf $crust_chain_main_install_dir
   verbose INFO " SUCCESS" t
 fi
 
 verbose INFO "Move crust chain to aim folder: $crust_chain_main_install_dir" h
-cp "$crust_bin" "$crust_chain_main_install_dir/bin/"
-cp "$crust_subkey" "$crust_chain_main_install_dir/bin/"
+cp -r $crust_chain_resource_dir $crust_main_install_dir
 verbose INFO " SUCCESS\n" t
+rm -rf $crust_chain_resource_dir
 
 # Install crust API
 verbose INFO "---------- Installing crust API ----------" n
@@ -136,4 +133,3 @@ verbose INFO " SUCCESS" t
 verbose INFO "Move crust-client runnable stcript to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
 verbose INFO " SUCCESS\n" t
-
