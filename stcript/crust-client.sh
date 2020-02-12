@@ -11,9 +11,9 @@ function help()
 {
 cat << EOF
 Usage:
-    help      show help information
-    version   show crust-client version
-    config    show configuration files address
+    --help      show help information
+    --version   show crust-client version
+    --config    show configuration files address
 EOF
 }
 
@@ -38,13 +38,13 @@ function config()
 
 # Command line
 case "$1" in
-    config)
+    --config)
         config
         ;;
-    version)
+    --version)
         version
         ;;
-    help)
+    --help)
         help
         ;;
     *)
