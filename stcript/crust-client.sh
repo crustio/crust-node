@@ -7,13 +7,16 @@ crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
 crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
+. $crust_client_main_install_dir/stcript/utils.sh
+
 function help()
 {
 cat << EOF
 Usage:
-    --help      show help information
-    --version   show crust-client version
-    --config    show configuration files address
+    help      show help information
+    version   show crust-client version
+    config    show configuration files address
+    chain-lanuch-genesis <chain-start-stcript> <chain-identity-file>
 EOF
 }
 
@@ -34,17 +37,43 @@ function config()
     echo "crust-tee configuration file address: $crust_tee_main_install_dir/etc/Config.json"
 }
 
+function chainLanuchGenesis()
+{
+    if [ -z $1 ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR "Can't find chain-identity-file!"
+        exit 1
+    fi
+
+    source $1
+    if [ x"$secret_phrase" = x"" ] || [ x"$public_key_sr25519" = x"" ] || [ x"$address_sr25519" = x"" ] || [ x"$public_key_ed25519" = x"" ] || [ x"$address_ed25519" = x"" ]; then
+        verbose ERROR "Please give right chain-identity-file!"
+        exit 1
+    fi
+    
+    verbose INFO "Starting up crust chain without baby and grandpa key" h
+
+    verbose INFO " SUCCESS" t
+}
+
 ############### MAIN BODY ###############
 
 # Command line
 case "$1" in
-    --config)
+    chain-lanuch-genesis)
+        chainLanuchGenesis $2
+        ;;
+    config)
         config
         ;;
-    --version)
+    version)
         version
         ;;
-    --help)
+    help)
         help
         ;;
     *)

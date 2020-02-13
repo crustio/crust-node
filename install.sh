@@ -3,6 +3,8 @@
 . stcript/utils.sh
 
 # Some configuration
+user_dir=$(pwd)
+uid=$(stat -c '%U' $user_dir)
 crust_main_install_dir="/opt/crust"
 crust_chain_main_install_dir="$crust_main_install_dir/crust"
 crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
@@ -67,6 +69,7 @@ tar -xvf "$crust_tee_package" -C "$crust_resource_dir/" &>/dev/null
 verbose INFO " SUCCESS\n" t
 #./$crust_tee_resource_dir/install.sh
 rm -rf $crust_tee_resource_dir
+chown -R $uid:$uid $crust_main_install_dir
 
 # Install crust chain
 verbose INFO "---------- Installing crust chain ----------" n
@@ -88,6 +91,7 @@ verbose INFO "Move crust chain to aim folder: $crust_chain_main_install_dir" h
 cp -r $crust_chain_resource_dir $crust_main_install_dir
 verbose INFO " SUCCESS\n" t
 rm -rf $crust_chain_resource_dir
+chown -R $uid:$uid $crust_chain_main_install_dir
 
 # Install crust API
 verbose INFO "---------- Installing crust API ----------" n
@@ -109,6 +113,7 @@ verbose INFO "Move crust API to aim folder: $crust_api_main_install_dir" h
 cp -r $crust_api_resource_dir $crust_main_install_dir
 verbose INFO " SUCCESS\n" t
 rm -rf $crust_api_resource_dir
+chown -R $uid:$uid $crust_api_main_install_dir
 
 # Install crust client
 verbose INFO "---------- Installing crust client ----------" n
@@ -128,8 +133,14 @@ verbose INFO " SUCCESS" t
 verbose INFO "Move crust-client files to aim folder: $crust_client_main_install_dir" h
 cp VERSION $crust_client_main_install_dir
 cp -r etc/ $crust_client_main_install_dir
+cp -r stcript $crust_client_main_install_dir
+verbose INFO " SUCCESS" t
+
+verbose INFO "Create crust chain raw spec" h
+$crust_chain_main_install_dir/bin/crust build-spec --chain $crust_client_main_install_dir/etc/crust_chain_spec.json --raw > $crust_client_main_install_dir/etc/crust_chain_spec_raw.json &>/dev/null
 verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-client runnable stcript to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
 verbose INFO " SUCCESS\n" t
+chown -R $uid:$uid $crust_client_main_install_dir
