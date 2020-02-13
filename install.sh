@@ -10,7 +10,6 @@ crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
 crust_resource_dir="resource"
-version_file="VERSION"
 crust_chain_package="$crust_resource_dir/crust.tar"
 crust_chain_resource_dir="$crust_resource_dir/crust"
 crust_api_package="$crust_resource_dir/crust-api.tar"
@@ -127,7 +126,8 @@ mkdir $crust_client_main_install_dir
 verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-client files to aim folder: $crust_client_main_install_dir" h
-cp $version_file $crust_client_main_install_dir
+cp VERSION $crust_client_main_install_dir
+cp -r etc/ $crust_client_main_install_dir
 verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-client runnable stcript to /usr/bin" h
