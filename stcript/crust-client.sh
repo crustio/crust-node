@@ -39,30 +39,32 @@ function config()
 
 function send_grandpa_key()
 {
+local secret_phrase=${@:3}
 curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
-  "{
+ "{
     \"jsonrpc\":\"2.0\",
     \"id\":1,
     \"method\":\"author_insertKey\",
     \"params\": [
       \"gran\",
-      \"$2\",
-      \"$3\"
+      \"$secret_phrase\",
+      \"$2\"
     ]
   }"
 }
 
 function send_babe_key()
 {
+local secret_phrase=${@:3}
 curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
-  "{
+ "{
     \"jsonrpc\":\"2.0\",
     \"id\":1,
     \"method\":\"author_insertKey\",
     \"params\": [
       \"babe\",
-      \"$2\",
-      \"$3\"
+      \"$secret_phrase\",
+      \"$2\"
     ]
   }"
 }
@@ -99,7 +101,7 @@ function chainLanuchGenesis()
     verbose INFO " SUCCESS" t
     
     verbose INFO "Try to kill old crust chain with same <chain_start_stcript>" h
-    crust_chain_pid=$(ps -ef | grep "\"$chain_start_stcript\"" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid
         if [ $? -ne 0 ]; then
@@ -109,30 +111,48 @@ function chainLanuchGenesis()
     fi
     verbose INFO " SUCCESS" t
 
-    verbose INFO "Generate temp log file $name.temp.log for crust chain without babe and grandpa key" h
-    touch "$name.temp.log"
+    rand_log_file=$name.temp.log
+    verbose INFO "Generate temp log file $rand_log_file for crust chain without babe and grandpa key" h
+    touch $rand_log_file
     verbose INFO " SUCCESS" t
     
     verbose INFO "Start up crust chain without babe and grandpa key" h
     nohup $chain_start_stcript &>$rand_log_file &
-    checkRes $? "quit"
+    verbose INFO " SUCCESS" t
 
     verbose INFO "Please wait 20s for crust chain starts completely..." n
     timeout=20
     while [ $timeout -gt 0 ]; do
-        verbose INFO "$timeout s ->" h
+        echo -e "$timeout->\c"
         ((timeout--))
         sleep 1
     done
     verbose INFO " SUCCESS" t
 
     verbose INFO "Send grandpa key to your chain" h
-    send_grandpa_key $rpc_port $secret_phrase $public_key_ed25519
+    send_grandpa_key $rpc_port $public_key_ed25519 $secret_phrase
     verbose INFO " SUCCESS" t
 
     verbose INFO "Send babe key to your chain" h
-    send_grandpa_key $rpc_port $secret_phrase $public_key_sr25519
+    send_babe_key $rpc_port $public_key_sr25519 $secret_phrase 
     verbose INFO " SUCCESS" t
+
+    verbose INFO "Try to kill old crust chain with same <chain_start_stcript> again" h
+    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    echo $crust_chain_pid
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            execWithExpect "kill -9 $crust_chain_pid"
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+    rm $rand_log_file
+
+    verbose INFO "Lanuch crust chain <chain_start_stcript>" n
+    sleep 2
+    eval $chain_start_stcript
 }
 
 ############### MAIN BODY ###############
