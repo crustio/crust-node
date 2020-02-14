@@ -39,24 +39,32 @@ function config()
 
 function chainLanuchGenesis()
 {
-    if [ -z $1 ]; then
+    if [ x"$1" = x"" ] || [ x"$2" = x"" ]; then
         help
         exit 1
     fi
 
     if [ ! -f "$1" ]; then
+        verbose ERROR "Can't find chain-start-stcript!"
+        exit 1
+    fi
+
+    if [ ! -f "$2" ]; then
         verbose ERROR "Can't find chain-identity-file!"
         exit 1
     fi
 
-    source $1
+    chain-start-stcript=$(cat $1)
+
+    source $2
     if [ x"$secret_phrase" = x"" ] || [ x"$public_key_sr25519" = x"" ] || [ x"$address_sr25519" = x"" ] || [ x"$public_key_ed25519" = x"" ] || [ x"$address_ed25519" = x"" ]; then
         verbose ERROR "Please give right chain-identity-file!"
         exit 1
     fi
     
+    cat chain-start-stcript
     verbose INFO "Starting up crust chain without baby and grandpa key" h
-
+    # eval chain-start-stcript
     verbose INFO " SUCCESS" t
 }
 
@@ -65,7 +73,7 @@ function chainLanuchGenesis()
 # Command line
 case "$1" in
     chain-lanuch-genesis)
-        chainLanuchGenesis $2
+        chainLanuchGenesis $2 $3
         ;;
     config)
         config

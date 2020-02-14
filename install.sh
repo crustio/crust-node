@@ -136,8 +136,8 @@ cp -r etc/ $crust_client_main_install_dir
 cp -r stcript $crust_client_main_install_dir
 verbose INFO " SUCCESS" t
 
-verbose INFO "Create crust chain raw spec" h
-$crust_chain_main_install_dir/bin/crust build-spec --chain $crust_client_main_install_dir/etc/crust_chain_spec.json --raw > $crust_client_main_install_dir/etc/crust_chain_spec_raw.json &>/dev/null
+verbose INFO "Create crust chain raw spec" n
+$crust_chain_main_install_dir/bin/crust build-spec --chain $crust_client_main_install_dir/etc/crust_chain_spec.json --raw > $crust_client_main_install_dir/etc/crust_chain_spec_raw.json
 verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-client runnable stcript to /usr/bin" h
