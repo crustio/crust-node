@@ -96,11 +96,10 @@ chown -R $uid:$uid $crust_chain_main_install_dir
 # Install crust API
 verbose INFO "---------- Installing crust API ----------" n
 
-verbose INFO "Install crust API dependencies" h
-apt install nodejs &>/dev/null
-apt install npm &>/dev/null
-apt install yarn &>/dev/null
-verbose INFO " SUCCESS" t
+verbose INFO "Install crust API dependencies" n
+apt install nodejs
+apt install yarn
+verbose INFO "SUCCESS" t
 
 if [ -d "$crust_api_resource_dir" ]; then
   rm -rf $crust_api_resource_dir
