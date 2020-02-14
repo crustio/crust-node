@@ -54,17 +54,18 @@ function chainLanuchGenesis()
         exit 1
     fi
 
-    chain-start-stcript=$(cat $1)
+    chain_start_stcript=$(cat $1)
 
     source $2
     if [ x"$secret_phrase" = x"" ] || [ x"$public_key_sr25519" = x"" ] || [ x"$address_sr25519" = x"" ] || [ x"$public_key_ed25519" = x"" ] || [ x"$address_ed25519" = x"" ]; then
         verbose ERROR "Please give right chain-identity-file!"
         exit 1
     fi
-    
-    cat chain-start-stcript
+
+    chain_start_stcript=${chain_start_stcript/"\\\n"/""}
+    echo $chain_start_stcript
     verbose INFO "Starting up crust chain without baby and grandpa key" h
-    # eval chain-start-stcript
+    # eval $chain_start_stcript
     verbose INFO " SUCCESS" t
 }
 
