@@ -1,4 +1,18 @@
 #!/bin/bash
+function execWithExpect()
+{
+    local cmd=$1
+    local pkgPath=$2
+expect << EOF > $TMPFILE
+    set timeout $instTimeout
+    spawn sudo $cmd $pkgPath
+    expect "password"        { send "$passwd\n"  }
+    expect eof
+EOF
+    ! cat $TMPFILE | grep "error\|ERROR" &>/dev/null
+    return $?
+}
+
 function checkRes()
 {
     local res=$1
