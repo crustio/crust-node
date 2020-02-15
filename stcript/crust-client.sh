@@ -16,6 +16,7 @@ Usage:
     help      show help information
     version   show crust-client version
     chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>
+    api-lanuch <api-lanuch.config>
     tee-lanuch <tee-lanuch.json>
 EOF
 }
@@ -145,9 +146,30 @@ function chainLanuchGenesis()
     verbose INFO " SUCCESS" t
     rm $rand_log_file
 
-    verbose INFO "Lanuch crust chain <chain-lanuch.json>" n
+    verbose INFO "Lanuch crust chain with <chain-lanuch.json>" n
     sleep 2
     eval $chain_start_stcript
+}
+
+apiLanuch()
+{
+    trap '{ cd - ; }' INT
+    verbose INFO "Check <api-lanuch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR "Can't find api-lanuch.json!"
+        exit 1
+    fi
+    source $1
+    verbose INFO " SUCCESS" t
+
+    verbose INFO "Lanuch crust api with <api-lanuch.json>" n
+    cd $crust_api_main_install_dir
+    CRUST_API_PORT=$crust_api_port CRUST_CHAIN_ENDPOINT=$crust_chain_endpoint yarn start
 }
 
 teeLanuch()
@@ -165,7 +187,12 @@ teeLanuch()
     verbose INFO " SUCCESS" t
 
     tee_config=$(cat $1)
-    getJsonValuesByAwk "$tee_config" "api_base_url" "null"
+    api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
+    echo api_base_url
+
+    verbose INFO "Check <tee-lanuch.json>" h
+    $crust_tee_main_install_dir/bin/crust-tee -c $1
+    verbose INFO " SUCCESS" t
 }
 
 ############### MAIN BODY ###############
@@ -177,6 +204,9 @@ case "$1" in
         ;;
     tee-lanuch)
         teeLanuch $2
+        ;;
+    api-lanuch)
+        apiLanuch $2
         ;;
     version)
         version
