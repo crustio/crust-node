@@ -154,6 +154,7 @@ function chainLanuchGenesis()
 
 ipfsLanuch()
 {
+    # TODO: Custom ipfs
     verbose INFO "Lanuch ipfs" n
     $crust_tee_main_install_dir/bin/ipfs daemon
 }
@@ -174,7 +175,7 @@ apiLanuch()
     source $1
     verbose INFO " SUCCESS" t
 
-    verbose INFO "Lanuch crust api with <api-lanuch.json>" n
+    verbose INFO "Lanuch crust API with <api-lanuch.json>" n
     cd $crust_api_main_install_dir
     CRUST_API_PORT=$crust_api_port CRUST_CHAIN_ENDPOINT=$crust_chain_endpoint yarn start
 }
@@ -193,13 +194,14 @@ teeLanuch()
     fi
     verbose INFO " SUCCESS" t
 
-    tee_config=$(cat $1)
-    api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
-    echo api_base_url
+    # TODO: Analyze tee configurations
+    # tee_config=$(cat $1)
+    # api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
+    # validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
+    # echo api_base_url
 
-    verbose INFO "Check <tee-lanuch.json>" h
+    verbose INFO "Lanuch crust TEE with <tee-lanuch.json>" n
     $crust_tee_main_install_dir/bin/crust-tee -c $1
-    verbose INFO " SUCCESS" t
 }
 
 ############### MAIN BODY ###############
