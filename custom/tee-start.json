@@ -1,0 +1,27 @@
+{
+    "empty_path" : "crust/node1/tee/empty_path",
+    "empty_capacity" : 4,
+    
+    "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",
+    "api_base_url": "http://127.0.0.1:12222/api/v0",
+    "validator_api_base_url": "http://127.0.0.1:12222/api/v0",
+
+    "crust_api_base_url" : "http://127.0.0.1:56666/api/v1",
+    "crust_address" : "",
+    "crust_account_id" : "",
+    "crust_password" : "",
+    "crust_backup" : "",
+    
+    "spid": "FEF23C7E73A379823CE71FF289CFBC07",
+    "linkable": true,
+    "random_nonce": true,
+    "use_platform_services": false,
+    "ias_primary_subscription_key": "e2e08166ca0f41ef88af2797f007c7cd",
+    "ias_secondary_subscription_key": "2ecdd9cb7a004f3e8e0e45ed2ebd1fb4",
+    "ias_base_url": "api.trustedservices.intel.com",
+    "ias_base_path": "/sgx/dev/attestation/v3/report",
+
+    "flags": 4,
+    "debug": false,
+    "verbose": false
+}

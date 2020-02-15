@@ -15,8 +15,8 @@ cat << EOF
 Usage:
     help      show help information
     version   show crust-client version
-    config    show configuration files address
     chain-lanuch-genesis <chain-start.config> <chain-identity-file>
+    tee-lanuch <tee-start.json>
 EOF
 }
 
@@ -30,11 +30,6 @@ function version()
     cat $crust_api_main_install_dir/VERSION
     echo "crust-tee version:"
     cat $crust_tee_main_install_dir/VERSION
-}
-
-function config()
-{
-    echo "crust-tee configuration file address: $crust_tee_main_install_dir/etc/Config.json"
 }
 
 function send_grandpa_key()
@@ -106,7 +101,7 @@ function chainLanuchGenesis()
         kill -9 $crust_chain_pid
         if [ $? -ne 0 ]; then
             # If failed by using current user, kill it using root
-            execWithExpect "kill -9 $crust_chain_pid"
+            sudo "kill -9 $crust_chain_pid"
         fi
     fi
     verbose INFO " SUCCESS" t
@@ -144,7 +139,7 @@ function chainLanuchGenesis()
         kill -9 $crust_chain_pid
         if [ $? -ne 0 ]; then
             # If failed by using current user, kill it using root
-            execWithExpect "kill -9 $crust_chain_pid"
+            sudo "kill -9 $crust_chain_pid"
         fi
     fi
     verbose INFO " SUCCESS" t
@@ -155,6 +150,24 @@ function chainLanuchGenesis()
     eval $chain_start_stcript
 }
 
+teeLanuch()
+{
+    verbose INFO "Check <tee-start.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR "Can't find tee-start.json!"
+        exit 1
+    fi
+    verbose INFO " SUCCESS" t
+
+    tee_config=$(cat $1)
+    echo getJsonValuesByAwk "$tee_config" "api_base_url" "null"
+}
+
 ############### MAIN BODY ###############
 
 # Command line
@@ -162,8 +175,8 @@ case "$1" in
     chain-lanuch-genesis)
         chainLanuchGenesis $2 $3
         ;;
-    config)
-        config
+    tee-lanuch)
+        teeLanuch $2
         ;;
     version)
         version
