@@ -13,11 +13,12 @@ function help()
 {
 cat << EOF
 Usage:
-    help      show help information
-    version   show crust-client version
-    chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>
-    api-lanuch <api-lanuch.config>
-    tee-lanuch <tee-lanuch.json>
+    help                                                              show help information
+    version                                                           show crust-client version
+    chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>  lanuch crust-chain as genesis node
+    api-lanuch <api-lanuch.config>                                    lanuch crust-api
+    ipfs-lanuch                                                       lanuch ipfs (cannot be customized for now, ipfs will be install in ~.ipfs/)      
+    tee-lanuch <tee-lanuch.json>                                      lanuch crust-tee (if you set api_base_url==validator_api_base_url in config file, you need to be genesis node)
 EOF
 }
 
@@ -151,6 +152,12 @@ function chainLanuchGenesis()
     eval $chain_start_stcript
 }
 
+ipfsLanuch()
+{
+    verbose INFO "Lanuch ipfs" n
+    $crust_tee_main_install_dir/bin/ipfs daemon
+}
+
 apiLanuch()
 {
     trap '{ cd - ; }' INT
@@ -207,6 +214,9 @@ case "$1" in
         ;;
     api-lanuch)
         apiLanuch $2
+        ;;
+    ipfs-lanuch)
+        ipfsLanuch
         ;;
     version)
         version
