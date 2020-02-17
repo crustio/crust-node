@@ -19,6 +19,9 @@ Usage:
     api-lanuch <api-lanuch.config>                                    lanuch crust-api
     ipfs-lanuch                                                       lanuch ipfs (cannot be customized for now, ipfs will be install in ~.ipfs/)      
     tee-lanuch <tee-lanuch.json>                                      lanuch crust-tee (if you set api_base_url==validator_api_base_url in config file, you need to be genesis node)
+    -b <log-file> 
+        with "chain-lanuch-genesis", "api-lanuch",
+             "ipfs-lanuch", "tee-lanuch"                              lanuch commands will be started in backend
 EOF
 }
 
@@ -94,16 +97,19 @@ function chainLanuchGenesis()
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
-    chain_start_stcript="/opt/crust/crust/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --telemetry-url ws://telemetry.polkadot.io:1024 --validator --name $name"
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --telemetry-url ws://telemetry.polkadot.io:1024 --validator --name $name"
+    if [ x"$bootnodes" = x"" ]; then
+        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+    fi
     verbose INFO " SUCCESS" t
     
     verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
-        kill -9 $crust_chain_pid
+        kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
             # If failed by using current user, kill it using root
-            sudo "kill -9 $crust_chain_pid"
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
         fi
     fi
     verbose INFO " SUCCESS" t
@@ -136,27 +142,42 @@ function chainLanuchGenesis()
 
     verbose INFO "Try to kill old crust chain with same <chain-lanuch.json> again" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
-    echo $crust_chain_pid
     if [ x"$crust_chain_pid" != x"" ]; then
-        kill -9 $crust_chain_pid
+        kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
             # If failed by using current user, kill it using root
-            sudo "kill -9 $crust_chain_pid"
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
         fi
     fi
     verbose INFO " SUCCESS" t
-    rm $rand_log_file
+    rm $rand_log_file &>/dev/null
 
-    verbose INFO "Lanuch crust chain with <chain-lanuch.json>" n
     sleep 2
-    eval $chain_start_stcript
+    if [ -z "$3" ]; then
+        verbose INFO "Lanuch crust chain with $1 configurations\n"
+        eval $chain_start_stcript
+    else
+        nohup $chain_start_stcript &>$3 &
+        sleep 1
+        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        mv $3 $3.$chain_pid
+        verbose INFO "Lanuch crust chain with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+    fi
 }
 
 ipfsLanuch()
 {
     # TODO: Custom ipfs
-    verbose INFO "Lanuch ipfs" n
-    $crust_tee_main_install_dir/bin/ipfs daemon
+    cmd_run="$crust_tee_main_install_dir/bin/ipfs daemon"
+    if [ -z "$1" ]; then
+        verbose INFO "Lanuch ipfs\n"
+        eval $cmd_run
+    else
+        nohup $cmd_run &>$1 &
+        ipfs_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+        mv $1 $1.$ipfs_pid
+        verbose INFO "Lanuch ipfs in backend (pid is $ipfs_pid), log information will be saved in $1.$ipfs_pid\n"
+    fi
 }
 
 apiLanuch()
@@ -175,9 +196,16 @@ apiLanuch()
     source $1
     verbose INFO " SUCCESS" t
 
-    verbose INFO "Lanuch crust API with <api-lanuch.json>" n
-    cd $crust_api_main_install_dir
-    CRUST_API_PORT=$crust_api_port CRUST_CHAIN_ENDPOINT=$crust_chain_endpoint yarn start
+    cmd_run="node $crust_api_main_install_dir/node_modules/.bin/ts-node $crust_api_main_install_dir/src/index.ts $crust_api_port $crust_chain_endpoint"
+    if [ -z "$2" ]; then
+        verbose INFO "Lanuch crust API with $1 configurations\n"
+        $cmd_run
+    else
+        nohup $cmd_run &>$2 &
+        api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+        mv $2 $2.$api_pid
+        verbose INFO "Lanuch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
+    fi
 }
 
 teeLanuch()
@@ -194,41 +222,65 @@ teeLanuch()
     fi
     verbose INFO " SUCCESS" t
 
-    # TODO: Analyze tee configurations
-    # tee_config=$(cat $1)
-    # api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
-    # validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
-    # echo api_base_url
+    tee_config=$(cat $1)
+    api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
+    validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
+    if [ $api_base_url = $validator_api_base_url ]; then
+         verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesisi nodes\n"
+    fi
 
-    verbose INFO "Lanuch crust TEE with <tee-lanuch.json>" n
-    $crust_tee_main_install_dir/bin/crust-tee -c $1
+    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
+    if [ -z "$2" ]; then
+        verbose INFO "Lanuch crust TEE with $1 configurations\n"
+        eval $cmd_run
+    else
+        nohup $cmd_run &>$2 &
+        tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+        mv $2 $2.$tee_pid
+        verbose INFO "Lanuch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.$tee_pid\n"
+    fi
 }
 
 ############### MAIN BODY ###############
-
+backend_log_file=""
 # Command line
-case "$1" in
-    chain-lanuch-genesis)
-        chainLanuchGenesis $2 $3
-        ;;
-    tee-lanuch)
-        teeLanuch $2
-        ;;
-    api-lanuch)
-        apiLanuch $2
-        ;;
-    ipfs-lanuch)
-        ipfsLanuch
-        ;;
-    version)
-        version
-        ;;
-    help)
-        help
-        ;;
-    *)
-        help
-        exit 1
-        ;;
-esac
+while true ; do
+    case "$1" in
+        -b)
+            backend_log_file=$2
+            shift 2
+            ;;
+        chain-lanuch-genesis)
+            cmd_run="chainLanuchGenesis $2 $3"
+            shift 3
+            ;;
+        tee-lanuch)
+            cmd_run="teeLanuch $2"
+            shift 2
+            ;;
+        api-lanuch)
+            cmd_run="apiLanuch $2"
+            shift 2
+            ;;
+        ipfs-lanuch)
+            cmd_run="ipfsLanuch"
+            shift 1
+            ;;
+        version)
+            cmd_run="version"
+            break;
+            ;;
+        help)
+            cmd_run="help"
+            break;
+            ;;
+        --) 
+            shift ;
+            break ;;
+        *)
+            break;
+            ;;
+    esac
+done
+$cmd_run $backend_log_file
 exit 0
