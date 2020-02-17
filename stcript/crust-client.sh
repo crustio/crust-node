@@ -159,8 +159,9 @@ function chainLanuchGenesis()
     else
         nohup $chain_start_stcript &>$3 &
         sleep 1
-        crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
-        verbose INFO "Lanuch crust chain with $1 configurations in backend (pid is $crust_chain_pid), log information will be saved in $3\n"
+        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        mv $3 $3.$chain_pid
+        verbose INFO "Lanuch crust chain with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
     fi
 }
 
@@ -174,7 +175,8 @@ ipfsLanuch()
     else
         nohup $cmd_run &>$1 &
         ipfs_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        verbose INFO "Lanuch ipfs in backend (pid is $ipfs_pid), log information will be saved in $1\n"
+        mv $1 $1.$ipfs_pid
+        verbose INFO "Lanuch ipfs in backend (pid is $ipfs_pid), log information will be saved in $1.$ipfs_pid\n"
     fi
 }
 
@@ -201,8 +203,8 @@ apiLanuch()
     else
         nohup $cmd_run &>$2 &
         api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        verbose INFO "Lanuch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2\n"
-        cd - &>/dev/null
+        mv $2 $2.$api_pid
+        verbose INFO "Lanuch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
     fi
 }
 
@@ -234,7 +236,8 @@ teeLanuch()
     else
         nohup $cmd_run &>$2 &
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        verbose INFO "Lanuch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2\n"
+        mv $2 $2.$tee_pid
+        verbose INFO "Lanuch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.$tee_pid\n"
     fi
 }
 
