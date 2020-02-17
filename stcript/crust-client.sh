@@ -197,11 +197,12 @@ teeLanuch()
     fi
     verbose INFO " SUCCESS" t
 
-    # TODO: Analyze tee configurations
-    # tee_config=$(cat $1)
-    # api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
-    # validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
-    # echo api_base_url
+    tee_config=$(cat $1)
+    api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
+    validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
+    if [ $api_base_url = $validator_api_base_url ]; then
+         verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesisi nodes" n
+    fi
 
     verbose INFO "Lanuch crust TEE with <tee-lanuch.json>" n
     $crust_tee_main_install_dir/bin/crust-tee -c $1
