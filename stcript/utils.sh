@@ -5,7 +5,7 @@ function getJsonValuesByAwk() {
     awk -v json="$1" -v key="$2" -v defaultValue="$3" 'BEGIN{
         foundKeyCount = 0
         while (length(json) > 0) {
-            # pos = index(json, "\""key"\""); ## 这行更快一些，但是如果有value是字符串，且刚好与要查找的key相同，会被误认为是key而导致值获取错误
+            # pos = index(json, "\""key"\"");
             pos = match(json, "\""key"\"[ \\t]*?:[ \\t]*");
             if (pos == 0) {if (foundKeyCount == 0) {print defaultValue;} exit 0;}
 
