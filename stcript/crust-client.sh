@@ -160,17 +160,17 @@ function chainLanuchGenesis()
     rm $rand_log_file &>/dev/null
 
     verbose WARN "You need to open the port($port) in your device to Make extranet nodes discover your node."
-    sleep 2
+    sleep 1
 
     if [ -z "$3" ]; then
-        verbose INFO "Lanuch crust chain with $1 configurations\n"
+        verbose INFO "Lanuch crust chain(genesis node) with $1 configurations\n"
         eval $chain_start_stcript
     else
         nohup $chain_start_stcript &>$3 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
         mv $3 $3.$chain_pid
-        verbose INFO "Lanuch crust chain with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+        verbose INFO "Lanuch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
     fi
 }
 
@@ -197,11 +197,14 @@ chainLanuchNormal()
     
     verbose INFO " SUCCESS" t
 
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes($bootnodes)" h
         chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
         verbose INFO " SUCCESS" t
+    else
+        verbose ERROR "Please fill bootnodes in chain configuration!"
+        exit 1
     fi
 
     verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
@@ -220,7 +223,17 @@ chainLanuchNormal()
         verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
     fi
 
-    echo $chain_start_stcript
+    sleep 1
+    if [ -z "$2" ]; then
+        verbose INFO "Lanuch crust chain(normal node) with $1 configurations\n"
+        eval $chain_start_stcript
+    else
+        nohup $chain_start_stcript &>$2 &
+        sleep 1
+        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        mv $2 $2.$chain_pid
+        verbose INFO "Lanuch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+    fi
 }
 
 ipfsLanuch()
