@@ -8,14 +8,17 @@ crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
 . $crust_client_main_install_dir/stcript/utils.sh
+trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
 function help()
 {
 cat << EOF
+
 Usage:
     help                                                              show help information
     version                                                           show crust-client version
     chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>  lanuch crust-chain as genesis node
+    chain-lanuch-normal <chain-lanuch.config>                         lanuch crust-chain as normal node
     api-lanuch <api-lanuch.config>                                    lanuch crust-api
     ipfs-lanuch                                                       lanuch ipfs (cannot be customized for now, ipfs will be install in ~.ipfs/)      
     tee-lanuch <tee-lanuch.json>                                      lanuch crust-tee (if you set api_base_url==validator_api_base_url in config file, you need to be genesis node)
@@ -72,28 +75,32 @@ curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
 function chainLanuchGenesis()
 {
     verbose INFO "Check <chain-lanuch.config> and <chain-identity-file>" h
-    if [ x"$1" = x"" ] || [ x"$2" = x"" ]; then
+    if [ -z $1 ] || [ -z $2 ]; then
         help
         exit 1
     fi
 
     if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Can't find chain-lanuch.config!"
         exit 1
     fi
     if [ ! -f "$2" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Can't find chain-identity-file!"
         exit 1
     fi
     
     source $2
     if [ x"$secret_phrase" = x"" ] || [ x"$public_key_sr25519" = x"" ] || [ x"$address_sr25519" = x"" ] || [ x"$public_key_ed25519" = x"" ] || [ x"$address_ed25519" = x"" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Please give right chain-identity-file!"
         exit 1
     fi
 
     source $1
     if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
@@ -152,16 +159,80 @@ function chainLanuchGenesis()
     verbose INFO " SUCCESS" t
     rm $rand_log_file &>/dev/null
 
-    sleep 2
+    verbose WARN "You need to open the port($port) in your device to Make extranet nodes discover your node."
+    sleep 1
+
     if [ -z "$3" ]; then
-        verbose INFO "Lanuch crust chain with $1 configurations\n"
+        verbose INFO "Lanuch crust chain(genesis node) with $1 configurations\n"
         eval $chain_start_stcript
     else
         nohup $chain_start_stcript &>$3 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
         mv $3 $3.$chain_pid
-        verbose INFO "Lanuch crust chain with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+        verbose INFO "Lanuch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+    fi
+}
+
+chainLanuchNormal()
+{
+    verbose INFO "Check <chain-lanuch.config>" h
+    if [ -z $1 ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find chain-lanuch.config!"
+        exit 1
+    fi
+
+    source $1
+    if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Please give right chain-lanuch.config!"
+        exit 1
+    fi
+    
+    verbose INFO " SUCCESS" t
+
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    if [ ! -z $bootnodes ]; then
+        verbose INFO "Add bootnodes($bootnodes)" h
+        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO " SUCCESS" t
+    else
+        verbose ERROR "Please fill bootnodes in chain configuration!"
+        exit 1
+    fi
+
+    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
+    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
+    if [ x"$external_rpc_ws" = x"true" ]; then
+        chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
+        verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
+    fi
+
+    sleep 1
+    if [ -z "$2" ]; then
+        verbose INFO "Lanuch crust chain(normal node) with $1 configurations\n"
+        eval $chain_start_stcript
+    else
+        nohup $chain_start_stcript &>$2 &
+        sleep 1
+        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        mv $2 $2.$chain_pid
+        verbose INFO "Lanuch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
     fi
 }
 
@@ -182,7 +253,6 @@ ipfsLanuch()
 
 apiLanuch()
 {
-    trap '{ cd - ; }' INT
     verbose INFO "Check <api-lanuch.json>" h
     if [ x"$1" = x"" ]; then
         help
@@ -190,7 +260,7 @@ apiLanuch()
     fi
 
     if [ ! -f "$1" ]; then
-        verbose ERROR "Can't find api-lanuch.json!"
+        verbose ERROR "Failed!\nCan't find api-lanuch.json!"
         exit 1
     fi
     source $1
@@ -217,7 +287,7 @@ teeLanuch()
     fi
 
     if [ ! -f "$1" ]; then
-        verbose ERROR "Can't find tee-lanuch.json!"
+        verbose ERROR "Failed!\nCan't find tee-lanuch.json!"
         exit 1
     fi
     verbose INFO " SUCCESS" t
@@ -248,19 +318,46 @@ while true ; do
     case "$1" in
         -b)
             backend_log_file=$2
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         chain-lanuch-genesis)
             cmd_run="chainLanuchGenesis $2 $3"
+            if [ -z $2 ] && [ -z $3 ]; then
+                shift 1
+            elif [ -z $3 ]; then
+                shift 2
+            else
+                shift 3
+            fi
             shift 3
+            ;;
+        chain-lanuch-normal)
+            cmd_run="chainLanuchNormal $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         tee-lanuch)
             cmd_run="teeLanuch $2"
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         api-lanuch)
             cmd_run="apiLanuch $2"
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         ipfs-lanuch)
             cmd_run="ipfsLanuch"
