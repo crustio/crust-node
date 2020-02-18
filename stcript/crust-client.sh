@@ -13,6 +13,7 @@ trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 function help()
 {
 cat << EOF
+
 Usage:
     help                                                              show help information
     version                                                           show crust-client version
@@ -74,28 +75,32 @@ curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
 function chainLanuchGenesis()
 {
     verbose INFO "Check <chain-lanuch.config> and <chain-identity-file>" h
-    if [ x"$1" = x"" ] || [ x"$2" = x"" ]; then
+    if [ -z $1 ] || [ -z $2 ]; then
         help
         exit 1
     fi
 
     if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Can't find chain-lanuch.config!"
         exit 1
     fi
     if [ ! -f "$2" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Can't find chain-identity-file!"
         exit 1
     fi
     
     source $2
     if [ x"$secret_phrase" = x"" ] || [ x"$public_key_sr25519" = x"" ] || [ x"$address_sr25519" = x"" ] || [ x"$public_key_ed25519" = x"" ] || [ x"$address_ed25519" = x"" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Please give right chain-identity-file!"
         exit 1
     fi
 
     source $1
     if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
@@ -172,18 +177,20 @@ function chainLanuchGenesis()
 chainLanuchNormal()
 {
     verbose INFO "Check <chain-lanuch.config>" h
-    if [ x"$1" = x"" ]; then
+    if [ -z $1 ]; then
         help
         exit 1
     fi
 
     if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Can't find chain-lanuch.config!"
         exit 1
     fi
 
     source $1
     if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
+        verbose ERROR " Failed" t
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
@@ -208,7 +215,7 @@ chainLanuchNormal()
     fi
     verbose INFO " SUCCESS" t
 
-    if [ -z $external_rpc_ws ] && [ $external_rpc_ws = "true" ]; then
+    if [ x"$external_rpc_ws" = x"true" ]; then
         chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
         verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
     fi
@@ -233,7 +240,6 @@ ipfsLanuch()
 
 apiLanuch()
 {
-    trap '{ cd - ; }' INT
     verbose INFO "Check <api-lanuch.json>" h
     if [ x"$1" = x"" ]; then
         help
@@ -241,7 +247,7 @@ apiLanuch()
     fi
 
     if [ ! -f "$1" ]; then
-        verbose ERROR "Can't find api-lanuch.json!"
+        verbose ERROR "Failed!\nCan't find api-lanuch.json!"
         exit 1
     fi
     source $1
@@ -268,7 +274,7 @@ teeLanuch()
     fi
 
     if [ ! -f "$1" ]; then
-        verbose ERROR "Can't find tee-lanuch.json!"
+        verbose ERROR "Failed!\nCan't find tee-lanuch.json!"
         exit 1
     fi
     verbose INFO " SUCCESS" t
@@ -299,23 +305,46 @@ while true ; do
     case "$1" in
         -b)
             backend_log_file=$2
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         chain-lanuch-genesis)
             cmd_run="chainLanuchGenesis $2 $3"
+            if [ -z $2 ] && [ -z $3 ]; then
+                shift 1
+            elif [ -z $3 ]; then
+                shift 2
+            else
+                shift 3
+            fi
             shift 3
             ;;
         chain-lanuch-normal)
             cmd_run="chainLanuchNormal $2"
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         tee-lanuch)
             cmd_run="teeLanuch $2"
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         api-lanuch)
             cmd_run="apiLanuch $2"
-            shift 2
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
             ;;
         ipfs-lanuch)
             cmd_run="ipfsLanuch"
