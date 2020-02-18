@@ -1,9 +1,7 @@
 {
   "name": "Alpha net",
   "id": "Alpha_net",
-  "bootNodes": [
-    "/ip4/127.0.0.1/tcp/30333/p2p/QmbeVAVrqTy4htdg1Ni8RX6Fa1mjNCLcRsYJpPC2H6seAy"
-  ],
+  "bootNodes": [],
   "telemetryEndpoints": null,
   "protocolId": "cru",
   "properties": null,
