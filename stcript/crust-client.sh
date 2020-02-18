@@ -8,6 +8,7 @@ crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
 . $crust_client_main_install_dir/stcript/utils.sh
+trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
 function help()
 {
@@ -16,6 +17,7 @@ Usage:
     help                                                              show help information
     version                                                           show crust-client version
     chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>  lanuch crust-chain as genesis node
+    chain-lanuch-normal <chain-lanuch.config>                         lanuch crust-chain as normal node
     api-lanuch <api-lanuch.config>                                    lanuch crust-api
     ipfs-lanuch                                                       lanuch ipfs (cannot be customized for now, ipfs will be install in ~.ipfs/)      
     tee-lanuch <tee-lanuch.json>                                      lanuch crust-tee (if you set api_base_url==validator_api_base_url in config file, you need to be genesis node)
@@ -152,7 +154,9 @@ function chainLanuchGenesis()
     verbose INFO " SUCCESS" t
     rm $rand_log_file &>/dev/null
 
+    verbose WARN "You need to open the port($port) in your device to Make extranet nodes discover your node."
     sleep 2
+
     if [ -z "$3" ]; then
         verbose INFO "Lanuch crust chain with $1 configurations\n"
         eval $chain_start_stcript
@@ -163,6 +167,53 @@ function chainLanuchGenesis()
         mv $3 $3.$chain_pid
         verbose INFO "Lanuch crust chain with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
     fi
+}
+
+chainLanuchNormal()
+{
+    verbose INFO "Check <chain-lanuch.config>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR "Can't find chain-lanuch.config!"
+        exit 1
+    fi
+
+    source $1
+    if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
+        verbose ERROR "Please give right chain-lanuch.config!"
+        exit 1
+    fi
+    
+    verbose INFO " SUCCESS" t
+
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
+    if [ ! -z $bootnodes ]; then
+        verbose INFO "Add bootnodes($bootnodes)" h
+        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO " SUCCESS" t
+    fi
+
+    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
+    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
+    if [ -z $external_rpc_ws ] && [ $external_rpc_ws = "true" ]; then
+        chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
+        verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
+    fi
+
+    echo $chain_start_stcript
 }
 
 ipfsLanuch()
@@ -253,6 +304,10 @@ while true ; do
         chain-lanuch-genesis)
             cmd_run="chainLanuchGenesis $2 $3"
             shift 3
+            ;;
+        chain-lanuch-normal)
+            cmd_run="chainLanuchNormal $2"
+            shift 2
             ;;
         tee-lanuch)
             cmd_run="teeLanuch $2"
