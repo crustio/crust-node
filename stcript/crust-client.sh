@@ -97,8 +97,8 @@ function chainLanuchGenesis()
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --telemetry-url ws://telemetry.polkadot.io:1024 --validator --name $name"
-    if [ x"$bootnodes" = x"" ]; then
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
+    if [ ! -z $bootnodes ]; then
         chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
     fi
     verbose INFO " SUCCESS" t

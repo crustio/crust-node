@@ -1,9 +1,7 @@
 {
   "name": "Alpha net",
   "id": "Alpha_net",
-  "bootNodes": [
-    "/ip4/127.0.0.1/tcp/30333/p2p/QmbeVAVrqTy4htdg1Ni8RX6Fa1mjNCLcRsYJpPC2H6seAy"
-  ],
+  "bootNodes": [],
   "telemetryEndpoints": null,
   "protocolId": "cru",
   "properties": null,
@@ -20,7 +18,9 @@
       "indices": {
         "ids": [
           "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
-          "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b"
+          "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
+          "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+          "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr"
         ]
       },
       "balances": {
@@ -32,15 +32,24 @@
           [
             "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
             1000000000000000000
+          ],
+          [
+            "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+            1000000000000000000
+          ],
+          [
+            "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
+            1000000000000000000
           ]
         ],
         "vesting": []
       },
       "staking": {
-        "validatorCount": 2,
-        "minimumValidatorCount": 1,
+        "validatorCount": 4,
+        "minimumValidatorCount": 2,
         "invulnerables": [
-          "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b"
+          "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
+          "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr"
         ],
         "currentEra": 0,
         "forceEra": "NotForcing",
@@ -50,6 +59,12 @@
           [
             "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
             "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
+            20000000000000000,
+            "Validator"
+          ],
+          [
+            "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
+            "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
             20000000000000000,
             "Validator"
           ]
@@ -64,6 +79,15 @@
               "babe": "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
               "im_online": "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
               "authority_discovery": "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA"
+            }
+          ],
+          [
+            "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
+            {
+              "grandpa": "5Fhktfg3jV6wDjVJnzp4GDHU3N8sKueAk9xfoNjzW4cx1pAp",
+              "babe": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+              "im_online": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+              "authority_discovery": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3"
             }
           ]
         ]
@@ -86,6 +110,16 @@
               "account_id": "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
               "validator_pub_key": [],
               "validator_account_id": "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
+              "sig": []
+            }
+          ],
+          [
+            "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+            {
+              "pub_key": [],
+              "account_id": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+              "validator_pub_key": [],
+              "validator_account_id": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
               "sig": []
             }
           ]
