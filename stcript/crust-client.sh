@@ -77,6 +77,66 @@ curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
   }"
 }
 
+# params are <base_path> <rpc_port> <name> <chain_start_stcript>
+function get_rotate_keys()
+{
+    local rotate_keys=""
+    local chain_start_stcript=${@:4}
+    local rotate_keys_file_path=$1/chains/rotate_keys.json
+    local rotate_keys_file_dir=$1/chains/
+    local rpc_port=$2
+    local rand_log_file=$3.temp.log
+
+    if [ -f "$rotate_keys_file_path" ]; then
+        verbose INFO "Get rotate keys from $rotate_keys_file_path" h
+        rotate_keys=$(cat $rotate_keys_file_path)
+        verbose INFO " SUCCESS" t
+    else
+        verbose INFO "Generate temp log file $rand_log_file for crust chain node without rotate keys" h
+        mkdir -p $rotate_keys_file_dir
+        touch $rand_log_file
+        verbose INFO " SUCCESS" t
+    
+        verbose INFO "Start up crust chain node without rotate keys" h
+        nohup $chain_start_stcript &>$rand_log_file &
+        verbose INFO " SUCCESS" t
+
+        verbose INFO "Please wait 20s for crust chain node starts completely..." n
+        timeout=20
+        while [ $timeout -gt 0 ]; do
+            echo -e "$timeout->\c"
+            ((timeout--))
+            sleep 1
+        done
+        verbose INFO " SUCCESS" t
+
+        verbose INFO "Call rpc to generate rotate keys for your chain node" h
+        local result=$(curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "author_rotateKeys", "params":[]}' http://localhost:$rpc_port)
+        rotate_keys=$(getJsonValuesByAwk "$result" "result" "null")
+        verbose INFO " SUCCESS" t
+
+        verbose INFO "Save rotate keys result into $rotate_keys_file_path" h
+        touch $rotate_keys_file_path
+        echo $rotate_keys > $rotate_keys_file_path
+       
+        verbose INFO " SUCCESS" t
+
+        verbose INFO "Kill old crust chain with same <chain-lanuch.json>" h
+        local crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        if [ x"$crust_chain_pid" != x"" ]; then
+            kill -9 $crust_chain_pid &>/dev/null
+            if [ $? -ne 0 ]; then
+                # If failed by using current user, kill it using root
+                sudo "kill -9 $crust_chain_pid" &>/dev/null
+            fi
+        fi
+        rm $rand_log_file $>/dev/null
+        verbose INFO " SUCCESS" t
+    fi
+    
+    verbose WARN "Please go to chain web page to bond your account with the session keys: $rotate_keys"
+}
+
 function chainLanuchGenesis()
 {
     verbose INFO "Check <chain-lanuch.config> and <chain-identity-file>" h
@@ -139,15 +199,15 @@ function chainLanuchGenesis()
     verbose INFO " SUCCESS" t
 
     rand_log_file=$name.temp.log
-    verbose INFO "Generate temp log file $rand_log_file for crust chain without babe and grandpa key" h
+    verbose INFO "Generate temp log file $rand_log_file for crust chain node without babe and grandpa key" h
     touch $rand_log_file
     verbose INFO " SUCCESS" t
     
-    verbose INFO "Start up crust chain without babe and grandpa key" h
+    verbose INFO "Start up crust chain node without babe and grandpa key" h
     nohup $chain_start_stcript &>$rand_log_file &
     verbose INFO " SUCCESS" t
 
-    verbose INFO "Please wait 20s for crust chain starts completely..." n
+    verbose INFO "Please wait 20s for crust chain node starts completely..." n
     timeout=20
     while [ $timeout -gt 0 ]; do
         echo -e "$timeout->\c"
@@ -309,6 +369,10 @@ chainLanuchValidator()
         fi
     fi
     verbose INFO " SUCCESS" t
+
+    # Get rotate_keys
+    get_rotate_keys $base_path $rpc_port $name $chain_start_stcript
+    trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit. Please remember the node session keys: $(cat $base_path/chains/rotate_keys.json)" ; exit 1; }' INT
 
     # Run chain
     sleep 1
