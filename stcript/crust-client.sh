@@ -118,7 +118,7 @@ function chainLanuchGenesis()
 
     verbose INFO " SUCCESS" t
 
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"  
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes($bootnodes)" h
         chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
@@ -193,6 +193,7 @@ function chainLanuchGenesis()
 
 chainLanuchNormal()
 {
+    # Check configurations
     verbose INFO "Check <chain-lanuch.config>" h
     if [ -z $1 ]; then
         help
@@ -214,6 +215,7 @@ chainLanuchNormal()
     
     verbose INFO " SUCCESS" t
 
+    # Get chain start stcript
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes($bootnodes)" h
@@ -224,6 +226,7 @@ chainLanuchNormal()
         exit 1
     fi
 
+    # Kill old chain
     verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
@@ -235,11 +238,13 @@ chainLanuchNormal()
     fi
     verbose INFO " SUCCESS" t
 
+    # Add external rpc and ws flag
     if [ x"$external_rpc_ws" = x"true" ]; then
         chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
         verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
     fi
 
+    # Run chain
     sleep 1
     if [ -z "$2" ]; then
         verbose INFO "Lanuch crust chain(normal node) with $1 configurations\n"
@@ -255,6 +260,7 @@ chainLanuchNormal()
 
 chainLanuchValidator()
 {
+    # Check configurations
     verbose INFO "Check <chain-lanuch.config>" h
     if [ -z $1 ]; then
         help
@@ -273,10 +279,17 @@ chainLanuchValidator()
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
+
+    if [ x"$external_rpc_ws" = x"true" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "The rpc and ws of validator node can not be external"
+        exit 1
+    fi
     
     verbose INFO " SUCCESS" t
 
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    # Get chain start stcript
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name" 
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes($bootnodes)" h
         chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
@@ -286,21 +299,29 @@ chainLanuchValidator()
         exit 1
     fi
 
-    if [ x"$external_rpc_ws" = x"true" ]; then
-        chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
-        verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
-    fi
-
+    # Kill old chain
     verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
-            # If failed by using current user, kill it using root
             sudo "kill -9 $crust_chain_pid" &>/dev/null
         fi
     fi
     verbose INFO " SUCCESS" t
+
+    # Run chain
+    sleep 1
+    if [ -z "$2" ]; then
+        verbose INFO "Lanuch crust chain(validator node) with $1 configurations\n"
+        eval $chain_start_stcript
+    else
+        nohup $chain_start_stcript &>$2 &
+        sleep 1
+        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        mv $2 $2.$chain_pid
+        verbose INFO "Lanuch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+    fi
 }
 
 ipfsLanuch()
