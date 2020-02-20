@@ -17,19 +17,19 @@ cat << EOF
 Usage:
     help                                                                show help information   
     version                                                             show crust-client version   
-    chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>    lanuch crust-chain as a genesis node   
-    chain-lanuch-normal <chain-lanuch.config>                           lanuch crust-chain as a normal node
-    chain-lanuch-validator <chain-lanuch.config>                        lanuch crust-chain as a validator node
-    api-lanuch <api-lanuch.config>                                      lanuch crust-api
-    ipfs-lanuch                                                         lanuch ipfs (cannot be customized for now,
+    chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
+    chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
+    chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node
+    api-launch <api-launch.config>                                      launch crust-api
+    ipfs-launch                                                         launch ipfs (cannot be customized for now,
                                                                             ipfs will be install in ~.ipfs/)      
-    tee-lanuch <tee-lanuch.json>                                        lanuch crust-tee (if you set 
+    tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
-    -b <log-file>                                                       lanuch commands will be started in backend
-                                                                            with "chain-lanuch-genesis", "chain-lanuch-normal",
-                                                                            "chain-lanuch-normal", "api-lanuch", "ipfs-lanuch",
-                                                                            "tee-lanuch"                                                       
+    -b <log-file>                                                       launch commands will be started in backend
+                                                                            with "chain-launch-genesis", "chain-launch-normal",
+                                                                            "chain-launch-normal", "api-launch", "ipfs-launch",
+                                                                            "tee-launch"                                                       
 EOF
 }
 
@@ -121,7 +121,7 @@ function get_rotate_keys()
        
         verbose INFO " SUCCESS" t
 
-        verbose INFO "Kill old crust chain with same <chain-lanuch.json>" h
+        verbose INFO "Kill old crust chain with same <chain-launch.json>" h
         local crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
         if [ x"$crust_chain_pid" != x"" ]; then
             kill -9 $crust_chain_pid &>/dev/null
@@ -137,9 +137,9 @@ function get_rotate_keys()
     verbose WARN "Please go to chain web page to bond your account with the session keys: $rotate_keys"
 }
 
-function chainLanuchGenesis()
+function chainLaunchGenesis()
 {
-    verbose INFO "Check <chain-lanuch.config> and <chain-identity-file>" h
+    verbose INFO "Check <chain-launch.config> and <chain-identity-file>" h
     if [ -z $1 ] || [ -z $2 ]; then
         help
         exit 1
@@ -147,7 +147,7 @@ function chainLanuchGenesis()
 
     if [ ! -f "$1" ]; then
         verbose ERROR " Failed" t
-        verbose ERROR "Can't find chain-lanuch.config!"
+        verbose ERROR "Can't find chain-launch.config!"
         exit 1
     fi
     if [ ! -f "$2" ]; then
@@ -166,7 +166,7 @@ function chainLanuchGenesis()
     source $1
     if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
         verbose ERROR " Failed" t
-        verbose ERROR "Please give right chain-lanuch.config!"
+        verbose ERROR "Please give right chain-launch.config!"
         exit 1
     fi
 
@@ -187,7 +187,7 @@ function chainLanuchGenesis()
         verbose WARN "No bootnodes in chain configuration, you must be the frist genesis node."
     fi
     
-    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
+    verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
@@ -224,7 +224,7 @@ function chainLanuchGenesis()
     send_babe_key $rpc_port $public_key_sr25519 $secret_phrase 
     verbose INFO " SUCCESS" t
 
-    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json> again" h
+    verbose INFO "Try to kill old crust chain with same <chain-launch.json> again" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
@@ -240,21 +240,21 @@ function chainLanuchGenesis()
     sleep 1
 
     if [ -z "$3" ]; then
-        verbose INFO "Lanuch crust chain(genesis node) with $1 configurations\n"
+        verbose INFO "launch crust chain(genesis node) with $1 configurations\n"
         eval $chain_start_stcript
     else
         nohup $chain_start_stcript &>$3 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
         mv $3 $3.$chain_pid
-        verbose INFO "Lanuch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+        verbose INFO "launch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
     fi
 }
 
-chainLanuchNormal()
+chainLaunchNormal()
 {
     # Check configurations
-    verbose INFO "Check <chain-lanuch.config>" h
+    verbose INFO "Check <chain-launch.config>" h
     if [ -z $1 ]; then
         help
         exit 1
@@ -262,14 +262,14 @@ chainLanuchNormal()
 
     if [ ! -f "$1" ]; then
         verbose ERROR " Failed" t
-        verbose ERROR "Can't find chain-lanuch.config!"
+        verbose ERROR "Can't find chain-launch.config!"
         exit 1
     fi
 
     source $1
     if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
         verbose ERROR " Failed" t
-        verbose ERROR "Please give right chain-lanuch.config!"
+        verbose ERROR "Please give right chain-launch.config!"
         exit 1
     fi
     
@@ -287,7 +287,7 @@ chainLanuchNormal()
     fi
 
     # Kill old chain
-    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
+    verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
@@ -307,21 +307,21 @@ chainLanuchNormal()
     # Run chain
     sleep 1
     if [ -z "$2" ]; then
-        verbose INFO "Lanuch crust chain(normal node) with $1 configurations\n"
+        verbose INFO "Launch crust chain(normal node) with $1 configurations\n"
         eval $chain_start_stcript
     else
         nohup $chain_start_stcript &>$2 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
         mv $2 $2.$chain_pid
-        verbose INFO "Lanuch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+        verbose INFO "Launch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
     fi
 }
 
-chainLanuchValidator()
+chainLaunchValidator()
 {
     # Check configurations
-    verbose INFO "Check <chain-lanuch.config>" h
+    verbose INFO "Check <chain-launch.config>" h
     if [ -z $1 ]; then
         help
         exit 1
@@ -329,14 +329,14 @@ chainLanuchValidator()
 
     if [ ! -f "$1" ]; then
         verbose ERROR " Failed" t
-        verbose ERROR "Can't find chain-lanuch.config!"
+        verbose ERROR "Can't find chain-launch.config!"
         exit 1
     fi
 
     source $1
     if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
         verbose ERROR " Failed" t
-        verbose ERROR "Please give right chain-lanuch.config!"
+        verbose ERROR "Please give right chain-launch.config!"
         exit 1
     fi
 
@@ -360,7 +360,7 @@ chainLanuchValidator()
     fi
 
     # Kill old chain
-    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
+    verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
@@ -377,42 +377,42 @@ chainLanuchValidator()
     # Run chain
     sleep 1
     if [ -z "$2" ]; then
-        verbose INFO "Lanuch crust chain(validator node) with $1 configurations\n"
+        verbose INFO "Launch crust chain(validator node) with $1 configurations\n"
         eval $chain_start_stcript
     else
         nohup $chain_start_stcript &>$2 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
         mv $2 $2.$chain_pid
-        verbose INFO "Lanuch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+        verbose INFO "Launch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
     fi
 }
 
-ipfsLanuch()
+ipfsLaunch()
 {
     # TODO: Custom ipfs
     cmd_run="$crust_tee_main_install_dir/bin/ipfs daemon"
     if [ -z "$1" ]; then
-        verbose INFO "Lanuch ipfs\n"
+        verbose INFO "Launch ipfs\n"
         eval $cmd_run
     else
         nohup $cmd_run &>$1 &
         ipfs_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
         mv $1 $1.$ipfs_pid
-        verbose INFO "Lanuch ipfs in backend (pid is $ipfs_pid), log information will be saved in $1.$ipfs_pid\n"
+        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in $1.$ipfs_pid\n"
     fi
 }
 
-apiLanuch()
+apiLaunch()
 {
-    verbose INFO "Check <api-lanuch.json>" h
+    verbose INFO "Check <api-launch.json>" h
     if [ x"$1" = x"" ]; then
         help
         exit 1
     fi
 
     if [ ! -f "$1" ]; then
-        verbose ERROR "Failed!\nCan't find api-lanuch.json!"
+        verbose ERROR "Failed!\nCan't find api-launch.json!"
         exit 1
     fi
     source $1
@@ -420,26 +420,26 @@ apiLanuch()
 
     cmd_run="node $crust_api_main_install_dir/node_modules/.bin/ts-node $crust_api_main_install_dir/src/index.ts $crust_api_port $crust_chain_endpoint"
     if [ -z "$2" ]; then
-        verbose INFO "Lanuch crust API with $1 configurations\n"
+        verbose INFO "Launch crust API with $1 configurations\n"
         $cmd_run
     else
         nohup $cmd_run &>$2 &
         api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
         mv $2 $2.$api_pid
-        verbose INFO "Lanuch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
+        verbose INFO "Launch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
     fi
 }
 
-teeLanuch()
+teeLaunch()
 {
-    verbose INFO "Check <tee-lanuch.json>" h
+    verbose INFO "Check <tee-launch.json>" h
     if [ x"$1" = x"" ]; then
         help
         exit 1
     fi
 
     if [ ! -f "$1" ]; then
-        verbose ERROR "Failed!\nCan't find tee-lanuch.json!"
+        verbose ERROR "Failed!\nCan't find tee-launch.json!"
         exit 1
     fi
     verbose INFO " SUCCESS" t
@@ -453,13 +453,13 @@ teeLanuch()
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
     if [ -z "$2" ]; then
-        verbose INFO "Lanuch crust TEE with $1 configurations\n"
+        verbose INFO "Launch crust TEE with $1 configurations\n"
         eval $cmd_run
     else
         nohup $cmd_run &>$2 &
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
         mv $2 $2.$tee_pid
-        verbose INFO "Lanuch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.$tee_pid\n"
+        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.$tee_pid\n"
     fi
 }
 
@@ -476,8 +476,8 @@ while true ; do
                 shift 2
             fi
             ;;
-        chain-lanuch-genesis)
-            cmd_run="chainLanuchGenesis $2 $3"
+        chain-launch-genesis)
+            cmd_run="chainLaunchGenesis $2 $3"
             if [ -z $2 ] && [ -z $3 ]; then
                 shift 1
             elif [ -z $3 ]; then
@@ -487,40 +487,40 @@ while true ; do
             fi
             shift 3
             ;;
-        chain-lanuch-normal)
-            cmd_run="chainLanuchNormal $2"
+        chain-launch-normal)
+            cmd_run="chainLaunchNormal $2"
             if [ -z $2 ]; then
                 shift 1
             else
                 shift 2
             fi
             ;;
-        chain-lanuch-validator)
-            cmd_run="chainLanuchValidator $2"
+        chain-launch-validator)
+            cmd_run="chainLaunchValidator $2"
             if [ -z $2 ]; then
                 shift 1
             else
                 shift 2
             fi
             ;;
-        tee-lanuch)
-            cmd_run="teeLanuch $2"
+        tee-launch)
+            cmd_run="teeLaunch $2"
             if [ -z $2 ]; then
                 shift 1
             else
                 shift 2
             fi
             ;;
-        api-lanuch)
-            cmd_run="apiLanuch $2"
+        api-launch)
+            cmd_run="apiLaunch $2"
             if [ -z $2 ]; then
                 shift 1
             else
                 shift 2
             fi
             ;;
-        ipfs-lanuch)
-            cmd_run="ipfsLanuch"
+        ipfs-launch)
+            cmd_run="ipfsLaunch"
             shift 1
             ;;
         version)
