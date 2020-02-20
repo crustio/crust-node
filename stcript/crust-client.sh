@@ -15,16 +15,21 @@ function help()
 cat << EOF
 
 Usage:
-    help                                                              show help information
-    version                                                           show crust-client version
-    chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>  lanuch crust-chain as genesis node
-    chain-lanuch-normal <chain-lanuch.config>                         lanuch crust-chain as normal node
-    api-lanuch <api-lanuch.config>                                    lanuch crust-api
-    ipfs-lanuch                                                       lanuch ipfs (cannot be customized for now, ipfs will be install in ~.ipfs/)      
-    tee-lanuch <tee-lanuch.json>                                      lanuch crust-tee (if you set api_base_url==validator_api_base_url in config file, you need to be genesis node)
-    -b <log-file> 
-        with "chain-lanuch-genesis", "api-lanuch",
-             "ipfs-lanuch", "tee-lanuch"                              lanuch commands will be started in backend
+    help                                                                show help information   
+    version                                                             show crust-client version   
+    chain-lanuch-genesis <chain-lanuch.config> <chain-identity-file>    lanuch crust-chain as a genesis node   
+    chain-lanuch-normal <chain-lanuch.config>                           lanuch crust-chain as a normal node
+    chain-lanuch-validator <chain-lanuch.config>                        lanuch crust-chain as a validator node
+    api-lanuch <api-lanuch.config>                                      lanuch crust-api
+    ipfs-lanuch                                                         lanuch ipfs (cannot be customized for now,
+                                                                            ipfs will be install in ~.ipfs/)      
+    tee-lanuch <tee-lanuch.json>                                        lanuch crust-tee (if you set 
+                                                                            api_base_url==validator_api_base_url
+                                                                            in config file, you need to be genesis node)
+    -b <log-file>                                                       lanuch commands will be started in backend
+                                                                            with "chain-lanuch-genesis", "chain-lanuch-normal",
+                                                                            "chain-lanuch-normal", "api-lanuch", "ipfs-lanuch",
+                                                                            "tee-lanuch"                                                       
 EOF
 }
 
@@ -104,11 +109,23 @@ function chainLanuchGenesis()
         verbose ERROR "Please give right chain-lanuch.config!"
         exit 1
     fi
+
+    if [ x"$external_rpc_ws" = x"true" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "The rpc and ws of genesis node can not be external"
+        exit 1
+    fi
+
+    verbose INFO " SUCCESS" t
+
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
     if [ ! -z $bootnodes ]; then
+        verbose INFO "Add bootnodes($bootnodes)" h
         chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO " SUCCESS" t
+    else
+        verbose WARN "No bootnodes in chain configuration, you must be the frist genesis node."
     fi
-    verbose INFO " SUCCESS" t
     
     verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
@@ -236,6 +253,56 @@ chainLanuchNormal()
     fi
 }
 
+chainLanuchValidator()
+{
+    verbose INFO "Check <chain-lanuch.config>" h
+    if [ -z $1 ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find chain-lanuch.config!"
+        exit 1
+    fi
+
+    source $1
+    if [ x"$base_path" = x"" ] || [ x"$port" = x"" ] || [ x"$ws_port" = x"" ] || [ x"$rpc_port" = x"" ] || [ x"$name" = x"" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Please give right chain-lanuch.config!"
+        exit 1
+    fi
+    
+    verbose INFO " SUCCESS" t
+
+    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    if [ ! -z $bootnodes ]; then
+        verbose INFO "Add bootnodes($bootnodes)" h
+        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO " SUCCESS" t
+    else
+        verbose ERROR "Please fill bootnodes in chain configuration!"
+        exit 1
+    fi
+
+    if [ x"$external_rpc_ws" = x"true" ]; then
+        chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
+        verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
+    fi
+
+    verbose INFO "Try to kill old crust chain with same <chain-lanuch.json>" h
+    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+}
+
 ipfsLanuch()
 {
     # TODO: Custom ipfs
@@ -337,6 +404,14 @@ while true ; do
             ;;
         chain-lanuch-normal)
             cmd_run="chainLanuchNormal $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        chain-lanuch-validator)
+            cmd_run="chainLanuchValidator $2"
             if [ -z $2 ]; then
                 shift 1
             else
