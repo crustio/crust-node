@@ -198,7 +198,8 @@ you will see a warning like:
 #### TEE
 
 - Configuration
-  please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use valdator account (not stash account ) to configure crust chain identity.
+  
+  Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use valdator account (not stash account ) to configure crust chain identity.
 
 - Launch
 ```shell
@@ -213,6 +214,7 @@ you will see a warning like:
 #### Start validate
 
 - Waiting TEE
+  
   Need to make sure your tee has plotted your empty disk and reported your first work report.
 
 - Click "Validate" button, like:
