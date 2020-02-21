@@ -28,7 +28,7 @@ Usage:
                                                                             in config file, you need to be genesis node)
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
-                                                                            "chain-launch-normal", "api-launch", "ipfs-launch",
+                                                                            "chain-launch-validator", "api-launch", "ipfs-launch",
                                                                             "tee-launch"                                                       
 EOF
 }
@@ -372,7 +372,7 @@ chainLaunchValidator()
 
     # Get rotate_keys
     get_rotate_keys $base_path $rpc_port $name $chain_start_stcript
-    trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit. Please remember the node session keys: $(cat $base_path/chains/rotate_keys.json)" ; exit 1; }' INT
+    trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit. Please remember the node session keys: "$(cat $base_path/chains/rotate_keys.json)" ; exit 1; }' INT
 
     # Run chain
     sleep 1
@@ -392,6 +392,17 @@ ipfsLaunch()
 {
     # TODO: Custom ipfs
     cmd_run="$crust_tee_main_install_dir/bin/ipfs daemon"
+
+    verbose INFO "Try to kill old ipfs" h
+    ipfs_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$ipfs_pid" != x"" ]; then
+        kill -9 $ipfs_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $ipfs_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
     if [ -z "$1" ]; then
         verbose INFO "Launch ipfs\n"
         eval $cmd_run

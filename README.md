@@ -78,7 +78,7 @@ ipfs_api_base_url -> for connect to ipfs
 
 api_base_url -> your tee node api address
 
-validator_api_base_url -> the tee validator address (if you are genesis node, this url must equal to 'api_base_url')
+validator_api_base_url -> the tee validator address (**if you are genesis node, this url must equal to 'api_base_url'**)
 
 crust_api_base_url -> the address of crust api
 
@@ -86,5 +86,136 @@ crust_address, crust_account_id, crust_password, crust_backup -> your crust chai
 
 ## Run
 
+### Run IPFS
+Currently ipfs does not support customization.
+- Launch
+```shell
+   crust-client ipfs-launch -b logs/ipfs.log
+```
+- Monitor
+```shell
+   tail -f logs/ipfs.log.pid
+```
+
 ### Run genesis node
 The genesis node refers to the initial nodes of the chain written in the genesis spec. These nodes have a very important meaning as the core of the chain startup. They are also the initial validators. Generally genesis node's identity file is issued by crust organization.
+
+#### Chain
+- Launch
+```shell
+   crust-client chain-launch-genesis genesis1_config/chain-launch.config genesis1_config/chain-identity-file -b logs/genesis1-chain.log
+```
+- Monitor
+```shell
+   tail -f logs/genesis1-chain.log.pid
+```
+
+#### API
+- Launch
+```shell
+   crust-client api-launch genesis1_config/api-launch.config -b logs/genesis1-api.log
+```
+- Monitor
+```shell
+   tail -f logs/genesis1-api.log.pid
+```
+
+- Test
+```shell
+   curl --location --request GET 'http://localhost:56667/api/v1/block/header'
+```
+
+#### TEE
+- Launch
+```shell
+   crust-client tee-launch genesis1_config/tee-launch.json -b logs/genesis1-tee.log
+```
+- Monitor
+```shell
+   tail -f logs/genesis1-api.log.pid
+```
+
+### Run normal node
+Normal node cannot be a validator, it is only an access node of the chain, and it can be connected to the chain browser by setting external_rpc_ws=true
+
+#### Chain
+- Launch
+```shell
+   crust-client chain-launch-normal normal1_config/chain-lanuch.config -b logs/normal1-chain.log
+```
+- Monitor
+```shell
+   tail -f logs/normal1-chain.log.pid
+```
+
+#### Chain browser
+Connet to normal node ws like: ws://139.196.122.228:6013/ to see crust chian status.
+
+### Run validator node
+If you are not genesis node but want to apply to become a validator, please follow the instructions below. Of course you need a tee to report your workload
+
+#### Chain
+- Launch
+```shell
+   crust-client chain-launch-validator validator1_config/chain-launch.config -b logs/validator1-chain.log
+```
+- Monitor
+```shell
+   tail -f logs/validator1-chain.log.pid
+```
+- Get session keys
+you will see a warning like:
+```shell
+   2020/02/21 14:51:30.023 [WARN] Please go to chain web page to bond your account with the session keys: "0x3715f28f8e3c5cbbd82e490525df9aaff49fbb8e0e4a527498a810a0ace3d01b4c1a15741ebbecf4d402c88ac87fdbaf92f013191cc8720adfa21275dad71f08763a5996258e336f995ff72b94e2cee776de5fbfbae365e344ef6ce347d767284619c7ba6078d7e59ab555399ad81a9b2cc89b0d43b8bc40f6df047d21014215"
+```
+
+#### Bond your account with the session keys
+
+- Need two accounts and have some CRUs in those accounts, like:
+![validator1 and stash accounts](doc/img/validator1_and_stash_accounts.PNG)
+
+- Go to **Staking/Account actions/New stake** to Bond two accounts, like:
+![bond validator1](doc/img/bond_validator1.PNG)
+
+- Click **session key** to set session key, like:
+![set session key](doc/img/set_session_key.PNG)
+
+#### API
+- Launch
+```shell
+   crust-client api-launch validator1_config/api-launch.config -b logs/validator1-api.log
+```
+- Monitor
+```shell
+   tail -f logs/validator1-api.log.pid
+```
+
+- Test
+```shell
+   curl --location --request GET 'http://localhost:56669/api/v1/block/header'
+```
+
+#### TEE
+
+- Configuration
+  please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use valdator account (not stash account ) to configure crust chain identity.
+
+- Launch
+```shell
+   crust-client tee-launch validator1_config/tee-launch.json -b logs/validator1-tee.log
+```
+
+- Monitor
+```shell
+   tail -f logs/validator1-api.log.pid
+```
+
+#### Start validate
+
+- Waiting TEE
+  Need to make sure your tee has plotted your empty disk and reported your first work report.
+
+- Click "Validate" button, like:
+![set session key](doc/img/start_validate.PNG)
+
+- Waiting one era, you will see magic!
