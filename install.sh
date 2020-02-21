@@ -67,7 +67,7 @@ fi
 verbose INFO "Unzip crust TEE package" h
 tar -xvf "$crust_tee_package" -C "$crust_resource_dir/" &>/dev/null
 verbose INFO " SUCCESS\n" t
-#./$crust_tee_resource_dir/install.sh
+./$crust_tee_resource_dir/install.sh
 rm -rf $crust_tee_resource_dir
 chown -R $uid:$uid $crust_main_install_dir
 
