@@ -46,6 +46,16 @@ external_rpc_ws=false                        # Whether to publicize the ws and r
 
 Only genesis node need this file, please connect to crust organization to get it.
 
+### ipfs-launch.config
+
+```shell
+base_path=crust_store/node1/ipfs            # the base path for storing data
+swarm_port=4001                             # the swarm port for other ipfs node connection
+api_port=5001                               # the api port
+gateway_port=8080                           # the gateway port
+master_address=                             # if you are frist ipfs node, you don't need this
+```
+
 ### api-launch.config
 ```shell
 crust_api_port=56666                         # the api port
