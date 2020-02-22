@@ -413,13 +413,13 @@ ipfsLaunch()
     if [ -d "$IPFS_PATH" ]; then
         verbose INFO "IPFS has been initialized." n
     else
-        verbose INFO "Init ipfs..." h
-        $ipfs_bin init
-        checkRes $? "return"
-    
         verbose INFO "Set swarm key ..." h
         mkdir -p $IPFS_PATH
-        cp $swarm_key "$IPFS_PATH"
+        cp $swarm_key $IPFS_PATH
+        checkRes $? "return"
+
+        verbose INFO "Init ipfs..." h
+        $ipfs_bin init
         checkRes $? "return"
 
         verbose INFO "Remove public bootstrap..." h
@@ -454,14 +454,14 @@ ipfsLaunch()
 
     cmd_run="$ipfs_bin daemon"
 
-    if [ -z "$1" ]; then
+    if [ -z "$2" ]; then
         verbose INFO "Launch ipfs, if ipfs launch failed, please check the port usage, old ipfs may be running.\n"
         eval $cmd_run
     else
-        nohup $cmd_run &>$1 &
+        nohup $cmd_run &>$2 &
         ipfs_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        mv $1 $1.$ipfs_pid
-        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in $1.$ipfs_pid . If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
+        mv $2 $2.$ipfs_pid
+        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in $2.$ipfs_pid . If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
     fi
 }
 
