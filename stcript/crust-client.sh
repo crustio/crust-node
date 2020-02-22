@@ -435,7 +435,7 @@ ipfsLaunch()
         fi
 
         verbose INFO "Set swarm address ..." h
-        $ipfs_bin config Addresses.Swarm --json "[$\"/ip4/0.0.0.0/tcp/$swarm_port\", \"/ip6/::/tcp/$swarm_port\"]" &>/dev/null
+        $ipfs_bin config Addresses.Swarm --json "[\"/ip4/0.0.0.0/tcp/$swarm_port\", \"/ip6/::/tcp/$swarm_port\"]" &>/dev/null
         checkRes $? "return"
     
         verbose INFO "Set api address ..." h
