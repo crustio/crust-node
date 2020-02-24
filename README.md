@@ -231,3 +231,7 @@ you will see a warning like:
 ![set session key](doc/img/start_validate.PNG)
 
 - Waiting one era, you will see magic!
+
+## License
+
+[GPL v3](LICENSE)
