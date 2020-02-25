@@ -238,7 +238,7 @@ function chainLaunchGenesis()
     verbose INFO " SUCCESS" t
     rm $rand_log_file &>/dev/null
 
-    verbose WARN "You need to open the port($port) in your device to Make extranet nodes discover your node."
+    verbose WARN "You need to open the port($port) in your device to make external nodes to discover your node."
     sleep 1
 
     if [ -z "$3" ]; then
@@ -512,7 +512,7 @@ teeLaunch()
     api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
     validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
     if [ $api_base_url = $validator_api_base_url ]; then
-         verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesisi nodes\n"
+         verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesis nodes\n"
     fi
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
