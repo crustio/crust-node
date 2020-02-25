@@ -188,6 +188,12 @@ function chainLaunchGenesis()
     else
         verbose WARN "No bootnodes in chain configuration, you must be the frist genesis node."
     fi
+
+    if [ ! -z $node_key ]; then
+        verbose INFO "Add node key($node_key)" h
+        chain_start_stcript="$chain_start_stcript --node-key=$node_key"
+        verbose INFO " SUCCESS" t
+    fi
     
     verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
