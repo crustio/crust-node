@@ -79,6 +79,38 @@ curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
   }"
 }
 
+function send_im_online_key()
+{
+local secret_phrase=${@:3}
+curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
+ "{
+    \"jsonrpc\":\"2.0\",
+    \"id\":1,
+    \"method\":\"author_insertKey\",
+    \"params\": [
+      \"imon\",
+      \"$secret_phrase\",
+      \"$2\"
+    ]
+  }"
+}
+
+function send_authority_discovery_key()
+{
+local secret_phrase=${@:3}
+curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
+ "{
+    \"jsonrpc\":\"2.0\",
+    \"id\":1,
+    \"method\":\"author_insertKey\",
+    \"params\": [
+      \"audi\",
+      \"$secret_phrase\",
+      \"$2\"
+    ]
+  }"
+}
+
 # params are <base_path> <rpc_port> <name> <chain_start_stcript>
 function get_rotate_keys()
 {
@@ -230,6 +262,14 @@ function chainLaunchGenesis()
 
     verbose INFO "Send babe key to your chain" h
     send_babe_key $rpc_port $public_key_sr25519 $secret_phrase 
+    verbose INFO " SUCCESS" t
+
+    verbose INFO "Send im_online key to your chain" h
+    send_im_online_key $rpc_port $public_key_sr25519 $secret_phrase 
+    verbose INFO " SUCCESS" t
+
+    verbose INFO "Send authority_discovery key to your chain" h
+    send_authority_discovery_key $rpc_port $public_key_sr25519 $secret_phrase 
     verbose INFO " SUCCESS" t
 
     verbose INFO "Try to kill old crust chain with same <chain-launch.json> again" h

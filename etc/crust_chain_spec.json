@@ -2,12 +2,7 @@
   "name": "Crust Alphanet",
   "id": "crustalphanet",
   "bootNodes": [],
-  "telemetryEndpoints": [
-    [
-      "ws://telemetry.polkadot.io:1024",
-      0
-    ]
-  ],
+  "telemetryEndpoints": null,
   "protocolId": "cru",
   "properties": {
     "tokenSymbol": "CRU"
