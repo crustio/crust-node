@@ -10,8 +10,6 @@
   ],
   "protocolId": "cru",
   "properties": {
-    "ss58Format": 2,
-    "tokenDecimals": 12,
     "tokenSymbol": "CRU"
   },
   "consensusEngine": null,
