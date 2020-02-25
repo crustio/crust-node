@@ -1,10 +1,19 @@
 {
-  "name": "Alpha net",
-  "id": "Alpha_net",
+  "name": "Crust Alphanet",
+  "id": "crustalphanet",
   "bootNodes": [],
-  "telemetryEndpoints": null,
+  "telemetryEndpoints": [
+    [
+      "ws://telemetry.polkadot.io:1024",
+      0
+    ]
+  ],
   "protocolId": "cru",
-  "properties": null,
+  "properties": {
+    "ss58Format": 2,
+    "tokenDecimals": 12,
+    "tokenSymbol": "CRU"
+  },
   "consensusEngine": null,
   "genesis": {
     "runtime": {
@@ -20,36 +29,47 @@
           "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
           "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
           "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
-          "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr"
+          "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
+          "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+          "5CorT9c1EKYf2rtE4rpFhnQTf3JsBR3EZGfw1QhSBPVSn3t7"
         ]
       },
       "balances": {
         "balances": [
           [
             "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
-            1000000000000000000
+            2500000000000000000
           ],
           [
             "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
-            1000000000000000000
+            2500000000000000000
           ],
           [
             "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
-            1000000000000000000
+            2500000000000000000
           ],
           [
             "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
-            1000000000000000000
+            2500000000000000000
+          ],
+          [
+            "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+            2500000000000000000
+          ],
+          [
+            "5CorT9c1EKYf2rtE4rpFhnQTf3JsBR3EZGfw1QhSBPVSn3t7",
+            2500000000000000000
           ]
         ],
         "vesting": []
       },
       "staking": {
-        "validatorCount": 4,
-        "minimumValidatorCount": 2,
+        "validatorCount": 6,
+        "minimumValidatorCount": 3,
         "invulnerables": [
           "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
-          "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr"
+          "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
+          "5CorT9c1EKYf2rtE4rpFhnQTf3JsBR3EZGfw1QhSBPVSn3t7"
         ],
         "currentEra": 0,
         "forceEra": "NotForcing",
@@ -59,13 +79,19 @@
           [
             "5Gc3Z7Z6gS1X4ydZ2YfTAtmXsQzD65bjPwjeQh3y5etiJB4b",
             "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
-            20000000000000000,
+            1250000000000000000,
             "Validator"
           ],
           [
             "5FTbsFqd1wCp2zfJG6A1WmuXvMUJU7MugW2P9GHGNZoitxzr",
             "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
-            20000000000000000,
+            1250000000000000000,
+            "Validator"
+          ],
+          [
+            "5CorT9c1EKYf2rtE4rpFhnQTf3JsBR3EZGfw1QhSBPVSn3t7",
+            "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+            600000000000000000,
             "Validator"
           ]
         ]
@@ -88,6 +114,15 @@
               "babe": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
               "im_online": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
               "authority_discovery": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3"
+            }
+          ],
+          [
+            "5CorT9c1EKYf2rtE4rpFhnQTf3JsBR3EZGfw1QhSBPVSn3t7",
+            {
+              "grandpa": "5F3Ubu6tZkuuBGCvfG6K3owQrrpSNdqeKuZj2wSz1z5LvWYD",
+              "babe": "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+              "im_online": "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+              "authority_discovery": "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm"
             }
           ]
         ]
@@ -120,6 +155,54 @@
               "account_id": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
               "validator_pub_key": [],
               "validator_account_id": "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+              "sig": []
+            }
+          ],
+          [
+            "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+            {
+              "pub_key": [],
+              "account_id": "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+              "validator_pub_key": [],
+              "validator_account_id": "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+              "sig": []
+            }
+          ]
+        ],
+        "workReports": [
+          [
+            "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
+            {
+              "pub_key": [],
+              "block_number": 0,
+              "block_hash": [],
+              "empty_root": [],
+              "empty_workload": 0,
+              "meaningful_workload": 0,
+              "sig": []
+            }
+          ],
+          [
+            "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+            {
+              "pub_key": [],
+              "block_number": 0,
+              "block_hash": [],
+              "empty_root": [],
+              "empty_workload": 0,
+              "meaningful_workload": 0,
+              "sig": []
+            }
+          ],
+          [
+            "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+            {
+              "pub_key": [],
+              "block_number": 0,
+              "block_hash": [],
+              "empty_root": [],
+              "empty_workload": 0,
+              "meaningful_workload": 0,
               "sig": []
             }
           ]
