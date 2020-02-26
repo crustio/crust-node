@@ -170,7 +170,7 @@
               "block_number": 0,
               "block_hash": [],
               "empty_root": [],
-              "empty_workload": 40000000000,
+              "empty_workload": 0,
               "meaningful_workload": 0,
               "sig": []
             }
@@ -182,7 +182,7 @@
               "block_number": 0,
               "block_hash": [],
               "empty_root": [],
-              "empty_workload": 40000000000,
+              "empty_workload": 0,
               "meaningful_workload": 0,
               "sig": []
             }
@@ -194,7 +194,7 @@
               "block_number": 0,
               "block_hash": [],
               "empty_root": [],
-              "empty_workload": 40000000000,
+              "empty_workload": 0,
               "meaningful_workload": 0,
               "sig": []
             }
