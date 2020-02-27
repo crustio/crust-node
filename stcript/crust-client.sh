@@ -214,8 +214,8 @@ function chainLaunchGenesis()
 
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"  
     if [ ! -z $bootnodes ]; then
-        verbose INFO "Add bootnodes($bootnodes)" h
-        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO "Add bootnodes(${bootnodes[*]})" h
+        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose WARN "No bootnodes in chain configuration, you must be the frist genesis node."
@@ -223,7 +223,7 @@ function chainLaunchGenesis()
 
     if [ ! -z $node_key ]; then
         verbose INFO "Add node key($node_key)" h
-        chain_start_stcript="$chain_start_stcript --node-key=$node_key"
+        chain_start_stcript="$chain_start_stcript --node-key $node_key"
         verbose INFO " SUCCESS" t
     fi
     
@@ -326,8 +326,8 @@ chainLaunchNormal()
     # Get chain start stcript
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
     if [ ! -z $bootnodes ]; then
-        verbose INFO "Add bootnodes($bootnodes)" h
-        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO "Add bootnodes(${bootnodes[*]})" h
+        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose ERROR "Please fill bootnodes in chain configuration!"
@@ -399,8 +399,8 @@ chainLaunchValidator()
     # Get chain start stcript
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name" 
     if [ ! -z $bootnodes ]; then
-        verbose INFO "Add bootnodes($bootnodes)" h
-        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO "Add bootnodes(${bootnodes[*]})" h
+        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose ERROR "Please fill bootnodes in chain configuration!"
