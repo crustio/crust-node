@@ -74,6 +74,23 @@ function checkRes()
     done
 }
 
+function setTimeWait()
+{
+    local info=$1
+    local syncfile=$2
+    local index=1
+    local timeout=100
+    while [ ! -s "$syncfile" ] && [ $timeout -gt 0 ]; do
+        printf "%s\r" "${info}${index}s"
+        ((index++))
+        ((timeout--))
+        sleep 1
+    done
+
+    echo "${info}$(cat $SYNCFILE)"
+    true > $SYNCFILE
+}
+
 function verbose()
 {
     local type=$1

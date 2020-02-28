@@ -10,6 +10,8 @@ crust_chain_main_install_dir="$crust_main_install_dir/crust"
 crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
 crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 crust_client_main_install_dir="$crust_main_install_dir/crust-client"
+sync_file=.syncfile
+sub_pid=()
 
 crust_resource_dir="resource"
 crust_chain_package="$crust_resource_dir/crust.tar"
@@ -22,7 +24,20 @@ crust_tee_resource_dir="$crust_resource_dir/crust-tee"
 crust_client_sh="stcript/crust-client.sh"
 crust_client_aim="/usr/bin/crust-client"
 
-trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
+function successExit()
+{
+  rm -f $sync_file &>/dev/null
+
+  # Kill alive useless sub process
+  for el in ${sub_pid[@]}; do
+    if ps -ef | grep -v grep | grep $el &>/dev/null; then
+        kill -9 $el
+    fi
+  done
+}
+
+trap '{ successExit; echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
+trap '{ successExit }' EXIT
 
 # Get crust resources
 verbose INFO "---------- Getting resource ----------" n
@@ -96,9 +111,12 @@ chown -R $uid:$uid $crust_chain_main_install_dir
 # Install crust API
 verbose INFO "---------- Installing crust API ----------" n
 
-verbose INFO "Install nodejs..." h
+setTimeWait "$(verbose INFO "Install nodejs..." h)" $sub_pid &
+toKillPID[${#sub_pid[*]}]=$!
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - &>/dev/null
 apt install nodejs &>/dev/null
-verbose INFO "SUCCESS" t
+checkRes $? "quit" "$sub_pid"
+
 verbose INFO "Install yarn..." h
 apt install yarn &>/dev/null
 verbose INFO "SUCCESS" t
