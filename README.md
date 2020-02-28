@@ -17,6 +17,8 @@ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt install nodejs
 sudo apt install yarn
 ```
+
+### Git mode
 Step 1. Download crust-client
 ```shell
 git clone https://github.com/crustio/crust-client.git
@@ -29,9 +31,35 @@ Step 3. Preparing the installation packages
 ```shell
 mkdir resource # create resource directory
 ```
-Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization ).
+Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization and rename them ).
 
 Step 4. Run install stcript
+```shell
+sudo ./install
+```
+
+### Package mode
+Step 1. Download source code in release
+
+[release page](https://github.com/crustio/crust-client/releases)
+
+Step 2. Unzip crust-client-0.1.0-alpha.tar.gz
+```shell
+tar -zxf crust-client-0.1.0-alpha.tar.gz
+```
+
+Step 3. Into directory
+```shell
+cd crust-client-0.1.0-alpha
+```
+
+Step 4. Preparing the installation packages
+```shell
+mkdir resource # create resource directory
+```
+Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization and rename them ).
+
+Step 5. Run install stcript
 ```shell
 sudo ./install
 ```
