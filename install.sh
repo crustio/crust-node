@@ -24,6 +24,11 @@ crust_client_aim="/usr/bin/crust-client"
 
 trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
+if [ $(id -u) -ne 0 ]; then
+    verbose ERROR "Please run with sudo!"
+    exit 1
+fi
+
 # Get crust resources
 verbose INFO "---------- Getting resource ----------" n
 crust_version=$1
@@ -145,5 +150,3 @@ verbose INFO "Move crust-client runnable stcript to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
 verbose INFO " SUCCESS\n" t
 chown -R $uid:$uid $crust_client_main_install_dir
-
-successExit

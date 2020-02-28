@@ -649,6 +649,9 @@ while true ; do
             shift ;
             break ;;
         *)
+            if [ x"$cmd_run" = x"" ]; then
+                cmd_run="help"
+            fi
             break;
             ;;
     esac
