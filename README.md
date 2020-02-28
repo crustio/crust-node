@@ -10,6 +10,13 @@ On one hand, this project is used to install all crust related programs, includi
   Unbantu 16.04
 
 ## Install crust-client
+Step 0. Install curl, nodejs and yarn
+```shell
+sudo apt install curl
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+sudo apt install nodejs
+sudo apt install yarn
+```
 Step 1. Download crust-client
 ```shell
 git clone https://github.com/crustio/crust-client.git
