@@ -24,6 +24,11 @@ crust_client_aim="/usr/bin/crust-client"
 
 trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
+if [ $(id -u) -ne 0 ]; then
+    verbose ERROR "Please run with sudo!"
+    exit 1
+fi
+
 # Get crust resources
 verbose INFO "---------- Getting resource ----------" n
 crust_version=$1
@@ -95,13 +100,6 @@ chown -R $uid:$uid $crust_chain_main_install_dir
 
 # Install crust API
 verbose INFO "---------- Installing crust API ----------" n
-
-verbose INFO "Install nodejs..." h
-apt install nodejs &>/dev/null
-verbose INFO "SUCCESS" t
-verbose INFO "Install yarn..." h
-apt install yarn &>/dev/null
-verbose INFO "SUCCESS" t
 
 if [ -d "$crust_api_resource_dir" ]; then
   rm -rf $crust_api_resource_dir

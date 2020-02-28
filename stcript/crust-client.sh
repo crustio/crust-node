@@ -79,6 +79,38 @@ curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
   }"
 }
 
+function send_im_online_key()
+{
+local secret_phrase=${@:3}
+curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
+ "{
+    \"jsonrpc\":\"2.0\",
+    \"id\":1,
+    \"method\":\"author_insertKey\",
+    \"params\": [
+      \"imon\",
+      \"$secret_phrase\",
+      \"$2\"
+    ]
+  }"
+}
+
+function send_authority_discovery_key()
+{
+local secret_phrase=${@:3}
+curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
+ "{
+    \"jsonrpc\":\"2.0\",
+    \"id\":1,
+    \"method\":\"author_insertKey\",
+    \"params\": [
+      \"audi\",
+      \"$secret_phrase\",
+      \"$2\"
+    ]
+  }"
+}
+
 # params are <base_path> <rpc_port> <name> <chain_start_stcript>
 function get_rotate_keys()
 {
@@ -182,11 +214,17 @@ function chainLaunchGenesis()
 
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"  
     if [ ! -z $bootnodes ]; then
-        verbose INFO "Add bootnodes($bootnodes)" h
-        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO "Add bootnodes(${bootnodes[*]})" h
+        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose WARN "No bootnodes in chain configuration, you must be the frist genesis node."
+    fi
+
+    if [ ! -z $node_key ]; then
+        verbose INFO "Add node key($node_key)" h
+        chain_start_stcript="$chain_start_stcript --node-key $node_key"
+        verbose INFO " SUCCESS" t
     fi
     
     verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
@@ -226,6 +264,14 @@ function chainLaunchGenesis()
     send_babe_key $rpc_port $public_key_sr25519 $secret_phrase 
     verbose INFO " SUCCESS" t
 
+    verbose INFO "Send im_online key to your chain" h
+    send_im_online_key $rpc_port $public_key_sr25519 $secret_phrase 
+    verbose INFO " SUCCESS" t
+
+    verbose INFO "Send authority_discovery key to your chain" h
+    send_authority_discovery_key $rpc_port $public_key_sr25519 $secret_phrase 
+    verbose INFO " SUCCESS" t
+
     verbose INFO "Try to kill old crust chain with same <chain-launch.json> again" h
     crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
@@ -238,7 +284,7 @@ function chainLaunchGenesis()
     verbose INFO " SUCCESS" t
     rm $rand_log_file &>/dev/null
 
-    verbose WARN "You need to open the port($port) in your device to Make extranet nodes discover your node."
+    verbose WARN "You need to open the port($port) in your device to make external nodes to discover your node."
     sleep 1
 
     if [ -z "$3" ]; then
@@ -280,8 +326,8 @@ chainLaunchNormal()
     # Get chain start stcript
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
     if [ ! -z $bootnodes ]; then
-        verbose INFO "Add bootnodes($bootnodes)" h
-        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO "Add bootnodes(${bootnodes[*]})" h
+        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose ERROR "Please fill bootnodes in chain configuration!"
@@ -353,8 +399,8 @@ chainLaunchValidator()
     # Get chain start stcript
     chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name" 
     if [ ! -z $bootnodes ]; then
-        verbose INFO "Add bootnodes($bootnodes)" h
-        chain_start_stcript="$chain_start_stcript --bootnodes=$bootnodes"
+        verbose INFO "Add bootnodes(${bootnodes[*]})" h
+        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose ERROR "Please fill bootnodes in chain configuration!"
@@ -512,7 +558,7 @@ teeLaunch()
     api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
     validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
     if [ $api_base_url = $validator_api_base_url ]; then
-         verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesisi nodes\n"
+         verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesis nodes\n"
     fi
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
@@ -603,6 +649,9 @@ while true ; do
             shift ;
             break ;;
         *)
+            if [ x"$cmd_run" = x"" ]; then
+                cmd_run="help"
+            fi
             break;
             ;;
     esac
