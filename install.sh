@@ -114,8 +114,9 @@ verbose INFO "---------- Installing crust API ----------" n
 setTimeWait "$(verbose INFO "Install nodejs..." h)" $sub_pid &
 toKillPID[${#sub_pid[*]}]=$!
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash - &>/dev/null
-apt install nodejs &>/dev/null
 checkRes $? "quit" "$sub_pid"
+
+apt install nodejs
 
 verbose INFO "Install yarn..." h
 apt install yarn &>/dev/null
@@ -170,3 +171,5 @@ verbose INFO "Move crust-client runnable stcript to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
 verbose INFO " SUCCESS\n" t
 chown -R $uid:$uid $crust_client_main_install_dir
+
+successExit
