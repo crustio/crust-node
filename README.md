@@ -268,6 +268,8 @@ you will see a warning like:
   
   Need to make sure your tee has plotted your empty disk and reported your first work report.
 
+- Waiting one era
+
 - Click "Validate" button, like:
 ![set session key](doc/img/start_validate.PNG)
 

@@ -505,9 +505,13 @@ ipfsLaunch()
         eval $cmd_run
     else
         nohup $cmd_run &>$2 &
-        ipfs_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+        sleep 5
+        ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+        ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
+        ipfs_pid_str=${ipfs_pid_str[0]/\/ipfs/}
+        ipfs_pid=$(echo $ipfs_pid_str)
         mv $2 $2.$ipfs_pid
-        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in $2.$ipfs_pid . If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
+        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2.$ipfs_pid'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
     fi
 }
 
@@ -567,9 +571,10 @@ teeLaunch()
         eval $cmd_run
     else
         nohup $cmd_run &>$2 &
+        sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$tee_pid
-        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.$tee_pid\n"
+        mv $2 $2.${tee_pid[0]: 0: 5}
+        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.${tee_pid[0]: 0: 5}\n"
     fi
 }
 
