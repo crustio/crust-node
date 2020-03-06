@@ -590,10 +590,11 @@ teeLaunch()
     fi
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
-    crontab_cmd="crust-client tee-launch $config_path -b $log_path"
+    crontab_cmd="crust-client tee-launch $config_path -b $log_path" 
+    crontab -l 2>/dev/null | grep -v "$crontab_cmd" | crontab -
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
-    crontab -l 2>/dev/null | grep -v ''$crontab_cmd'' | crontab -
+   
     tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
     if [ x"$tee_pid" != x"" ]; then
         kill -9 $tee_pid &>/dev/null
@@ -644,7 +645,7 @@ teeStop()
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
     crontab_cmd="crust-client tee-launch $config_path -b $log_path"
-    crontab -l 2>/dev/null | grep -v ''$crontab_cmd'' | crontab -
+    crontab -l 2>/dev/null | grep -v "$crontab_cmd" | crontab -
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
     tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
