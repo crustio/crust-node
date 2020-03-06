@@ -579,9 +579,19 @@ teeLaunch()
          verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesis nodes\n"
     fi
 
-    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
     local_pwd=$(pwd)
-    crontab_cmd="crust-client tee-launch $local_pwd/$1 -b $local_pwd/$2"
+    config_path=$1
+    log_path=$2
+
+    if [[ $config_path != /* ]]; then
+        config_path=$local_pwd/$config_path
+    fi
+    if [[ $log_path != /* ]]; then
+        log_path=$local_pwd/$log_path
+    fi
+
+    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
+    crontab_cmd="crust-client tee-launch $config_path -b $log_path"
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
     tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
@@ -599,7 +609,7 @@ teeLaunch()
         verbose INFO "Launch crust TEE with $1 configurations\n"
         eval $cmd_run
     else
-        nohup $cmd_run &>$2 &
+        nohup $cmd_run &>$log_path &
         (crontab -l 2>/dev/null; echo "*/5 * * * * $crontab_cmd") | crontab -
         sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
@@ -622,9 +632,19 @@ teeStop()
     fi
     verbose INFO " SUCCESS" t
 
-    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
     local_pwd=$(pwd)
-    crontab_cmd="crust-client tee-launch $local_pwd/$1 -b $local_pwd/$2"
+    config_path=$1
+    log_path=$2
+
+    if [[ $config_path != /* ]]; then
+        config_path=$local_pwd/$config_path
+    fi
+    if [[ $log_path != /* ]]; then
+        log_path=$local_pwd/$log_path
+    fi
+
+    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
+    crontab_cmd="crust-client tee-launch $config_path -b $log_path"
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
     tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
