@@ -28,6 +28,7 @@ Usage:
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
+    tee-stop <tee-launch.json>                                          stop crust-tee
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
                                                                             "chain-launch-validator", "api-launch", "ipfs-launch",
@@ -579,11 +580,13 @@ teeLaunch()
     fi
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
+    local_pwd=$(pwd)
+    crontab_cmd="crust-client tee-launch $local_pwd/$1 -b $local_pwd/$2"
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
     tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
     if [ x"$tee_pid" != x"" ]; then
-        crontab -l 2>/dev/null | grep -v ''$cmd_run'' | crontab -
+        crontab -l 2>/dev/null | grep -v ''$crontab_cmd'' | crontab -
         kill -9 $tee_pid &>/dev/null
         if [ $? -ne 0 ]; then
             sudo "kill -9 $tee_pid" &>/dev/null
@@ -597,11 +600,42 @@ teeLaunch()
         eval $cmd_run
     else
         nohup $cmd_run &>$2 &
-        (crontab -l 2>/dev/null; echo "*/5 * * * * nohup $cmd_run &>$2 &") | crontab -
+        (crontab -l 2>/dev/null; echo "*/5 * * * * $crontab_cmd") | crontab -
         sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
         verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2\n"
     fi
+}
+
+teeStop()
+{
+    verbose INFO "Check <tee-launch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find tee-launch.json!"
+        exit 1
+    fi
+    verbose INFO " SUCCESS" t
+
+    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
+    local_pwd=$(pwd)
+    crontab_cmd="crust-client tee-launch $local_pwd/$1 -b $local_pwd/$2"
+
+    verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
+    tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$tee_pid" != x"" ]; then
+        crontab -l 2>/dev/null | grep -v ''$crontab_cmd'' | crontab -
+        kill -9 $tee_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $tee_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 ############### MAIN BODY ###############
@@ -646,6 +680,14 @@ while true ; do
             ;;
         tee-launch)
             cmd_run="teeLaunch $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        tee-stop)
+            cmd_run="teeStop $2"
             if [ -z $2 ]; then
                 shift 1
             else
