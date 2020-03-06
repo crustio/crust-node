@@ -28,6 +28,7 @@ Usage:
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
+    tee-stop <tee-launch.json>                                          stop crust-tee
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
                                                                             "chain-launch-validator", "api-launch", "ipfs-launch",
@@ -532,6 +533,18 @@ apiLaunch()
     verbose INFO " SUCCESS" t
 
     cmd_run="node $crust_api_main_install_dir/node_modules/.bin/ts-node $crust_api_main_install_dir/src/index.ts $crust_api_port $crust_chain_endpoint"
+    
+    verbose INFO "Try to kill old crust api with same <api-launch.json>" h
+    api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$api_pid" != x"" ]; then
+        kill -9 $api_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $api_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+    
+    
     if [ -z "$2" ]; then
         verbose INFO "Launch crust API with $1 configurations\n"
         $cmd_run
@@ -565,17 +578,84 @@ teeLaunch()
          verbose WARN "TEE verifier address is the same as yourself, please confirm that you are one of genesis nodes\n"
     fi
 
-    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
+    local_pwd=$(pwd)
+    config_path=$1
+    log_path=$2
+
+    if [[ $config_path != /* ]]; then
+        config_path=$local_pwd/$config_path
+    fi
+    if [[ $log_path != /* ]]; then
+        log_path=$local_pwd/$log_path
+    fi
+
+    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
+    crontab_cmd="crust-client tee-launch $config_path -b $log_path" 
+    crontab -l 2>/dev/null | grep -v "$crontab_cmd" | crontab -
+
+    verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
+   
+    tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$tee_pid" != x"" ]; then
+        kill -9 $tee_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $tee_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
+    
     if [ -z "$2" ]; then
         verbose INFO "Launch crust TEE with $1 configurations\n"
         eval $cmd_run
     else
-        nohup $cmd_run &>$2 &
+        nohup $cmd_run &>$log_path &
+        (crontab -l 2>/dev/null; echo "* 3 * * * $crontab_cmd") | crontab -
         sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        mv $2 $2.${tee_pid[0]: 0: 5}
-        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.${tee_pid[0]: 0: 5}\n"
+        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2\n"
     fi
+}
+
+teeStop()
+{
+    verbose INFO "Check <tee-launch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find tee-launch.json!"
+        exit 1
+    fi
+    verbose INFO " SUCCESS" t
+
+    local_pwd=$(pwd)
+    config_path=$1
+    log_path=$2
+
+    if [[ $config_path != /* ]]; then
+        config_path=$local_pwd/$config_path
+    fi
+    if [[ $log_path != /* ]]; then
+        log_path=$local_pwd/$log_path
+    fi
+
+    cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
+    crontab_cmd="crust-client tee-launch $config_path -b $log_path"
+    crontab -l 2>/dev/null | grep -v "$crontab_cmd" | crontab -
+
+    verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
+    tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$tee_pid" != x"" ]; then
+        kill -9 $tee_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $tee_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 ############### MAIN BODY ###############
@@ -620,6 +700,14 @@ while true ; do
             ;;
         tee-launch)
             cmd_run="teeLaunch $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        tee-stop)
+            cmd_run="teeStop $2"
             if [ -z $2 ]; then
                 shift 1
             else

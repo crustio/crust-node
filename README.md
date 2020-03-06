@@ -99,9 +99,8 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
 ```
 
 ### tee-launch.json
-```json
 {
-    "base_path" : "crust_store/node1/tee/",                    # All files will be stored in this directory
+    "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",                    # All files will be stored in this directory, must be absolute path
     "empty_capacity" : 4,                                      # empty disk storage in Gb
     
     "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",      # for connect to ipfs
