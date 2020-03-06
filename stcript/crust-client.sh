@@ -610,7 +610,7 @@ teeLaunch()
         eval $cmd_run
     else
         nohup $cmd_run &>$log_path &
-        (crontab -l 2>/dev/null; echo "* */3 * * * $crontab_cmd") | crontab -
+        (crontab -l 2>/dev/null; echo "* 3 * * * $crontab_cmd") | crontab -
         sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
         verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2\n"
