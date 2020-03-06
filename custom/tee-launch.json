@@ -1,5 +1,5 @@
 {
-    "empty_path" : "crust_store/node1/tee/empty_path",
+    "base_path" : "crust_store/node1/tee/",
     "empty_capacity" : 4,
     
     "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",

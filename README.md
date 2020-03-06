@@ -101,7 +101,7 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
 ### tee-launch.json
 ```json
 {
-    "empty_path" : "crust_store/node1/tee/empty_path",         # plot file will be stored in this directory
+    "base_path" : "crust_store/node1/tee/",                    # All files will be stored in this directory
     "empty_capacity" : 4,                                      # empty disk storage in Gb
     
     "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",      # for connect to ipfs
