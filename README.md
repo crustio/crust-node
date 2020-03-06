@@ -99,16 +99,17 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
 ```
 
 ### tee-launch.json
+```json
 {
-    "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",                    # All files will be stored in this directory, must be absolute path
-    "empty_capacity" : 4,                                      # empty disk storage in Gb
+    "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",    # All files will be stored in this directory, must be absolute path
+    "empty_capacity" : 4,                                                # empty disk storage in Gb
     
-    "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",      # for connect to ipfs
-    "api_base_url": "http://127.0.0.1:12222/api/v0",           # your tee node api address
-    "validator_api_base_url": "http://127.0.0.1:12222/api/v0", # the tee validator address (**if you are genesis node, this url must equal to 'api_base_url'**)
+    "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",                # for connect to ipfs
+    "api_base_url": "http://127.0.0.1:12222/api/v0",                     # your tee node api address
+    "validator_api_base_url": "http://127.0.0.1:12222/api/v0",           # the tee validator address (**if you are genesis node, this url must equal to 'api_base_url'**)
 
-    "crust_api_base_url" : "http://127.0.0.1:56666/api/v1",    #the address of crust api
-    "crust_address" : "",                                      # your crust chain identity
+    "crust_api_base_url" : "http://127.0.0.1:56666/api/v1",              # the address of crust api
+    "crust_address" : "",                                                # your crust chain identity
     "crust_account_id" : "",
     "crust_password" : "",
     "crust_backup" : "",
