@@ -532,6 +532,19 @@ apiLaunch()
     verbose INFO " SUCCESS" t
 
     cmd_run="node $crust_api_main_install_dir/node_modules/.bin/ts-node $crust_api_main_install_dir/src/index.ts $crust_api_port $crust_chain_endpoint"
+    
+    verbose INFO "Try to kill old crust api with same <api-launch.json>" h
+    api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$api_pid" != x"" ]; then
+        crontab -l | grep -v ''$cmd_run'' | crontab -
+        kill -9 $api_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $api_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+    
+    
     if [ -z "$2" ]; then
         verbose INFO "Launch crust API with $1 configurations\n"
         $cmd_run
@@ -566,15 +579,28 @@ teeLaunch()
     fi
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $1"
+
+    verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
+    tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$tee_pid" != x"" ]; then
+        crontab -l 2>/dev/null | grep -v ''$cmd_run'' | crontab -
+        kill -9 $tee_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $tee_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
+    
     if [ -z "$2" ]; then
         verbose INFO "Launch crust TEE with $1 configurations\n"
         eval $cmd_run
     else
         nohup $cmd_run &>$2 &
+        (crontab -l 2>/dev/null; echo "*/5 * * * * nohup $cmd_run &>$2 &") | crontab -
         sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        mv $2 $2.${tee_pid[0]: 0: 5}
-        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2.${tee_pid[0]: 0: 5}\n"
+        verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2\n"
     fi
 }
 
