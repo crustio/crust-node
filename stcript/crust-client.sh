@@ -572,8 +572,6 @@ teeLaunch()
     verbose INFO " SUCCESS" t
 
     tee_config=$(cat $1)
-    base_path=$(getJsonValuesByAwk "$tee_config" "base_path" "null")
-    base_path=$(echo "$base_path" | sed -e 's/^"//' -e 's/"$//')
     api_base_url=$(getJsonValuesByAwk "$tee_config" "api_base_url" "null")
     validator_api_base_url=$(getJsonValuesByAwk "$tee_config" "validator_api_base_url" "null")
     if [ $api_base_url = $validator_api_base_url ]; then
@@ -583,7 +581,6 @@ teeLaunch()
     local_pwd=$(pwd)
     config_path=$1
     log_path=$2
-    recover_file_path=$base_path/recover.bin
 
     if [[ $config_path != /* ]]; then
         config_path=$local_pwd/$config_path
@@ -594,7 +591,7 @@ teeLaunch()
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
     crontab_cmd="crust-client tee-launch $config_path -b $log_path"
-    crontab_cmd_with_if="t_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}'); if [x"\$t_pid" == x""] && [ -f $recover_file_path ]; then crust-client tee-launch $config_path -b $log_path; fi"
+    crontab_cmd_with_if="t_pid=\$(ps -ef | grep \"$cmd_run\" | grep -v grep | awk '{print \$2}'); if [ -z \"\$t_pid\" ]; then crust-client tee-launch $config_path -b $log_path; fi"
     crontab -l 2>/dev/null | grep -v "$crontab_cmd" | crontab -
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
