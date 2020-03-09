@@ -138,7 +138,7 @@ The genesis node refers to the initial nodes of the chain written in the genesis
 ```
 - Monitor
 ```shell
-   tail -f logs/genesis1-api.log.pid
+   tail -f logs/genesis1-api.log
 ```
 
 - Wait for plotting disk
@@ -213,7 +213,7 @@ If you are not genesis node but want to apply to become a validator, please foll
 
 - Monitor
 ```shell
-   tail -f logs/validator1-api.log.pid
+   tail -f logs/validator1-tee.log
 ```
 
 - Wait for plotting disk
