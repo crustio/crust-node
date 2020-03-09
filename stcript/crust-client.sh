@@ -590,7 +590,8 @@ teeLaunch()
     fi
 
     cmd_run="$crust_tee_main_install_dir/bin/crust-tee -c $config_path"
-    crontab_cmd="crust-client tee-launch $config_path -b $log_path" 
+    crontab_cmd="crust-client tee-launch $config_path -b $log_path"
+    crontab_cmd_with_if="t_pid=\$(ps -ef | grep \"$cmd_run\" | grep -v grep | awk '{print \$2}'); if [ -z \"\$t_pid\" ]; then crust-client tee-launch $config_path -b $log_path; fi"
     crontab -l 2>/dev/null | grep -v "$crontab_cmd" | crontab -
 
     verbose INFO "Try to kill old crust tee with same <tee-launch.json>" h
@@ -610,7 +611,7 @@ teeLaunch()
         eval $cmd_run
     else
         nohup $cmd_run &>$log_path &
-        (crontab -l 2>/dev/null; echo "* 3 * * * $crontab_cmd") | crontab -
+        (crontab -l 2>/dev/null; echo "*/5 * * * * $crontab_cmd_with_if") | crontab -
         sleep 3
         tee_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
         verbose INFO "Launch tee with $1 configurations in backend (pid is $tee_pid), log information will be saved in $2\n"
