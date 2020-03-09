@@ -138,7 +138,7 @@ The genesis node refers to the initial nodes of the chain written in the genesis
 ```
 - Monitor
 ```shell
-   tail -f logs/genesis1-api.log
+   tail -f logs/genesis1-tee.log
 ```
 
 - Wait for plotting disk
