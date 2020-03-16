@@ -7,7 +7,10 @@ On one hand, this project is used to install all crust related programs, includi
   CPU must contain SGX module, and make sure the SGX function is turned on in the bios
 - Operating system requirements:
 
-  Unbantu 16.04
+  Ubuntu 16.04
+- Check if your configuration supports SGX
+
+  [Test SGX functions on your computer](https://space.bilibili.com/518994760). Many thanks to Phala network of provid such helpful scripts.
 
 ## Install crust-client
 Step 0. Install curl, nodejs and yarn
