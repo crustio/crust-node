@@ -34,14 +34,14 @@ fi
 # Test sgx environment
 gcc $tool_dir/test-sgx.c -o $tool_dir/test-sgx.o
 ./$tool_dir/test-sgx.o &>/dev/null
-
-if [ $? -eq 1 ]; then
+sgx_check_res=$?
+if [ $sgx_check_res -eq 1 ]; then
     verbose ERROR "CPU SGX functions are deactivated or SGX is not supported!"
     exit 1
-elif [ $? -eq 2 ]; then
+elif [ $sgx_check_res -eq 2 ]; then
     verbose ERROR "SGX is available for your CPU but not enabled in BIOS!"
     exit 1
-elif [ $? -eq 0 ]; then
+elif [ $sgx_check_res -eq 0 ]; then
     verbose INFO "SGX is available for your CPU and enabled in BIOS!"
 else
     verbose ERROR "SGX check has unkown error!"
