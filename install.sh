@@ -35,14 +35,17 @@ fi
 gcc $tool_dir/test-sgx.c -o $tool_dir/test-sgx.o
 ./$tool_dir/test-sgx.o &>/dev/null
 
-if [ $? -eq -1 ]; then
-  verbose ERROR "CPU SGX functions are deactivated or SGX is not supported!"
-  exit 1
-elif [ $? -eq -2 ]; then
-  verbose ERROR "SGX is available for your CPU but not enabled in BIOS!"
-  exit 1
+if [ $? -eq 1 ]; then
+    verbose ERROR "CPU SGX functions are deactivated or SGX is not supported!"
+    exit 1
+elif [ $? -eq 2 ]; then
+    verbose ERROR "SGX is available for your CPU but not enabled in BIOS!"
+    exit 1
+elif [ $? -eq 0 ]; then
+    verbose INFO "SGX is available for your CPU and enabled in BIOS!"
 else
-  verbose INFO "SGX is available for your CPU and enabled in BIOS!"
+    verbose ERROR "SGX check has unkown error!"
+    exit 1
 fi
 
 # Get crust resources

@@ -106,12 +106,12 @@ int main(int argc, char **argv)
     if (is_sgx_available != 1)
     {
         printf("\033[31m\nCPU SGX functions are deactivated or SGX is not supported!\033[0m\n");
-        return -1;
+        return 1;
     }
     else if (is_sgx_enable != 1)
     {
         printf("\033[31m\nSGX is available for your CPU but not enabled in BIOS!\033[0m\n");
-        return -2;
+        return 2;
     }
 
     printf("\033[32m\nSGX is available for your CPU and enabled in BIOS!\033[0m\n");
