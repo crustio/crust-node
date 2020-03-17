@@ -5,12 +5,13 @@ On one hand, this project is used to install all crust related programs, includi
 - Hardware requirements: 
 
   CPU must contain SGX module, and make sure the SGX function is turned on in the bios
+
 - Operating system requirements:
 
   Ubuntu 16.04
-- Check if your configuration supports SGX
 
-  [Test SGX functions on your computer](https://space.bilibili.com/518994760). Many thanks to Phala network of provid such helpful scripts.
+- Check if your machine supports SGX
+  When you run stcript to install crust client ( git mode step4, package mode step5 ), you will know if your machine supports SGX. If not support or not enabled, please go to [this page](https://github.com/crustio/crust/wiki/Problems-of-enabling-SGX) to find how to fix those problems.
 
 ## Install crust-client
 Step 0. Install gcc, git, openssl, boost, curl, nodejs and yarn
@@ -51,14 +52,14 @@ Step 1. Download source code in release
 
 [release page](https://github.com/crustio/crust-client/releases)
 
-Step 2. Unzip crust-client-0.1.0-alpha.tar.gz
+Step 2. Unzip crust-client-0.1.1-alpha.tar.gz
 ```shell
-tar -zxf crust-client-0.1.0-alpha.tar.gz
+tar -zxf crust-client-0.1.1-alpha.tar.gz
 ```
 
 Step 3. Into directory
 ```shell
-cd crust-client-0.1.0-alpha
+cd crust-client-0.1.1-alpha
 ```
 
 Step 4. Preparing the installation packages
@@ -81,7 +82,7 @@ port=30333                                   # the port for p2p
 ws_port=9944                                 # the port for ws
 rpc_port=9933                                # the port for rpc
 name=node1                                   # the name of chain
-node_key=                                    # only the genesis node need this:0000000000000000000000000000000000000000000000000000000000000001
+node_key=                                    # only the genesis node need this, for example:0000000000000000000000000000000000000000000000000000000000000001
 bootnodes=(address1 address2 ...)            # the bootnodes for connect to the exist chain (if you are first node, you don't need this)
 external_rpc_ws=false                        # Whether to publicize the ws and rpc interface (if you are genesis node or validator node, this configuration must be false)
 ```
