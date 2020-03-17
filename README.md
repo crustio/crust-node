@@ -13,10 +13,13 @@ On one hand, this project is used to install all crust related programs, includi
   [Test SGX functions on your computer](https://space.bilibili.com/518994760). Many thanks to Phala network of provid such helpful scripts.
 
 ## Install crust-client
-Step 0. Install gcc, git, curl, nodejs and yarn
+Step 0. Install gcc, git, openssl, boost, curl, nodejs and yarn
 ```shell
 sudo apt install build-essential
 sudo apt install git
+sudo apt install libboost-all-dev
+sudo apt install openssl
+sudo apt install libssl-dev
 sudo apt install curl
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt install nodejs

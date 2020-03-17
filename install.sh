@@ -32,8 +32,8 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 # Test sgx environment
-gcc $tool_dir/test-sgx.c -o $tool_dir/test-sgx
-./$tool_dir/test-sgx &>/dev/null
+gcc $tool_dir/test-sgx.c -o $tool_dir/test-sgx.o
+./$tool_dir/test-sgx.o &>/dev/null
 
 if [ $? -eq -1 ]; then
   verbose ERROR "CPU SGX functions are deactivated or SGX is not supported!"
