@@ -11,6 +11,7 @@ On one hand, this project is used to install all crust related programs, includi
   Ubuntu 16.04
 
 - Check if your machine supports SGX
+  
   When you run stcript to install crust client ( git mode step4, package mode step5 ), you will know if your machine supports SGX. If not support or not enabled, please go to [this page](https://github.com/crustio/crust/wiki/Problems-of-enabling-SGX) to find how to fix those problems.
 
 ## Install crust-client
