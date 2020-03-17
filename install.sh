@@ -5,6 +5,8 @@
 # Some configuration
 user_dir=$(pwd)
 uid=$(stat -c '%U' $user_dir)
+tool_dir="tool"
+
 crust_main_install_dir="/opt/crust"
 crust_chain_main_install_dir="$crust_main_install_dir/crust"
 crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
@@ -26,6 +28,23 @@ trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
 if [ $(id -u) -ne 0 ]; then
     verbose ERROR "Please run with sudo!"
+    exit 1
+fi
+
+# Test sgx environment
+gcc $tool_dir/test-sgx.c -o $tool_dir/test-sgx.o
+./$tool_dir/test-sgx.o &>/dev/null
+sgx_check_res=$?
+if [ $sgx_check_res -eq 1 ]; then
+    verbose ERROR "CPU SGX functions are deactivated or SGX is not supported!"
+    exit 1
+elif [ $sgx_check_res -eq 2 ]; then
+    verbose ERROR "SGX is available for your CPU but not enabled in BIOS!"
+    exit 1
+elif [ $sgx_check_res -eq 0 ]; then
+    verbose INFO "SGX is available for your CPU and enabled in BIOS!"
+else
+    verbose ERROR "SGX check has unkown error!"
     exit 1
 fi
 
@@ -72,7 +91,15 @@ fi
 verbose INFO "Unzip crust TEE package" h
 tar -xvf "$crust_tee_package" -C "$crust_resource_dir/" &>/dev/null
 verbose INFO " SUCCESS\n" t
+
+verbose INFO "Run crust TEE install package" h
 ./$crust_tee_resource_dir/install.sh
+if [ $? -ne 0 ]; then
+  verbose ERROR " Failed" t
+  exit 1
+fi
+verbose INFO " SUCCESS" t
+
 rm -rf $crust_tee_resource_dir
 chown -R $uid:$uid $crust_main_install_dir
 
@@ -144,7 +171,11 @@ verbose INFO " SUCCESS" t
 
 verbose INFO "Create crust chain raw spec" n
 $crust_chain_main_install_dir/bin/crust build-spec --chain $crust_client_main_install_dir/etc/crust_chain_spec.json --raw > $crust_client_main_install_dir/etc/crust_chain_spec_raw.json
-checkRes $? "quit"
+if [ $? -ne 0 ]; then
+  verbose ERROR " Failed" t
+  exit 1
+fi
+verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-client runnable stcript to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
