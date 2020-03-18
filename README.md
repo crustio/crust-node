@@ -4,15 +4,11 @@ On one hand, this project is used to install all crust related programs, includi
 ## Preparation work
 - Hardware requirements: 
 
-  CPU must contain SGX module, and make sure the SGX function is turned on in the bios
+  CPU must contain SGX module, and make sure the SGX function is turned on in the bios, please click [this page](https://github.com/crustio/crust/wiki/Check-TEE-supportive) to check if your machine supports SGX
 
 - Operating system requirements:
 
   Ubuntu 16.04
-
-- Check if your machine supports SGX
-  
-  When you run script to install crust client ( git mode step4, package mode step5 ), you will know if your machine supports SGX. If not support or not enabled, please go to [this page](https://github.com/crustio/crust/wiki/Problems-of-enabling-SGX) to find how to fix those problems.
 
 ## Install crust-client
 Step 0. Install gcc, git, openssl, boost, curl, nodejs and yarn
