@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. stcript/utils.sh
+. script/utils.sh
 
 # Some configuration
 user_dir=$(pwd)
@@ -21,7 +21,7 @@ crust_api_resource_dir="$crust_resource_dir/crust-api"
 crust_tee_package="$crust_resource_dir/crust-tee.tar"
 crust_tee_resource_dir="$crust_resource_dir/crust-tee"
 
-crust_client_sh="stcript/crust-client.sh"
+crust_client_sh="script/crust-client.sh"
 crust_client_aim="/usr/bin/crust-client"
 
 trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
@@ -166,7 +166,8 @@ verbose INFO " SUCCESS" t
 verbose INFO "Move crust-client files to aim folder: $crust_client_main_install_dir" h
 cp VERSION $crust_client_main_install_dir
 cp -r etc/ $crust_client_main_install_dir
-cp -r stcript $crust_client_main_install_dir
+chmod +x script/*
+cp -r script $crust_client_main_install_dir
 verbose INFO " SUCCESS" t
 
 verbose INFO "Create crust chain raw spec" n
@@ -177,7 +178,7 @@ if [ $? -ne 0 ]; then
 fi
 verbose INFO " SUCCESS" t
 
-verbose INFO "Move crust-client runnable stcript to /usr/bin" h
+verbose INFO "Move crust-client runnable script to /usr/bin" h
 cp $crust_client_sh $crust_client_aim
 verbose INFO " SUCCESS\n" t
 chown -R $uid:$uid $crust_client_main_install_dir

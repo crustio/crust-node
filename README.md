@@ -4,15 +4,11 @@ On one hand, this project is used to install all crust related programs, includi
 ## Preparation work
 - Hardware requirements: 
 
-  CPU must contain SGX module, and make sure the SGX function is turned on in the bios
+  CPU must contain SGX module, and make sure the SGX function is turned on in the bios, please click [this page](https://github.com/crustio/crust/wiki/Check-TEE-supportive) to check if your machine supports SGX
 
 - Operating system requirements:
 
   Ubuntu 16.04
-
-- Check if your machine supports SGX
-  
-  When you run stcript to install crust client ( git mode step4, package mode step5 ), you will know if your machine supports SGX. If not support or not enabled, please go to [this page](https://github.com/crustio/crust/wiki/Problems-of-enabling-SGX) to find how to fix those problems.
 
 ## Install crust-client
 Step 0. Install gcc, git, openssl, boost, curl, nodejs and yarn
@@ -43,7 +39,7 @@ mkdir resource # create resource directory
 ```
 Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization and rename them ).
 
-Step 4. Run install stcript
+Step 4. Run install script
 ```shell
 sudo ./install
 ```
@@ -69,7 +65,7 @@ mkdir resource # create resource directory
 ```
 Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization and rename them ).
 
-Step 5. Run install stcript
+Step 5. Run install script
 ```shell
 sudo ./install
 ```
