@@ -10,7 +10,7 @@ crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 ipfs_bin=$crust_tee_main_install_dir/bin/ipfs
 swarm_key=$crust_client_main_install_dir/etc/swarm.key
 
-. $crust_client_main_install_dir/stcript/utils.sh
+. $crust_client_main_install_dir/script/utils.sh
 trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
 function help()
@@ -112,11 +112,11 @@ curl http://localhost:$1 -H "Content-Type:application/json;charset=utf-8" -d \
   }"
 }
 
-# params are <base_path> <rpc_port> <name> <chain_start_stcript>
+# params are <base_path> <rpc_port> <name> <chain_start_script>
 function get_rotate_keys()
 {
     local rotate_keys=""
-    local chain_start_stcript=${@:4}
+    local chain_start_script=${@:4}
     local rotate_keys_file_path=$1/chains/rotate_keys.json
     local rotate_keys_file_dir=$1/chains/
     local rpc_port=$2
@@ -133,7 +133,7 @@ function get_rotate_keys()
         verbose INFO " SUCCESS" t
     
         verbose INFO "Start up crust chain node without rotate keys" h
-        nohup $chain_start_stcript &>$rand_log_file &
+        nohup $chain_start_script &>$rand_log_file &
         verbose INFO " SUCCESS" t
 
         verbose INFO "Please wait 20s for crust chain node starts completely..." n
@@ -157,7 +157,7 @@ function get_rotate_keys()
         verbose INFO " SUCCESS" t
 
         verbose INFO "Kill old crust chain with same <chain-launch.json>" h
-        local crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        local crust_chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
         if [ x"$crust_chain_pid" != x"" ]; then
             kill -9 $crust_chain_pid &>/dev/null
             if [ $? -ne 0 ]; then
@@ -213,10 +213,10 @@ function chainLaunchGenesis()
 
     verbose INFO " SUCCESS" t
 
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"  
+    chain_start_script="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"  
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes(${bootnodes[*]})" h
-        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
+        chain_start_script="$chain_start_script --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose WARN "No bootnodes in chain configuration, you must be the frist genesis node."
@@ -224,12 +224,12 @@ function chainLaunchGenesis()
 
     if [ ! -z $node_key ]; then
         verbose INFO "Add node key($node_key)" h
-        chain_start_stcript="$chain_start_stcript --node-key $node_key"
+        chain_start_script="$chain_start_script --node-key $node_key"
         verbose INFO " SUCCESS" t
     fi
     
     verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
-    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
@@ -245,7 +245,7 @@ function chainLaunchGenesis()
     verbose INFO " SUCCESS" t
     
     verbose INFO "Start up crust chain node without babe and grandpa key" h
-    nohup $chain_start_stcript &>$rand_log_file &
+    nohup $chain_start_script &>$rand_log_file &
     verbose INFO " SUCCESS" t
 
     verbose INFO "Please wait 20s for crust chain node starts completely..." n
@@ -274,7 +274,7 @@ function chainLaunchGenesis()
     verbose INFO " SUCCESS" t
 
     verbose INFO "Try to kill old crust chain with same <chain-launch.json> again" h
-    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
@@ -290,11 +290,11 @@ function chainLaunchGenesis()
 
     if [ -z "$3" ]; then
         verbose INFO "launch crust chain(genesis node) with $1 configurations\n"
-        eval $chain_start_stcript
+        eval $chain_start_script
     else
-        nohup $chain_start_stcript &>$3 &
+        nohup $chain_start_script &>$3 &
         sleep 1
-        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
         mv $3 $3.$chain_pid
         verbose INFO "launch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
     fi
@@ -324,11 +324,11 @@ chainLaunchNormal()
     
     verbose INFO " SUCCESS" t
 
-    # Get chain start stcript
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    # Get chain start script
+    chain_start_script="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes(${bootnodes[*]})" h
-        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
+        chain_start_script="$chain_start_script --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose ERROR "Please fill bootnodes in chain configuration!"
@@ -337,7 +337,7 @@ chainLaunchNormal()
 
     # Kill old chain
     verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
-    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
@@ -349,7 +349,7 @@ chainLaunchNormal()
 
     # Add external rpc and ws flag
     if [ x"$external_rpc_ws" = x"true" ]; then
-        chain_start_stcript="$chain_start_stcript --ws-external --rpc-external --rpc-cors all"
+        chain_start_script="$chain_start_script --ws-external --rpc-external --rpc-cors all"
         verbose WARN "Rpc($rpc_port) and ws($ws_port) will be external, you need open those ports in your device to exposing ports to the external network."
     fi
 
@@ -357,11 +357,11 @@ chainLaunchNormal()
     sleep 1
     if [ -z "$2" ]; then
         verbose INFO "Launch crust chain(normal node) with $1 configurations\n"
-        eval $chain_start_stcript
+        eval $chain_start_script
     else
-        nohup $chain_start_stcript &>$2 &
+        nohup $chain_start_script &>$2 &
         sleep 1
-        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
         mv $2 $2.$chain_pid
         verbose INFO "Launch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
     fi
@@ -397,11 +397,11 @@ chainLaunchValidator()
     
     verbose INFO " SUCCESS" t
 
-    # Get chain start stcript
-    chain_start_stcript="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name" 
+    # Get chain start script
+    chain_start_script="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name" 
     if [ ! -z $bootnodes ]; then
         verbose INFO "Add bootnodes(${bootnodes[*]})" h
-        chain_start_stcript="$chain_start_stcript --bootnodes ${bootnodes[*]}"
+        chain_start_script="$chain_start_script --bootnodes ${bootnodes[*]}"
         verbose INFO " SUCCESS" t
     else
         verbose ERROR "Please fill bootnodes in chain configuration!"
@@ -410,7 +410,7 @@ chainLaunchValidator()
 
     # Kill old chain
     verbose INFO "Try to kill old crust chain with same <chain-launch.json>" h
-    crust_chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
@@ -420,18 +420,18 @@ chainLaunchValidator()
     verbose INFO " SUCCESS" t
 
     # Get rotate_keys
-    get_rotate_keys $base_path $rpc_port $name $chain_start_stcript
+    get_rotate_keys $base_path $rpc_port $name $chain_start_script
     trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit. Please remember the node session keys: "$(cat $base_path/chains/rotate_keys.json)" ; exit 1; }' INT
 
     # Run chain
     sleep 1
     if [ -z "$2" ]; then
         verbose INFO "Launch crust chain(validator node) with $1 configurations\n"
-        eval $chain_start_stcript
+        eval $chain_start_script
     else
-        nohup $chain_start_stcript &>$2 &
+        nohup $chain_start_script &>$2 &
         sleep 1
-        chain_pid=$(ps -ef | grep "$chain_start_stcript" | grep -v grep | awk '{print $2}')
+        chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
         mv $2 $2.$chain_pid
         verbose INFO "Launch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
     fi
