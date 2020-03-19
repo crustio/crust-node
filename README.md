@@ -4,14 +4,19 @@ On one hand, this project is used to install all crust related programs, includi
 ## Preparation work
 - Hardware requirements: 
 
-  CPU must contain SGX module, and make sure the SGX function is turned on in the bios, please click [this page](https://github.com/crustio/crust/wiki/Check-TEE-supportive) to check if your machine supports SGX
+  CPU must contain **SGX module**, and make sure the SGX function is turned on in the bios, please click [this page](https://github.com/crustio/crust/wiki/Check-TEE-supportive) to check if your machine supports SGX
 
 - Operating system requirements:
 
   Ubuntu 16.04
+  
+- Other configurations
+
+  - **Secure Boot** in BIOS needs to be turned off
+  - Need use ordinary account, **cannot support root account**
 
 ## Install crust-client
-Step 0. Install gcc, git, openssl, boost, curl, nodejs and yarn
+Step 0. Install gcc, git, openssl, boost, curl, elf, nodejs and yarn
 ```shell
 sudo apt install build-essential
 sudo apt install git
@@ -19,6 +24,7 @@ sudo apt install libboost-all-dev
 sudo apt install openssl
 sudo apt install libssl-dev
 sudo apt install curl
+sudo apt install libelf-dev
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt install nodejs
 sudo apt install yarn
@@ -105,7 +111,7 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
 ```
 
 ### tee-launch.json
-```json
+```shell
 {
     "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",    # All files will be stored in this directory, must be absolute path
     "empty_capacity" : 4,                                                # empty disk storage in Gb
