@@ -166,7 +166,6 @@ verbose INFO " SUCCESS" t
 verbose INFO "Move crust-client files to aim folder: $crust_client_main_install_dir" h
 cp VERSION $crust_client_main_install_dir
 cp -r etc/ $crust_client_main_install_dir
-chmod +x script/*
 cp -r script $crust_client_main_install_dir
 verbose INFO " SUCCESS" t
 
