@@ -43,7 +43,7 @@ Step 3. Preparing the installation packages
 ```shell
 mkdir resource # create resource directory
 ```
-Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization and rename them ).
+Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get resource.tar from [release page](https://github.com/crustio/crust-client/releases) ).
 
 Step 4. Run install script
 ```shell
@@ -55,21 +55,21 @@ Step 1. Download source code in release
 
 [release page](https://github.com/crustio/crust-client/releases)
 
-Step 2. Unzip crust-client-0.1.1-alpha.tar.gz
+Step 2. Unzip crust-client-x.x.x-alpha.tar.gz
 ```shell
-tar -zxf crust-client-0.1.1-alpha.tar.gz
+tar -zxf crust-client-x.x.x-alpha.tar.gz
 ```
 
 Step 3. Into directory
 ```shell
-cd crust-client-0.1.1-alpha
+cd crust-client-x.x.x-alpha
 ```
 
 Step 4. Preparing the installation packages
 ```shell
 mkdir resource # create resource directory
 ```
-Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get those packages from crust organization and rename them ).
+Then you need move installation packages into this directory ( resource ), include 'crust-api.tar' 'crust.tar'  'crust-tee.tar' ( for now, you can get resource.tar from [release page](https://github.com/crustio/crust-client/releases) ).
 
 Step 5. Run install script
 ```shell
