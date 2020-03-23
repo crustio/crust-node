@@ -21,6 +21,9 @@ crust_api_resource_dir="$crust_resource_dir/crust-api"
 crust_tee_package="$crust_resource_dir/crust-tee.tar"
 crust_tee_resource_dir="$crust_resource_dir/crust-tee"
 
+crust_subkey_bin="$crust_resource_dir/crust-subkey"
+crust_subkey_bin_aim="/usr/bin/crust-subkey"
+
 crust_client_sh="script/crust-client.sh"
 crust_client_aim="/usr/bin/crust-client"
 
@@ -62,7 +65,7 @@ verbose INFO " SUCCESS" t
 # Check the resources
 verbose INFO "Check the resources" h
 if [ ! -d "$crust_resource_dir" ]; then
-  verbose ERROR "Resource folder dosen't exist!"
+  verbose ERROR "Resource folder dosen't exist! Please go to this page (https://github.com/crustio/crust-client/releases) to download 'resource.tar' and unzip it."
   exit 1
 fi
 
@@ -80,6 +83,12 @@ if [ ! -f "$crust_tee_package" ]; then
   verbose ERROR "Crust TEE package dosen't exist!"
   exit 1
 fi
+
+if [ ! -f "$crust_subkey_bin" ]; then
+  verbose ERROR "Crust subkey bin dosen't exist!"
+  exit 1
+fi
+
 verbose INFO " SUCCESS\n" t
 
 # Install crust TEE
@@ -176,6 +185,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 verbose INFO " SUCCESS" t
+
+verbose INFO "Move crust-subkey bin to /usr/bin" h
+cp $crust_subkey_bin $crust_subkey_bin_aim
+verbose INFO " SUCCESS\n" t
 
 verbose INFO "Move crust-client runnable script to /usr/bin" h
 cp $crust_client_sh $crust_client_aim

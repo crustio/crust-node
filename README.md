@@ -216,8 +216,15 @@ If you are not genesis node but want to apply to become a validator, please foll
 #### TEE
 
 - Configuration
+   - Need create two account (controller and stash account) in crust chain browser and put some CRU in them, like:
+   ![validator1 and stash accounts](doc/img/validator1_and_stash_accounts.PNG) 
   
-  Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use valdator account (not stash account ) to configure crust chain identity.
+   - Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use controller account (not stash account) to configure crust chain identity.
+
+   - Use this command to get 'crust_account_id' by convert 'crust_address', please note that you need to remove the initial '0x' when filling 'crust_account_id' in the TEE configuration.
+      ```shell
+      crust-subkey inspect "crust_address"
+      ```
 
 - Launch
 ```shell
