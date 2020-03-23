@@ -217,7 +217,12 @@ If you are not genesis node but want to apply to become a validator, please foll
 
 - Configuration
   
-  Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use valdator account (not stash account ) to configure crust chain identity.
+   - Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use validator account (not stash account ) to configure crust chain identity.
+
+   - Use this command to get 'crust_account_id' by convert 'crust_address'
+      ```shell
+      crust-subkey inspect "crust_address"
+      ```
 
 - Launch
 ```shell
