@@ -24,12 +24,13 @@ Usage:
     chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
     chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
     api-launch <api-launch.config>                                      launch crust-api
+    api-stop <api-launch.config>                                        stop crust-api with same configuration 
     ipfs-launch <ipfs-launch.config>                                    launch ipfs
-    ipfs-stop <ipfs-launch.config>                                      stop ipfs     
+    ipfs-stop <ipfs-launch.config>                                      stop ipfs with same configuration     
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
-    tee-stop <tee-launch.json>                                          stop crust-tee    
+    tee-stop <tee-launch.json>                                          stop crust-tee with same configuration   
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
                                                                             "chain-launch-validator", "api-launch", "ipfs-launch",
@@ -500,7 +501,7 @@ ipfsLaunch()
         checkRes $? "return"
     fi
 
-    ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+    ipfs_pid_str=$(netstat -ntulp &>/dev/null | grep $api_port)
     ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
     ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
     ipfs_pid=$(echo $ipfs_pid_str_new)
@@ -527,7 +528,7 @@ ipfsLaunch()
     else
         nohup $cmd_run &>$2 &
         sleep 5
-        ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+        ipfs_pid_str=$(netstat -ntulp &>/dev/null | grep $api_port)
         ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
         ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
         ipfs_pid=$(echo $ipfs_pid_str_new)
@@ -555,7 +556,7 @@ ipfsStop()
     source $1
     verbose INFO " SUCCESS" t
 
-    ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+    ipfs_pid_str=$(netstat -ntulp &>/dev/null | grep $api_port)
     ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
     ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
     ipfs_pid=$(echo $ipfs_pid_str_new)
@@ -612,6 +613,33 @@ apiLaunch()
         mv $2 $2.$api_pid
         verbose INFO "Launch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
     fi
+}
+
+apiStop()
+{
+    verbose INFO "Check <api-launch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find api-launch.json!"
+        exit 1
+    fi
+    source $1
+    verbose INFO " SUCCESS" t
+
+    verbose INFO "Try to kill crust api with same <api-launch.json>" h
+    api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$api_pid" != x"" ]; then
+        kill -9 $api_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $api_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 teeLaunch()
@@ -775,6 +803,14 @@ while true ; do
             ;;
         api-launch)
             cmd_run="apiLaunch $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        api-stop)
+            cmd_run="apiStop $2"
             if [ -z $2 ]; then
                 shift 1
             else
