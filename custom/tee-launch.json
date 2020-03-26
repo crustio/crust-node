@@ -3,7 +3,7 @@
     "empty_capacity" : 4,
     
     "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",
-    "api_base_url": "http://127.0.0.1:12222/api/v0",
+    "api_base_url": "http://0.0.0.0:12222/api/v0",
     "validator_api_base_url": "http://127.0.0.1:12222/api/v0",
 
     "crust_api_base_url" : "http://127.0.0.1:56666/api/v1",
