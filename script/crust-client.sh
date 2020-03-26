@@ -500,6 +500,25 @@ ipfsLaunch()
         checkRes $? "return"
     fi
 
+    ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+    ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
+    ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
+    ipfs_pid=$(echo $ipfs_pid_str_new)
+    if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
+        ipfs_pid=""
+    fi
+
+    # Kill old ipfs
+    verbose INFO "Try to kill old ipfs with same <ipfs-launch.json>" h
+    if [ x"$ipfs_pid" != x"" ]; then
+        kill -9 $ipfs_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $ipfs_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
+    # Start new ipfs 
     cmd_run="$ipfs_bin daemon"
 
     if [ -z "$2" ]; then
@@ -510,8 +529,11 @@ ipfsLaunch()
         sleep 5
         ipfs_pid_str=$(netstat -ntulp | grep $api_port)
         ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
-        ipfs_pid_str=${ipfs_pid_str[0]/\/ipfs/}
-        ipfs_pid=$(echo $ipfs_pid_str)
+        ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
+        ipfs_pid=$(echo $ipfs_pid_str_new)
+        if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
+            ipfs_pid=""
+        fi
         verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
     fi
 }
@@ -535,9 +557,12 @@ ipfsStop()
 
     ipfs_pid_str=$(netstat -ntulp | grep $api_port)
     ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
-    ipfs_pid_str=${ipfs_pid_str[0]/\/ipfs/}
-    ipfs_pid=$(echo $ipfs_pid_str)
-
+    ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
+    ipfs_pid=$(echo $ipfs_pid_str_new)
+    if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
+        ipfs_pid=""
+    fi
+    
     # Kill ipfs
     verbose INFO "Try to kill ipfs with same <ipfs-launch.json>" h
     if [ x"$ipfs_pid" != x"" ]; then
