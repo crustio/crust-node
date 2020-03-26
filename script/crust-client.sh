@@ -22,13 +22,14 @@ Usage:
     version                                                             show crust-client version   
     chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
     chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
-    chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node
+    chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
     api-launch <api-launch.config>                                      launch crust-api
-    ipfs-launch <ipfs-launch>                                           launch ipfs      
+    ipfs-launch <ipfs-launch.config>                                    launch ipfs
+    ipfs-stop <ipfs-launch.config>                                      stop ipfs     
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
-    tee-stop <tee-launch.json>                                          stop crust-tee
+    tee-stop <tee-launch.json>                                          stop crust-tee    
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
                                                                             "chain-launch-validator", "api-launch", "ipfs-launch",
@@ -511,9 +512,41 @@ ipfsLaunch()
         ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
         ipfs_pid_str=${ipfs_pid_str[0]/\/ipfs/}
         ipfs_pid=$(echo $ipfs_pid_str)
-        mv $2 $2.$ipfs_pid
-        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2.$ipfs_pid'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
+        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
     fi
+}
+
+ipfsStop()
+{
+    # Check <ipfs-launch.json>
+    verbose INFO "Check <ipfs-launch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find ipfs-launch.json!"
+        exit 1
+    fi
+    source $1
+    verbose INFO " SUCCESS" t
+
+    ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+    ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
+    ipfs_pid_str=${ipfs_pid_str[0]/\/ipfs/}
+    ipfs_pid=$(echo $ipfs_pid_str)
+
+    # Kill ipfs
+    verbose INFO "Try to kill ipfs with same <ipfs-launch.json>" h
+    if [ x"$ipfs_pid" != x"" ]; then
+        kill -9 $ipfs_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $ipfs_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 apiLaunch()
@@ -725,6 +758,14 @@ while true ; do
             ;;
         ipfs-launch)
             cmd_run="ipfsLaunch $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        ipfs-stop)
+            cmd_run="ipfsStop $2"
             if [ -z $2 ]; then
                 shift 1
             else
