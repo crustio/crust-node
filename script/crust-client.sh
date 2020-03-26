@@ -501,7 +501,7 @@ ipfsLaunch()
         checkRes $? "return"
     fi
 
-    ipfs_pid_str=$(netstat -ntulp &>/dev/null | grep $api_port)
+    ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
     ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
     ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
     ipfs_pid=$(echo $ipfs_pid_str_new)
@@ -528,7 +528,7 @@ ipfsLaunch()
     else
         nohup $cmd_run &>$2 &
         sleep 5
-        ipfs_pid_str=$(netstat -ntulp &>/dev/null | grep $api_port)
+        ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
         ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
         ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
         ipfs_pid=$(echo $ipfs_pid_str_new)
@@ -556,7 +556,7 @@ ipfsStop()
     source $1
     verbose INFO " SUCCESS" t
 
-    ipfs_pid_str=$(netstat -ntulp &>/dev/null | grep $api_port)
+    ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
     ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
     ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
     ipfs_pid=$(echo $ipfs_pid_str_new)
@@ -603,15 +603,13 @@ apiLaunch()
     fi
     verbose INFO " SUCCESS" t
     
-    
     if [ -z "$2" ]; then
         verbose INFO "Launch crust API with $1 configurations\n"
         $cmd_run
     else
         nohup $cmd_run &>$2 &
         api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$api_pid
-        verbose INFO "Launch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
+        verbose INFO "Launch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2\n"
     fi
 }
 
@@ -630,6 +628,8 @@ apiStop()
     fi
     source $1
     verbose INFO " SUCCESS" t
+
+    cmd_run="node $crust_api_main_install_dir/node_modules/.bin/ts-node $crust_api_main_install_dir/src/index.ts $crust_api_port $crust_chain_endpoint"
 
     verbose INFO "Try to kill crust api with same <api-launch.json>" h
     api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
