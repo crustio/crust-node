@@ -23,6 +23,7 @@ Usage:
     chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
     chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
     chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
+    chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
     api-launch <api-launch.config>                                      launch crust-api
     api-stop <api-launch.config>                                        stop crust-api with same configuration 
     ipfs-launch <ipfs-launch.config>                                    launch ipfs
@@ -297,8 +298,7 @@ function chainLaunchGenesis()
         nohup $chain_start_script &>$3 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
-        mv $3 $3.$chain_pid
-        verbose INFO "launch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+        verbose INFO "launch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3\n"
     fi
 }
 
@@ -364,8 +364,7 @@ chainLaunchNormal()
         nohup $chain_start_script &>$2 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$chain_pid
-        verbose INFO "Launch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+        verbose INFO "Launch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2\n"
     fi
 }
 
@@ -434,9 +433,42 @@ chainLaunchValidator()
         nohup $chain_start_script &>$2 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$chain_pid
-        verbose INFO "Launch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+        verbose INFO "Launch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2\n"
     fi
+}
+
+chainStop()
+{
+    # Check configurations
+    verbose INFO "Check <chain-launch.config>" h
+    if [ -z $1 ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find chain-launch.config!"
+        exit 1
+    fi
+
+    source $1
+    verbose INFO " SUCCESS" t
+
+    # Get chain start script
+    chain_start_script="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+
+    # Kill old chain
+    verbose INFO "Try to kill crust chain with same <chain-launch.json>" h
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 ipfsLaunch()
@@ -779,6 +811,14 @@ while true ; do
             ;;
         chain-launch-validator)
             cmd_run="chainLaunchValidator $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        chain-stop)
+            cmd_run="chainStop $2"
             if [ -z $2 ]; then
                 shift 1
             else
