@@ -456,12 +456,13 @@ chainStop()
     verbose INFO " SUCCESS" t
 
     # Get chain start script
-    chain_start_script1="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
-    chain_start_script2="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    chain_start_script_genesis="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
+    chain_start_script_validator="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    chain_start_script_normal="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
 
     # Kill old chain
     verbose INFO "Try to kill crust chain with same <chain-launch.json>" h
-    crust_chain_pid=$(ps -ef | grep "$chain_start_script1" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script_genesis" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
@@ -470,7 +471,16 @@ chainStop()
         fi
     fi
 
-    crust_chain_pid=$(ps -ef | grep "$chain_start_script2" | grep -v grep | awk '{print $2}')
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script_validator" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script_normal" | grep -v grep | awk '{print $2}')
     if [ x"$crust_chain_pid" != x"" ]; then
         kill -9 $crust_chain_pid &>/dev/null
         if [ $? -ne 0 ]; then
