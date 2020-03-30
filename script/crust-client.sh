@@ -22,13 +22,16 @@ Usage:
     version                                                             show crust-client version   
     chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
     chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
-    chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node
+    chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
+    chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
     api-launch <api-launch.config>                                      launch crust-api
-    ipfs-launch <ipfs-launch>                                           launch ipfs      
+    api-stop <api-launch.config>                                        stop crust-api with same configuration 
+    ipfs-launch <ipfs-launch.config>                                    launch ipfs
+    ipfs-stop <ipfs-launch.config>                                      stop ipfs with same configuration     
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
-    tee-stop <tee-launch.json>                                          stop crust-tee
+    tee-stop <tee-launch.json>                                          stop crust-tee with same configuration   
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
                                                                             "chain-launch-validator", "api-launch", "ipfs-launch",
@@ -295,8 +298,7 @@ function chainLaunchGenesis()
         nohup $chain_start_script &>$3 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
-        mv $3 $3.$chain_pid
-        verbose INFO "launch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3.$chain_pid\n"
+        verbose INFO "launch crust chain(genesis node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $3\n"
     fi
 }
 
@@ -362,8 +364,7 @@ chainLaunchNormal()
         nohup $chain_start_script &>$2 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$chain_pid
-        verbose INFO "Launch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+        verbose INFO "Launch crust chain(normal node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2\n"
     fi
 }
 
@@ -432,9 +433,62 @@ chainLaunchValidator()
         nohup $chain_start_script &>$2 &
         sleep 1
         chain_pid=$(ps -ef | grep "$chain_start_script" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$chain_pid
-        verbose INFO "Launch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2.$chain_pid\n"
+        verbose INFO "Launch crust chain(validator node) with $1 configurations in backend (pid is $chain_pid), log information will be saved in $2\n"
     fi
+}
+
+chainStop()
+{
+    # Check configurations
+    verbose INFO "Check <chain-launch.config>" h
+    if [ -z $1 ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find chain-launch.config!"
+        exit 1
+    fi
+
+    source $1
+    verbose INFO " SUCCESS" t
+
+    # Get chain start script
+    chain_start_script_genesis="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --port $port --ws-port $ws_port --rpc-port $rpc_port --validator --name $name"
+    chain_start_script_validator="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --validator --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+    chain_start_script_normal="$crust_chain_main_install_dir/bin/crust --base-path $base_path --chain /opt/crust/crust-client/etc/crust_chain_spec_raw.json --pruning=archive --port $port --ws-port $ws_port --rpc-port $rpc_port --name $name"
+
+    # Kill old chain
+    verbose INFO "Try to kill crust chain with same <chain-launch.json>" h
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script_genesis" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script_validator" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+
+    crust_chain_pid=$(ps -ef | grep "$chain_start_script_normal" | grep -v grep | awk '{print $2}')
+    if [ x"$crust_chain_pid" != x"" ]; then
+        kill -9 $crust_chain_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            # If failed by using current user, kill it using root
+            sudo "kill -9 $crust_chain_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 ipfsLaunch()
@@ -499,6 +553,25 @@ ipfsLaunch()
         checkRes $? "return"
     fi
 
+    ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
+    ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
+    ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
+    ipfs_pid=$(echo $ipfs_pid_str_new)
+    if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
+        ipfs_pid=""
+    fi
+
+    # Kill old ipfs
+    verbose INFO "Try to kill old ipfs with same <ipfs-launch.json>" h
+    if [ x"$ipfs_pid" != x"" ]; then
+        kill -9 $ipfs_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $ipfs_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
+
+    # Start new ipfs 
     cmd_run="$ipfs_bin daemon"
 
     if [ -z "$2" ]; then
@@ -507,13 +580,51 @@ ipfsLaunch()
     else
         nohup $cmd_run &>$2 &
         sleep 5
-        ipfs_pid_str=$(netstat -ntulp | grep $api_port)
+        ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
         ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
-        ipfs_pid_str=${ipfs_pid_str[0]/\/ipfs/}
-        ipfs_pid=$(echo $ipfs_pid_str)
-        mv $2 $2.$ipfs_pid
-        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2.$ipfs_pid'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
+        ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
+        ipfs_pid=$(echo $ipfs_pid_str_new)
+        if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
+            ipfs_pid=""
+        fi
+        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
     fi
+}
+
+ipfsStop()
+{
+    # Check <ipfs-launch.json>
+    verbose INFO "Check <ipfs-launch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find ipfs-launch.json!"
+        exit 1
+    fi
+    source $1
+    verbose INFO " SUCCESS" t
+
+    ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
+    ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
+    ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
+    ipfs_pid=$(echo $ipfs_pid_str_new)
+    if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
+        ipfs_pid=""
+    fi
+    
+    # Kill ipfs
+    verbose INFO "Try to kill ipfs with same <ipfs-launch.json>" h
+    if [ x"$ipfs_pid" != x"" ]; then
+        kill -9 $ipfs_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $ipfs_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 apiLaunch()
@@ -544,16 +655,43 @@ apiLaunch()
     fi
     verbose INFO " SUCCESS" t
     
-    
     if [ -z "$2" ]; then
         verbose INFO "Launch crust API with $1 configurations\n"
         $cmd_run
     else
         nohup $cmd_run &>$2 &
         api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
-        mv $2 $2.$api_pid
-        verbose INFO "Launch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2.$api_pid\n"
+        verbose INFO "Launch crust api with $1 configurations in backend (pid is $api_pid), log information will be saved in $2\n"
     fi
+}
+
+apiStop()
+{
+    verbose INFO "Check <api-launch.json>" h
+    if [ x"$1" = x"" ]; then
+        help
+        exit 1
+    fi
+
+    if [ ! -f "$1" ]; then
+        verbose ERROR " Failed" t
+        verbose ERROR "Can't find api-launch.json!"
+        exit 1
+    fi
+    source $1
+    verbose INFO " SUCCESS" t
+
+    cmd_run="node $crust_api_main_install_dir/node_modules/.bin/ts-node $crust_api_main_install_dir/src/index.ts $crust_api_port $crust_chain_endpoint"
+
+    verbose INFO "Try to kill crust api with same <api-launch.json>" h
+    api_pid=$(ps -ef | grep "$cmd_run" | grep -v grep | awk '{print $2}')
+    if [ x"$api_pid" != x"" ]; then
+        kill -9 $api_pid &>/dev/null
+        if [ $? -ne 0 ]; then
+            sudo "kill -9 $api_pid" &>/dev/null
+        fi
+    fi
+    verbose INFO " SUCCESS" t
 }
 
 teeLaunch()
@@ -699,6 +837,14 @@ while true ; do
                 shift 2
             fi
             ;;
+        chain-stop)
+            cmd_run="chainStop $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
         tee-launch)
             cmd_run="teeLaunch $2"
             if [ -z $2 ]; then
@@ -723,8 +869,24 @@ while true ; do
                 shift 2
             fi
             ;;
+        api-stop)
+            cmd_run="apiStop $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
         ipfs-launch)
             cmd_run="ipfsLaunch $2"
+            if [ -z $2 ]; then
+                shift 1
+            else
+                shift 2
+            fi
+            ;;
+        ipfs-stop)
+            cmd_run="ipfsStop $2"
             if [ -z $2 ]; then
                 shift 1
             else

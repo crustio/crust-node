@@ -188,7 +188,7 @@ verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-subkey bin to /usr/bin" h
 cp $crust_subkey_bin $crust_subkey_bin_aim
-verbose INFO " SUCCESS\n" t
+verbose INFO " SUCCESS" t
 
 verbose INFO "Move crust-client runnable script to /usr/bin" h
 cp $crust_client_sh $crust_client_aim

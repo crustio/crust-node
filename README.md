@@ -116,7 +116,7 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
     "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",    # All files will be stored in this directory, must be absolute path
     "empty_capacity" : 4,                                                # empty disk storage in Gb
     
-    "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",                # for connect to ipfs
+    "ipfs_api_base_url" : "http://0.0.0.0:5001/api/v0",                # for connect to ipfs
     "api_base_url": "http://127.0.0.1:12222/api/v0",                     # your tee node api address
     "validator_api_base_url": "http://127.0.0.1:12222/api/v0",           # the tee validator address (**if you are genesis node, this url must equal to 'api_base_url'**)
 
@@ -294,6 +294,27 @@ you will see a warning like:
 
 - Waiting one era, you will see magic!
 
+## Command line usage
+```
+    help                                                                show help information   
+    version                                                             show crust-client version   
+    chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
+    chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
+    chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
+    chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
+    api-launch <api-launch.config>                                      launch crust-api
+    api-stop <api-launch.config>                                        stop crust-api with same configuration 
+    ipfs-launch <ipfs-launch.config>                                    launch ipfs
+    ipfs-stop <ipfs-launch.config>                                      stop ipfs with same configuration     
+    tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
+                                                                            api_base_url==validator_api_base_url
+                                                                            in config file, you need to be genesis node)
+    tee-stop <tee-launch.json>                                          stop crust-tee with same configuration   
+    -b <log-file>                                                       launch commands will be started in backend
+                                                                            with "chain-launch-genesis", "chain-launch-normal",
+                                                                            "chain-launch-validator", "api-launch", "ipfs-launch",
+                                                                            "tee-launch"  
+```
 ## License
 
 [GPL v3](LICENSE)
