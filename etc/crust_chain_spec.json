@@ -130,6 +130,7 @@
         "keys": []
       },
       "tee": {
+        "lastReportSlot": 0,
         "teeIdentities": [
           [
             "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
@@ -164,7 +165,10 @@
         ],
         "workReports": [
           [
-            "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
+            [
+              "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
+              0
+            ],
             {
               "pub_key": [],
               "block_number": 0,
@@ -176,7 +180,10 @@
             }
           ],
           [
-            "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+            [
+              "5HpyALyFUJTDMc6iRziEKwh1BkvMHFJGHss3mJjXefuzCap3",
+              0
+            ],
             {
               "pub_key": [],
               "block_number": 0,
@@ -188,7 +195,10 @@
             }
           ],
           [
-            "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+            [
+              "5EUJ6BjBJiztjsN14rFX5SXJFYzdeXbDsp6MeAJve7q2WkDm",
+              0
+            ],
             {
               "pub_key": [],
               "block_number": 0,
