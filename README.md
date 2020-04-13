@@ -120,11 +120,11 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
     "api_base_url": "http://127.0.0.1:12222/api/v0",                     # your tee node api address
     "validator_api_base_url": "http://127.0.0.1:12222/api/v0",           # the tee validator address (**if you are genesis node, this url must equal to 'api_base_url'**)
 
-    "crust_api_base_url" : "http://127.0.0.1:56666/api/v1",              # the address of crust api
-    "crust_address" : "",                                                # your crust chain identity
-    "crust_account_id" : "",
-    "crust_password" : "",
-    "crust_backup" : "",
+    "chain_api_base_url" : "http://127.0.0.1:56666/api/v1",              # the address of crust api
+    "chain_address" : "",                                                # your crust chain identity
+    "chain_account_id" : "",
+    "chain_password" : "",
+    "chain_backup" : "",
     ......
 }
 ```
@@ -221,9 +221,9 @@ If you are not genesis node but want to apply to become a validator, please foll
   
    - Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use controller account (not stash account) to configure crust chain identity.
 
-   - Use this command to get 'crust_account_id' by convert 'crust_address', please note that you need to remove the initial '0x' when filling 'crust_account_id' in the TEE configuration.
+   - Use this command to get 'chain_account_id' by convert 'chain_address', please note that you need to remove the initial '0x' when filling 'chain_account_id' in the TEE configuration.
       ```shell
-      crust-subkey inspect "crust_address"
+      crust-subkey inspect "chain_address"
       ```
 
 - Launch
