@@ -101,13 +101,10 @@ verbose INFO "Unzip crust TEE package" h
 tar -xvf "$crust_tee_package" -C "$crust_resource_dir/" &>/dev/null
 verbose INFO " SUCCESS\n" t
 
-verbose INFO "Run crust TEE install package" h
 ./$crust_tee_resource_dir/install.sh
 if [ $? -ne 0 ]; then
-  verbose ERROR " Failed" t
   exit 1
 fi
-verbose INFO " SUCCESS" t
 
 rm -rf $crust_tee_resource_dir
 chown -R $uid:$uid $crust_main_install_dir
