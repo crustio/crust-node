@@ -1,5 +1,5 @@
 # Crust client
-On one hand, this project is used to install all crust related programs, including chain, TEE, API, IPFS, etc. On the other hand, it provides the corresponding command line to assist the startup of the crust programs.
+On one hand, this project is used to install all crust related programs, including chain, TEE, API, etc. On the other hand, it provides the corresponding command line to assist the startup of the crust programs.
 
 ## Preparation work
 - Hardware requirements: 
@@ -95,16 +95,6 @@ external_rpc_ws=false                        # Whether to publicize the ws and r
 
 Only genesis node need this file, please connect to crust organization to get it.
 
-### ipfs-launch.config
-
-```shell
-base_path=crust_store/node1/ipfs            # the base path for storing data
-swarm_port=4001                             # the swarm port for other ipfs node connection
-api_port=5001                               # the api port
-gateway_port=8080                           # the gateway port
-master_address=                             # if you are frist ipfs node, you don't need this
-```
-
 ### api-launch.config
 ```shell
 crust_api_port=56666                         # the api port
@@ -117,9 +107,11 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
     "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",    # All files will be stored in this directory, must be absolute path
     "empty_capacity" : 4,                                                # empty disk storage in Gb
     
-    "ipfs_api_base_url" : "http://0.0.0.0:5001/api/v0",                  # for connect to ipfs
     "api_base_url": "http://127.0.0.1:12222/api/v0",                     # your tee node api address
     "validator_api_base_url": "http://127.0.0.1:12222/api/v0",           # the tee validator address (**if you are genesis node, this url must equal to 'api_base_url'**)
+    "karst_url":  "ws://0.0.0.0:17000/api/v0/node/data",
+    "websocket_url" : "wss://0.0.0.0:19002",
+    "websocket_thread_num" : 3,
 
     "chain_api_base_url" : "http://127.0.0.1:56666/api/v1",              # the address of crust api
     "chain_address" : "",                                                # your crust chain identity
@@ -135,14 +127,14 @@ crust_chain_endpoint="ws://127.0.0.1:9944/"  # the ws address of chain
 ### Run genesis node
 The genesis node refers to the initial nodes of the chain written in the genesis spec. These nodes have a very important meaning as the core of the chain startup. They are also the initial validators. Generally genesis node's identity file is issued by crust organization.
 
-#### Run IPFS
+#### Chain
 - Launch
 ```shell
-   crust-client ipfs-launch genesis1_config/ipfs-launch.json -b logs/ipfs.log
+   crust-client chain-launch-genesis genesis1_config/chain-launch.config genesis1_config/chain-identity-file -b logs/genesis1-chain.log
 ```
 - Monitor
 ```shell
-   tail -f logs/ipfs.log.pid
+   tail -f logs/genesis1-chain.log.pid
 ```
 
 #### TEE
@@ -153,21 +145,6 @@ The genesis node refers to the initial nodes of the chain written in the genesis
 - Monitor
 ```shell
    tail -f logs/genesis1-tee.log
-```
-
-- Wait for plotting disk
-
-   Please use monitor to see infomation: "Waitting for chain to run..." before you launch chain.
-
-
-#### Chain
-- Launch
-```shell
-   crust-client chain-launch-genesis genesis1_config/chain-launch.config genesis1_config/chain-identity-file -b logs/genesis1-chain.log
-```
-- Monitor
-```shell
-   tail -f logs/genesis1-chain.log.pid
 ```
 
 #### API
@@ -204,43 +181,6 @@ Connet to normal node ws like: ws://139.196.122.228:6013/ to see crust chian sta
 ### Run validator node
 If you are not genesis node but want to apply to become a validator, please follow the instructions below. Of course you need a tee to report your workload
 
-#### Run IPFS
-- Launch
-```shell
-   crust-client ipfs-launch validator1_config/ipfs-launch.json -b logs/ipfs.log
-```
-- Monitor
-```shell
-   tail -f logs/ipfs.log.pid
-```
-
-#### TEE
-
-- Configuration
-   - Need create two account (controller and stash account) in crust chain browser and put some CRU in them, like:
-   ![validator1 and stash accounts](doc/img/validator1_and_stash_accounts.PNG) 
-  
-   - Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use controller account (not stash account) to configure crust chain identity.
-
-   - Use this command to get 'chain_account_id' by convert 'chain_address', please note that you need to remove the initial '0x' when filling 'chain_account_id' in the TEE configuration.
-      ```shell
-      crust-subkey inspect "chain_address"
-      ```
-
-- Launch
-```shell
-   crust-client tee-launch validator1_config/tee-launch.json -b logs/validator1-tee.log
-```
-
-- Monitor
-```shell
-   tail -f logs/validator1-tee.log
-```
-
-- Wait for plotting disk
-
-   Please use monitor to see infomation: "Waitting for chain to run..." before you launch chain.
-
 #### Chain
 - Launch
 ```shell
@@ -266,6 +206,29 @@ you will see a warning like:
 
 - Click **session key** to set session key, like:
 ![set session key](doc/img/set_session_key.PNG)
+
+#### TEE
+
+- Configuration
+   - Need create two account (controller and stash account) in crust chain browser and put some CRU in them, like:
+   ![validator1 and stash accounts](doc/img/validator1_and_stash_accounts.PNG) 
+  
+   - Please select tee of a validator node on chain to validate your tee by fill 'validator_api_base_url' and use controller account (not stash account) to configure crust chain identity.
+
+   - Use this command to get 'chain_account_id' by convert 'chain_address', please note that you need to remove the initial '0x' when filling 'chain_account_id' in the TEE configuration.
+      ```shell
+      crust-subkey inspect "chain_address"
+      ```
+
+- Launch
+```shell
+   crust-client tee-launch validator1_config/tee-launch.json -b logs/validator1-tee.log
+```
+
+- Monitor
+```shell
+   tail -f logs/validator1-tee.log
+```
 
 #### API
 - Launch
@@ -304,17 +267,14 @@ you will see a warning like:
     chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
     chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
     api-launch <api-launch.config>                                      launch crust-api
-    api-stop <api-launch.config>                                        stop crust-api with same configuration 
-    ipfs-launch <ipfs-launch.config>                                    launch ipfs
-    ipfs-stop <ipfs-launch.config>                                      stop ipfs with same configuration     
+    api-stop <api-launch.config>                                        stop crust-api with same configuration   
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
     tee-stop <tee-launch.json>                                          stop crust-tee with same configuration   
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
-                                                                            "chain-launch-validator", "api-launch", "ipfs-launch",
-                                                                            "tee-launch"  
+                                                                            "chain-launch-validator", "api-launch", "tee-launch"  
 ```
 ## License
 

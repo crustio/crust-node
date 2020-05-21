@@ -2,9 +2,11 @@
     "base_path" : "/home/user/crust-alphanet/crust_store/node1/tee/",
     "empty_capacity" : 4,
     
-    "ipfs_api_base_url" : "http://127.0.0.1:5001/api/v0",
     "api_base_url": "http://0.0.0.0:12222/api/v0",
     "validator_api_base_url": "http://127.0.0.1:12222/api/v0",
+    "karst_url":  "ws://0.0.0.0:17000/api/v0/node/data",
+    "websocket_url" : "wss://0.0.0.0:19002",
+    "websocket_thread_num" : 3,
 
     "chain_api_base_url" : "http://127.0.0.1:56666/api/v1",
     "chain_address" : "",
