@@ -7,9 +7,6 @@ crust_tee_main_install_dir="$crust_main_install_dir/crust-tee"
 crust_api_main_install_dir="$crust_main_install_dir/crust-api"
 crust_client_main_install_dir="$crust_main_install_dir/crust-client"
 
-ipfs_bin=$crust_tee_main_install_dir/bin/ipfs
-swarm_key=$crust_client_main_install_dir/etc/swarm.key
-
 . $crust_client_main_install_dir/script/utils.sh
 trap '{ echo "\nHey, you pressed Ctrl-C.  Time to quit." ; exit 1; }' INT
 
@@ -26,16 +23,13 @@ Usage:
     chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
     api-launch <api-launch.config>                                      launch crust-api
     api-stop <api-launch.config>                                        stop crust-api with same configuration 
-    ipfs-launch <ipfs-launch.config>                                    launch ipfs
-    ipfs-stop <ipfs-launch.config>                                      stop ipfs with same configuration     
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 
                                                                             api_base_url==validator_api_base_url
                                                                             in config file, you need to be genesis node)
     tee-stop <tee-launch.json>                                          stop crust-tee with same configuration   
     -b <log-file>                                                       launch commands will be started in backend
                                                                             with "chain-launch-genesis", "chain-launch-normal",
-                                                                            "chain-launch-validator", "api-launch", "ipfs-launch",
-                                                                            "tee-launch"                                                       
+                                                                            "chain-launch-validator", "api-launch", "tee-launch"
 EOF
 }
 
@@ -491,142 +485,6 @@ chainStop()
     verbose INFO " SUCCESS" t
 }
 
-ipfsLaunch()
-{
-    # Check <ipfs-launch.json>
-    verbose INFO "Check <ipfs-launch.json>" h
-    if [ x"$1" = x"" ]; then
-        help
-        exit 1
-    fi
-
-    if [ ! -f "$1" ]; then
-        verbose ERROR " Failed" t
-        verbose ERROR "Can't find ipfs-launch.json!"
-        exit 1
-    fi
-    source $1
-    verbose INFO " SUCCESS" t
-
-    # Check base_path
-    export IPFS_PATH=$base_path
-
-    if [ -d "$IPFS_PATH" ]; then
-        verbose INFO "IPFS has been initialized." n
-    else
-        verbose INFO "Set swarm key ..." h
-        mkdir -p $IPFS_PATH
-        cp $swarm_key $IPFS_PATH
-        checkRes $? "return"
-
-        verbose INFO "Init ipfs..." h
-        $ipfs_bin init
-        checkRes $? "return"
-
-        verbose INFO "Remove public bootstrap..." h
-        $ipfs_bin bootstrap rm --all &>/dev/null
-        checkRes $? "return"
-
-        if [ -z "$master_address" ]; then
-            verbose INFO "This node is master node" n
-        else
-            verbose INFO "This node is slave, master node is '[$master_address]'' ..." n
-            $ipfs_bin bootstrap add $master_address &>/dev/null
-            checkRes $? "return"
-        fi
-
-        verbose INFO "Set swarm address ..." h
-        $ipfs_bin config Addresses.Swarm --json "[\"/ip4/0.0.0.0/tcp/$swarm_port\", \"/ip6/::/tcp/$swarm_port\"]" &>/dev/null
-        checkRes $? "return"
-    
-        verbose INFO "Set api address ..." h
-        $ipfs_bin config Addresses.API /ip4/0.0.0.0/tcp/$api_port &>/dev/null
-        checkRes $? "return"
-
-        verbose INFO "Set gateway address ..." h
-        $ipfs_bin config Addresses.Gateway /ip4/127.0.0.1/tcp/$gateway_port &>/dev/null
-        checkRes $? "return"
-    
-        verbose INFO "Remove all useless data ..." h
-        $ipfs_bin pin rm $($ipfs_bin pin ls -q --type recursive) &>/dev/null
-        $ipfs_bin repo gc &>/dev/null
-        checkRes $? "return"
-    fi
-
-    ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
-    ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
-    ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
-    ipfs_pid=$(echo $ipfs_pid_str_new)
-    if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
-        ipfs_pid=""
-    fi
-
-    # Kill old ipfs
-    verbose INFO "Try to kill old ipfs with same <ipfs-launch.json>" h
-    if [ x"$ipfs_pid" != x"" ]; then
-        kill -9 $ipfs_pid &>/dev/null
-        if [ $? -ne 0 ]; then
-            sudo "kill -9 $ipfs_pid" &>/dev/null
-        fi
-    fi
-    verbose INFO " SUCCESS" t
-
-    # Start new ipfs 
-    cmd_run="$ipfs_bin daemon"
-
-    if [ -z "$2" ]; then
-        verbose INFO "Launch ipfs, if ipfs launch failed, please check the port usage, old ipfs may be running.\n"
-        eval $cmd_run
-    else
-        nohup $cmd_run &>$2 &
-        sleep 5
-        ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
-        ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
-        ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
-        ipfs_pid=$(echo $ipfs_pid_str_new)
-        if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
-            ipfs_pid=""
-        fi
-        verbose INFO "Launch ipfs in backend (pid is $ipfs_pid), log information will be saved in '$2'. If ipfs launch failed, please check the port usage, old ipfs may be running.\n"
-    fi
-}
-
-ipfsStop()
-{
-    # Check <ipfs-launch.json>
-    verbose INFO "Check <ipfs-launch.json>" h
-    if [ x"$1" = x"" ]; then
-        help
-        exit 1
-    fi
-
-    if [ ! -f "$1" ]; then
-        verbose ERROR " Failed" t
-        verbose ERROR "Can't find ipfs-launch.json!"
-        exit 1
-    fi
-    source $1
-    verbose INFO " SUCCESS" t
-
-    ipfs_pid_str=$(netstat -ntulp 2>/dev/null | grep $api_port)
-    ipfs_pid_str=${ipfs_pid_str[0]#tcp        0      0 0.0.0.0:$api_port            0.0.0.0:*               LISTEN      }
-    ipfs_pid_str_new=${ipfs_pid_str[0]/\/ipfs/}
-    ipfs_pid=$(echo $ipfs_pid_str_new)
-    if [ x"$ipfs_pid_str_new" = x"$ipfs_pid_str" ]; then
-        ipfs_pid=""
-    fi
-    
-    # Kill ipfs
-    verbose INFO "Try to kill ipfs with same <ipfs-launch.json>" h
-    if [ x"$ipfs_pid" != x"" ]; then
-        kill -9 $ipfs_pid &>/dev/null
-        if [ $? -ne 0 ]; then
-            sudo "kill -9 $ipfs_pid" &>/dev/null
-        fi
-    fi
-    verbose INFO " SUCCESS" t
-}
-
 apiLaunch()
 {
     verbose INFO "Check <api-launch.json>" h
@@ -871,22 +729,6 @@ while true ; do
             ;;
         api-stop)
             cmd_run="apiStop $2"
-            if [ -z $2 ]; then
-                shift 1
-            else
-                shift 2
-            fi
-            ;;
-        ipfs-launch)
-            cmd_run="ipfsLaunch $2"
-            if [ -z $2 ]; then
-                shift 1
-            else
-                shift 2
-            fi
-            ;;
-        ipfs-stop)
-            cmd_run="ipfsStop $2"
             if [ -z $2 ]; then
                 shift 1
             else
