@@ -125,6 +125,7 @@
       },
       "tee": {
         "code": [],
+        "currentReportSlot": 0,
         "teeIdentities": [
           [
             "5HZFQohYpN4MVyGjiq8bJhojt9yCVa8rXd4Kt9fmh5gAbQqA",
