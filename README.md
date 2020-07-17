@@ -176,7 +176,7 @@ Normal node cannot be a validator, it is only an access node of the chain, and i
 ```
 
 #### Chain browser
-Connet to normal node ws like: ws://139.196.122.228:6013/ to see crust chian status.
+Connet to normal node ws like: ws://139.196.122.228:6013/ to see crust chain status.
 
 ### Run validator node
 If you are not genesis node but want to apply to become a validator, please follow the instructions below. Of course you need a tee to report your workload
@@ -265,7 +265,7 @@ you will see a warning like:
     chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
     chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
     chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
-    chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
+    chain-stop <chain-launch.config>                                    stop crust-chain with same configuration
     api-launch <api-launch.config>                                      launch crust-api
     api-stop <api-launch.config>                                        stop crust-api with same configuration   
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 

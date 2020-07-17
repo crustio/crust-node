@@ -1,6 +1,7 @@
 {
     "identity": {
         "address": "",
+        "account_id": "",
         "backup": "",
         "password": ""
     },

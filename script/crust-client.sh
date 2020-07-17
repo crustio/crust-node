@@ -20,7 +20,7 @@ Usage:
     chain-launch-genesis <chain-launch.config> <chain-identity-file>    launch crust-chain as a genesis node   
     chain-launch-normal <chain-launch.config>                           launch crust-chain as a normal node
     chain-launch-validator <chain-launch.config>                        launch crust-chain as a validator node   
-    chain-stop <chain-launch.config>                                    stop crust-chian with same configuration
+    chain-stop <chain-launch.config>                                    stop crust-chain with same configuration
     api-launch <api-launch.config>                                      launch crust-api
     api-stop <api-launch.config>                                        stop crust-api with same configuration 
     tee-launch <tee-launch.json>                                        launch crust-tee (if you set 

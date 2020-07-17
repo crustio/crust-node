@@ -50,28 +50,11 @@ function getJsonValuesByAwk() {
 function checkRes()
 {
     local res=$1
-    local err_op=$2
-    local descriptor=$3
-
-    if [ x"$descriptor" = x"" ] ; then 
-        descriptor="&1"
-    fi
-
     if [ $res -ne 0 ]; then
-        eval "verbose ERROR "FAILED" t >$descriptor"
-        case $err_op in 
-            quit)       exit 1;;
-            return)     return 1;;
-            *)          ;;
-        esac
-        return 1
+         verbose ERROR " FAILED" t
+         exit 1
     fi
-
-    eval "verbose INFO "SUCCESS" t >$descriptor"
-
-    while [ -s $descriptor ]; do
-        sleep 1
-    done
+    verbose INFO " SUCCESS" t
 }
 
 function verbose()
