@@ -1,0 +1,29 @@
+{
+    "identity": {
+        "address": "",
+        "account_id": "",
+        "backup": "",
+        "password": ""
+    },
+    "chain": {
+        "base_path": "",
+        "name": "",
+        "port": 30333,
+        "rpc_port": 9933,
+        "ws_port": 9944
+    },
+    "api": {
+        "port": 56666
+    },
+    "tee": {
+        "base_path" : "",
+        "srd_paths" : [],
+        "srd_capacity" : 0,
+        "port": 12222
+    },
+    "karst": {
+        "base_path" : "",
+        "tracker_addrs": [],
+        "port": 17000
+    }
+}
