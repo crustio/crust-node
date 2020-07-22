@@ -3,3 +3,4 @@
 resource/
 *.o
 config/raw/
+.tmp
