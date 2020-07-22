@@ -11,7 +11,7 @@ async function genKarstConfig(config, outputCfg) {
 
   const outputFile = path.join(outputDir, 'karst_config.json')
   const karstConfig = {
-    ...config.karst,
+    ..._.omit(config.karst, ['tracker_addrs']),
     base_url: `http://0.0.0.0:${config.karst.port}/api/v0`,
     crust: getSharedChainConfig(config),
     fastdfs: {
@@ -39,9 +39,6 @@ async function genKarstComposeConfig(config) {
   return {
     image: 'crustio/crust-tee:0.5.0',
     network_mode: 'host',
-    devices: [
-      '/dev/isgx:/dev/isgx'
-    ],
     volumes: [
       ...baseVolume,
       './karst:/config'

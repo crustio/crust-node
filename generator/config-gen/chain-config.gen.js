@@ -47,7 +47,7 @@ async function genChainComposeConfig(config) {
 function getSharedChainConfig(config) {
   return {
     ...config.identity,
-    base_url: `http://127.0.0.1:${config.chain.rpc_port}/api/v1`,
+    base_url: `http://127.0.0.1:${config.api.port}/api/v1`,
     address: config.identity.backup.address,
     account_id: config.identity.account_id,
     backup: JSON.stringify(config.identity.backup),

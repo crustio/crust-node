@@ -11,7 +11,8 @@ async function genTeeConfig(config, outputCfg) {
 
   const outputFile = path.join(outputDir, 'tee_config.json')
   const teeConfig = {
-    ...config.tee,
+    ..._.omit(config.tee, ['port']),
+    base_url: `http://0.0.0.0:${config.tee.port}/api/v0`,
     karst_url: `ws://127.0.0.1:${config.karst.port}/api/v0/node/data`,
     chain: getSharedChainConfig(config),
   }
@@ -34,7 +35,7 @@ async function genTeeComposeConfig(config) {
         .map((p) => `${p}:${p}`)
 
   return {
-    image: 'crustio/crust-tee:0.5.0',
+    image: 'crustio/karst:0.2.0',
     network_mode: 'host',
     devices: [
       '/dev/isgx:/dev/isgx'
@@ -45,9 +46,9 @@ async function genTeeComposeConfig(config) {
       './tee:/config'
     ],
     environment: {
-      ARGS: '-c /config/tee_config.json, --debug',
+      ARGS: '-c /config/tee_config.json --debug',
     },
-    container_name: 'crust-tee-0.5.0',
+    container_name: 'karst-0.2.0',
     restart: 'always',
   }
 }
