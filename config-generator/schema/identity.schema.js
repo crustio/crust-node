@@ -1,10 +1,9 @@
 const Joi = require('joi')
 const bluebird = require('bluebird')
+const { logger } = require('../logger')
 
 const backupSchema = Joi.object({
-  address: Joi.string().required().external(async (v) => {
-    console.log('validing address', v)
-  }),
+  address: Joi.string().required(),
   encoded: Joi.string().required(),
   encoding: Joi.object({
     content: Joi.array().items(Joi.string()).min(1).required(),
@@ -20,7 +19,19 @@ const backupSchema = Joi.object({
 })
 
 const identitySchema = Joi.object({
-  backup: backupSchema.required(),
+  backup: Joi.string().custom((value, helpers) => {
+    try {
+      logger.info('value: %s', value)
+      const result = backupSchema.validate(JSON.parse(value))
+      if (result.error) {
+        return helpers.error(result.error)
+      }
+      return result.value
+    } catch(ex) {
+      logger.error('failed to parse json: %s', ex)
+      return helpers.error('backup is not a valid json string')
+    }
+  }).required(),
   password: Joi.string().min(1).required(),
 })
 
