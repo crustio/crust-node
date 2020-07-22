@@ -2,5 +2,4 @@
 .vscode/
 resource/
 *.o
-config/raw/
 .tmp
