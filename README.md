@@ -17,6 +17,12 @@ On one hand, this project is used to install and run all crust related programs,
 
 ## Install dependencies
 
+### Install docker
+curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+
+### Install docker-compose
+sudo apt install docker-compose
+
 ## License
 
 [GPL v3](LICENSE)
