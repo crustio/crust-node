@@ -18,9 +18,6 @@ async function genApiComposeConfig(config) {
   return {
     image: 'crustio/crust-api:0.5.0',
     network_mode: 'host',
-    volumes: [
-      `${config.chain.base_path}:/home/crust/crust/chain`
-    ],
     environment: {
       ARGS: args,
     },

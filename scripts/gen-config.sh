@@ -46,6 +46,7 @@ if [ "$SUCCESS" -ne "0" ]; then
     exit 1
 fi
 
+<<'COMMENT'
 log_info "valdate configs..."
 INVALID_PATHS=0
 while IFS= read -r line || [ -n "$line" ]; do
@@ -67,6 +68,8 @@ if [ $INVALID_PATHS -ne "0" ]; then
 fi
 
 log_info "validation pass"
+COMMENT
+
 log_info "cleanup work..."
 rm -f $BUILD_DIR/config.yaml
 cp -r $BUILD_DIR/.tmp/* $BUILD_DIR/
