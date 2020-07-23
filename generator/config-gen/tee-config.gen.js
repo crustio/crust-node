@@ -35,7 +35,7 @@ async function genTeeComposeConfig(config) {
         .map((p) => `${p}:${p}`)
 
   return {
-    image: 'crustio/karst:0.2.0',
+    image: 'crustio/crust-tee:0.5.0',
     network_mode: 'host',
     devices: [
       '/dev/isgx:/dev/isgx'
@@ -48,7 +48,7 @@ async function genTeeComposeConfig(config) {
     environment: {
       ARGS: '-c /config/tee_config.json --debug',
     },
-    container_name: 'karst-0.2.0',
+    container_name: 'crust-tee:0.5.0',
     restart: 'always',
   }
 }
