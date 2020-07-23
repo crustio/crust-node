@@ -23,6 +23,11 @@ curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
 ### Install docker-compose
 sudo apt install docker-compose
 
+### Generate application configuration
+#### prepare config.yaml
+You need to create a config.yaml from the config.example.yaml
+### Run the config gen script
+Run ```./scripts/gen_config.sh``` from where the config.yaml located. Configrations will generated in the build directory.
 ## License
 
 [GPL v3](LICENSE)

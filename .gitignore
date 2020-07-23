@@ -3,3 +3,5 @@
 resource/
 *.o
 .tmp
+/build
+/config.yaml
