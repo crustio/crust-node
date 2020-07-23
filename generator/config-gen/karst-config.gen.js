@@ -12,7 +12,7 @@ async function genKarstConfig(config, outputCfg) {
   const outputFile = path.join(outputDir, 'karst_config.json')
   const karstConfig = {
     base_path: config.karst.base_path,
-    base_url: `0.0.0.0:${config.karst.port}/api/v0`,
+    base_url: `0.0.0.0:${config.karst.port}`,
     crust: getSharedChainConfigForKarst(config),
     fastdfs: {
       max_conns: 100,
