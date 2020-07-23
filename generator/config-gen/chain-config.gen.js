@@ -12,7 +12,7 @@ async function genChainConfig(config, outputCfg) {
 
 async function genChainComposeConfig(config) {
   const args = [
-    '--base-path /home/crust/crust/chain',
+    `--base-path ${config.chain.base_path}`,
     '--chain rocky',
     '--validator',
     `--port ${config.chain.port}`,
@@ -25,7 +25,7 @@ async function genChainComposeConfig(config) {
     image: 'crustio/crust:0.6.0',
     network_mode: 'host',
     volumes: [
-      `${config.chain.base_path}:/home/crust/crust/chain`
+      `${config.chain.base_path}:${config.chain.base_path}`
     ],
     environment: {
       ARGS: args,
