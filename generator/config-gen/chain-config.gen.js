@@ -54,8 +54,18 @@ function getSharedChainConfig(config) {
   }
 }
 
+function getSharedChainConfigForKarst(config) {
+  return {
+    ...config.identity,
+    base_url: `127.0.0.1:${config.api.port}/api/v1`,
+    address: config.identity.backup.address,
+    backup: JSON.stringify(config.identity.backup),
+  }
+}
+
 module.exports = {
   genChainConfig,
   genChainComposeConfig,
   getSharedChainConfig,
+  getSharedChainConfigForKarst,
 }

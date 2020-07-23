@@ -2,7 +2,7 @@ const _ = require('lodash')
 const path = require('path')
 const shell = require('shelljs')
 const { createDir, writeConfig, } = require('../utils')
-const { getSharedChainConfig } = require('./chain-config.gen')
+const { getSharedChainConfigForKarst } = require('./chain-config.gen')
 
 async function genKarstConfig(config, outputCfg) {
   const { baseDir } = outputCfg
@@ -11,15 +11,15 @@ async function genKarstConfig(config, outputCfg) {
 
   const outputFile = path.join(outputDir, 'karst_config.json')
   const karstConfig = {
-    ..._.omit(config.karst, ['tracker_addrs']),
-    base_url: `http://0.0.0.0:${config.karst.port}/api/v0`,
-    crust: getSharedChainConfig(config),
+    base_path: config.karst.base_path,
+    base_url: `0.0.0.0:${config.karst.port}/api/v0`,
+    crust: getSharedChainConfigForKarst(config),
     fastdfs: {
       max_conns: 100,
       tracker_addrs: config.karst.tracker_addrs,
     },
     log_level: 'debug',
-    tee_base_url: `http://127.0.0.1:${config.tee.port}/api/v0`,
+    tee_base_url: `127.0.0.1:${config.tee.port}/api/v0`,
   }
   await writeConfig(outputFile, karstConfig)
   const basePaths = _.isEmpty(config.karst.base_path) ? [] : [{
@@ -37,7 +37,7 @@ async function genKarstComposeConfig(config) {
   const baseVolume = _.isEmpty(config.karst.base_path) ? [] : [ `${basePath}:${basePath}` ]
 
   return {
-    image: 'crustio/crust-tee:0.5.0',
+    image: 'crustio/karst:0.2.0',
     network_mode: 'host',
     volumes: [
       ...baseVolume,
