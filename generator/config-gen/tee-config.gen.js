@@ -1,15 +1,8 @@
 const _ = require('lodash')
-const path = require('path')
-const shell = require('shelljs')
 const { createDir, writeConfig, } = require('../utils')
 const { getSharedChainConfig } = require('./chain-config.gen')
 
 async function genTeeConfig(config, outputCfg) {
-  const { baseDir } = outputCfg
-  const outputDir = path.join(baseDir, 'tee')
-  await createDir(outputDir)
-
-  const outputFile = path.join(outputDir, 'tee_config.json')
   const teeConfig = {
     ..._.omit(config.tee, ['port']),
     base_url: `http://0.0.0.0:${config.tee.port}/api/v0`,
@@ -21,7 +14,6 @@ async function genTeeConfig(config, outputCfg) {
     path: p,
   }))
   return {
-    file: outputFile,
     config: teeConfig,
     paths: [{
       required: true,

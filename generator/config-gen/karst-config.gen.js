@@ -1,13 +1,7 @@
 const _ = require('lodash')
-const path = require('path')
-const shell = require('shelljs')
 const { getSharedChainConfigForKarst } = require('./chain-config.gen')
 
 async function genKarstConfig(config, outputCfg) {
-  const { baseDir } = outputCfg
-  const outputDir = path.join(baseDir, 'karst')
-
-  const outputFile = path.join(outputDir, 'karst_config.json')
   const karstConfig = {
     base_path: config.karst.base_path,
     base_url: `0.0.0.0:${config.karst.port}`,
@@ -24,7 +18,6 @@ async function genKarstConfig(config, outputCfg) {
     path: config.karst.base_path,
   }]
   return {
-    file: outputFile,
     config: karstConfig,
     paths: [...basePaths],
   }

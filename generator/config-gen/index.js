@@ -1,6 +1,7 @@
 /**
  * config generators
  */
+const path = require('path')
 const { createDir, writeConfig, } = require('../utils')
 const { genApiConfig, genApiComposeConfig } = require('./api-config.gen')
 const { genChainConfig, genChainComposeConfig } = require('./chain-config.gen')
@@ -25,21 +26,25 @@ const { logger } = require('../logger')
 const configGenerators = [{
   name: 'chain',
   configFunc: genChainConfig,
+  to: path.join('chain', 'chain_config.json'),
   composeName: 'crust',
   composeFunc: genChainComposeConfig,
 }, {
   name: 'api',
   configFunc: genApiConfig,
+  to: path.join('api', 'api_config.json'),
   composeName: 'crust-api',
   composeFunc: genApiComposeConfig,
 },{
   name: 'tee',
   configFunc: genTeeConfig,
+  to: path.join('tee', 'tee_config.json'),
   composeName: 'crust-tee',
   composeFunc: genTeeComposeConfig,
 }, {
   name: 'karst',
   configFunc: genKarstConfig,
+  to: path.join('karst', 'karst_config.json'),
   composeName: 'karst',
   composeFunc: genKarstComposeConfig,
 }]
@@ -48,10 +53,11 @@ async function genConfig(config, outputOpts) {
   //
   // application config generation
   let outputs = []
+  const { baseDir } = outputOpts
   for (const cg of configGenerators) {
     logger.info('generating config for %s', cg.name)
     const ret = await cg.configFunc(config, outputOpts)
-    await writeConfig(ret.file, ret.config)
+    await writeConfig(path.join(baseDir, cg.to), ret.config)
     outputs.push({
       generator: cg.name,
       ...ret,

@@ -1,17 +1,10 @@
-const path = require('path')
-const shell = require('shelljs')
 
 async function genApiConfig(config, outputCfg) {
-  const { baseDir } = outputCfg
-  const outputDir = path.join(baseDir, 'api')
-
-  const outputFile = path.join(outputDir, 'api_config.json')
   const apiConfig = {
     ...config.api,
     chain_ws_url: `ws://127.0.0.1:${config.chain.ws_port}`,
   }
   return {
-    file: outputFile,
     config: apiConfig,
     paths: [],
   }
