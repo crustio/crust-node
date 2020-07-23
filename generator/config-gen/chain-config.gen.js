@@ -1,17 +1,15 @@
 const path = require('path')
 const shell = require('shelljs')
-const { createDir, writeConfig, } = require('../utils')
 
 async function genChainConfig(config, outputCfg) {
   const { baseDir } = outputCfg
   const outputDir = path.join(baseDir, 'chain')
-  await createDir(outputDir)
 
   const outputFile = path.join(outputDir, 'chain_config.json')
   const chainConfig = config.chain
-  await writeConfig(outputFile, chainConfig)
   return {
     file: outputFile,
+    config: chainConfig,
     paths: [{
       required: true,
       path: config.chain.base_path,

@@ -9,7 +9,7 @@ async function createDir(dir) {
 }
 
 async function writeConfig(path, cfg) {
-  await fs.writeJson(path, cfg, {
+  await fs.outputJson(path, cfg, {
     spaces: 2,
   })
   return true

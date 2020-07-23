@@ -1,6 +1,7 @@
 /**
  * config generators
  */
+const { createDir, writeConfig, } = require('../utils')
 const { genApiConfig, genApiComposeConfig } = require('./api-config.gen')
 const { genChainConfig, genChainComposeConfig } = require('./chain-config.gen')
 const { genKarstConfig, genKarstComposeConfig } = require('./karst-config.gen')
@@ -50,6 +51,7 @@ async function genConfig(config, outputOpts) {
   for (const cg of configGenerators) {
     logger.info('generating config for %s', cg.name)
     const ret = await cg.configFunc(config, outputOpts)
+    await writeConfig(ret.file, ret.config)
     outputs.push({
       generator: cg.name,
       ...ret,

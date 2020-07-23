@@ -1,13 +1,11 @@
 const _ = require('lodash')
 const path = require('path')
 const shell = require('shelljs')
-const { createDir, writeConfig, } = require('../utils')
 const { getSharedChainConfigForKarst } = require('./chain-config.gen')
 
 async function genKarstConfig(config, outputCfg) {
   const { baseDir } = outputCfg
   const outputDir = path.join(baseDir, 'karst')
-  await createDir(outputDir)
 
   const outputFile = path.join(outputDir, 'karst_config.json')
   const karstConfig = {
@@ -21,13 +19,13 @@ async function genKarstConfig(config, outputCfg) {
     log_level: 'debug',
     tee_base_url: `127.0.0.1:${config.tee.port}/api/v0`,
   }
-  await writeConfig(outputFile, karstConfig)
   const basePaths = _.isEmpty(config.karst.base_path) ? [] : [{
     required: true,
     path: config.karst.base_path,
   }]
   return {
     file: outputFile,
+    config: karstConfig,
     paths: [...basePaths],
   }
 }

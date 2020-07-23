@@ -16,13 +16,13 @@ async function genTeeConfig(config, outputCfg) {
     karst_url: `ws://127.0.0.1:${config.karst.port}/api/v0/node/data`,
     chain: getSharedChainConfig(config),
   }
-  await writeConfig(outputFile, teeConfig)
   const srdPaths = _.map(config.tee.srdPaths, (p) => ({
     required: true,
     path: p,
   }))
   return {
     file: outputFile,
+    config: teeConfig,
     paths: [{
       required: true,
       path: config.tee.base_path,

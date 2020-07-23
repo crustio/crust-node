@@ -1,20 +1,18 @@
 const path = require('path')
 const shell = require('shelljs')
-const { createDir, writeConfig, } = require('../utils')
 
 async function genApiConfig(config, outputCfg) {
   const { baseDir } = outputCfg
   const outputDir = path.join(baseDir, 'api')
-  await createDir(outputDir)
 
   const outputFile = path.join(outputDir, 'api_config.json')
   const apiConfig = {
     ...config.api,
     chain_ws_url: `ws://127.0.0.1:${config.chain.ws_port}`,
   }
-  await writeConfig(outputFile, apiConfig)
   return {
     file: outputFile,
+    config: apiConfig,
     paths: [],
   }
 }
