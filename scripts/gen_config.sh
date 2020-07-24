@@ -31,7 +31,7 @@ mkdir -p $BUILD_DIR
 log_info "cleanup .tmp directory"
 rm -rf $BUILD_DIR/.tmp
 
-cp -f config.yaml build/
+cp -f $basedir/config.yaml $basedir/build/
 CIDFILE=`mktemp`
 rm $CIDFILE
 log_info "run config generator..."
