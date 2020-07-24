@@ -5,7 +5,6 @@ source $scriptdir/utils.sh
 
 log_info "preparing necessary tools"
 CG_IMAGE="crustio/config-generator:0.1.0"
-GEN_DIR=$basedir
 
 if [[ "$(docker images -q ${CG_IMAGE} 2> /dev/null)" == "" ]]; then
     log_info "retrieving config generator..."
@@ -20,12 +19,12 @@ else
     log_info "image exists"
 fi
 
-if [ ! -f "config.yaml" ]; then
+if [ ! -f "$basedir/config.yaml" ]; then
     log_info "config.yaml doesn't exists!"
     exit 1
 fi
 
-BUILD_DIR=$GEN_DIR/build
+BUILD_DIR=$basedir/build
 log_info "prepare build directory"
 mkdir -p $BUILD_DIR
 
