@@ -6,7 +6,7 @@ const { createDir, writeConfig, } = require('../utils')
 const { genApiConfig, genApiComposeConfig } = require('./api-config.gen')
 const { genChainConfig, genChainComposeConfig } = require('./chain-config.gen')
 const { genKarstConfig, genKarstComposeConfig } = require('./karst-config.gen')
-const { genTeeConfig, genTeeComposeConfig } = require('./tee-config.gen')
+const { genSworkerConfig, genSworkerComposeConfig } = require('./sworker-config.gen')
 const { logger } = require('../logger')
 
 /**
@@ -36,11 +36,11 @@ const configGenerators = [{
   composeName: 'crust-api',
   composeFunc: genApiComposeConfig,
 },{
-  name: 'tee',
-  configFunc: genTeeConfig,
-  to: path.join('tee', 'tee_config.json'),
-  composeName: 'crust-tee',
-  composeFunc: genTeeComposeConfig,
+  name: 'sworker',
+  configFunc: genSworkerConfig,
+  to: path.join('sworker', 'sworker_config.json'),
+  composeName: 'crust-sworker',
+  composeFunc: genSworkerComposeConfig,
 }, {
   name: 'karst',
   configFunc: genKarstConfig,

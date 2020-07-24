@@ -43,7 +43,7 @@ Run ```sudo ./scripts/gen_config.sh``` Configrations and docker compose will gen
 cd build
 sudo docker-compose up crust
 sudo docker-compose up crust-api
-sudo docker-compose up crust-tee
+sudo docker-compose up crust-sworker
 sudo docker-compose up karst # if your want to start karst, please make sure fastdfs is running in your computer
 ```
 
