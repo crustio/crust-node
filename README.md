@@ -17,28 +17,27 @@ Official crust node service for running crust protocol.
 
 ## Install dependencies
 
-### Install docker
+### Install docker and docker-compose
 ```shell
 curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-```
-
-### Install docker-compose
-```shell
 sudo apt install docker-compose
 ```
 
 ### Install sgx driver
 ```shell
-sudo ./install_sgx_driver.sh
+sudo ./scripts/install_sgx_driver.sh
 ```
 
 ### Generate application configuration
+
 #### Modify config.yaml
 You need to modify config.yaml
+
 ### Run the config gen script
 Run ```sudo ./scripts/gen_config.sh``` Configrations and docker compose will generated in the build directory.
 
 ### Run docker
+
 ```shell
 cd build
 sudo docker-compose up crust

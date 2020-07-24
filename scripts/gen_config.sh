@@ -1,11 +1,10 @@
 #! /usr/bin/env bash
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $DIR/utils.sh
+scriptdir=$(cd `dirname $0`;pwd)
+basedir=$(cd $scriptdir/..;pwd)
+source $scriptdir/utils.sh
 
 log_info "preparing necessary tools"
 CG_IMAGE="crustio/config-generator:0.1.0"
-GEN_DIR=`pwd`
 
 if [[ "$(docker images -q ${CG_IMAGE} 2> /dev/null)" == "" ]]; then
     log_info "retrieving config generator..."
@@ -20,19 +19,19 @@ else
     log_info "image exists"
 fi
 
-if [ ! -f "config.yaml" ]; then
+if [ ! -f "$basedir/config.yaml" ]; then
     log_info "config.yaml doesn't exists!"
     exit 1
 fi
 
-BUILD_DIR=$GEN_DIR/build
+BUILD_DIR=$basedir/build
 log_info "prepare build directory"
 mkdir -p $BUILD_DIR
 
 log_info "cleanup .tmp directory"
 rm -rf $BUILD_DIR/.tmp
 
-cp -f config.yaml build/
+cp -f $basedir/config.yaml $basedir/build/
 CIDFILE=`mktemp`
 rm $CIDFILE
 log_info "run config generator..."
