@@ -32,7 +32,7 @@ async function genTeeComposeConfig(config) {
     './tee:/config'
   ]
 
-  if (config.karst.base_path) { 
+  if (config.karst.base_path) {
     tempVolumes.push(`${config.karst.base_path}:${config.karst.base_path}`)
   }
 
