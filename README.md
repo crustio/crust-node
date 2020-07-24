@@ -29,7 +29,7 @@ sudo apt install docker-compose
 
 ### Install sgx driver
 ```shell
-sudo ./install_sgx_driver.sh
+sudo ../scripts/install_sgx_driver.sh
 ```
 
 ### Generate application configuration

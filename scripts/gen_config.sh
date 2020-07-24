@@ -1,11 +1,11 @@
 #! /usr/bin/env bash
-
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $DIR/utils.sh
+scriptdir=$(cd `dirname $0`;pwd)
+basedir=$(cd $scriptdir/..;pwd)
+source $scriptdir/utils.sh
 
 log_info "preparing necessary tools"
 CG_IMAGE="crustio/config-generator:0.1.0"
-GEN_DIR=`pwd`
+GEN_DIR=$basedir
 
 if [[ "$(docker images -q ${CG_IMAGE} 2> /dev/null)" == "" ]]; then
     log_info "retrieving config generator..."
