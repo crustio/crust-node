@@ -1,5 +1,5 @@
-# Crust client
-On one hand, this project is used to install and run all crust related programs, including chain, TEE, API, karst etc.
+# Crust node
+Official crust node service for running crust protocol.
 
 ## Preparation work
 - Hardware requirements: 
@@ -8,7 +8,7 @@ On one hand, this project is used to install and run all crust related programs,
 
 - Operating system requirements:
 
-  Ubuntu 16.04
+  Ubuntu 16.04/18.04
   
 - Other configurations
 
@@ -18,16 +18,35 @@ On one hand, this project is used to install and run all crust related programs,
 ## Install dependencies
 
 ### Install docker
+```shell
 curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+```
 
 ### Install docker-compose
+```shell
 sudo apt install docker-compose
+```
+
+### Install sgx driver
+```shell
+sudo ./install_sgx_driver.sh
+```
 
 ### Generate application configuration
-#### prepare config.yaml
-You need to create a config.yaml from the config.example.yaml
+#### Modify config.yaml
+You need to modify config.yaml
 ### Run the config gen script
-Run ```./scripts/gen_config.sh``` from where the config.yaml located. Configrations will generated in the build directory.
+Run ```sudo ./scripts/gen_config.sh``` Configrations and docker compose will generated in the build directory.
+
+### Run docker
+```shell
+cd build
+sudo docker-compose up crust
+sudo docker-compose up crust-api
+sudo docker-compose up crust-tee
+sudo docker-compose up karst # if your want to start karst, please make sure fastdfs is running in your computer
+```
+
 ## License
 
 [GPL v3](LICENSE)
