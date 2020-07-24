@@ -11,7 +11,7 @@ async function genKarstConfig(config, outputCfg) {
       tracker_addrs: config.karst.tracker_addrs,
     },
     log_level: 'debug',
-    tee_base_url: `127.0.0.1:${config.tee.port}/api/v0`,
+    tee_base_url: `127.0.0.1:${config.sworker.port}/api/v0`,
   }
   const basePaths = _.isEmpty(config.karst.base_path) ? [] : [{
     required: true,

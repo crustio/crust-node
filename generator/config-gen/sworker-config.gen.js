@@ -2,34 +2,34 @@ const _ = require('lodash')
 const { createDir, writeConfig, } = require('../utils')
 const { getSharedChainConfig } = require('./chain-config.gen')
 
-async function genTeeConfig(config, outputCfg) {
-  const teeConfig = {
-    ..._.omit(config.tee, ['port']),
-    base_url: `http://0.0.0.0:${config.tee.port}/api/v0`,
+async function genSworkerConfig(config, outputCfg) {
+  const sworkerConfig = {
+    ..._.omit(config.sworker, ['port']),
+    base_url: `http://0.0.0.0:${config.sworker.port}/api/v0`,
     karst_url: `ws://127.0.0.1:${config.karst.port}/api/v0/node/data`,
     chain: getSharedChainConfig(config),
   }
-  const srdPaths = _.map(config.tee.srdPaths, (p) => ({
+  const srdPaths = _.map(config.sworker.srdPaths, (p) => ({
     required: true,
     path: p,
   }))
   return {
-    config: teeConfig,
+    config: sworkerConfig,
     paths: [{
       required: true,
-      path: config.tee.base_path,
+      path: config.sworker.base_path,
     }, ...srdPaths],
   }
 }
 
-async function genTeeComposeConfig(config) {
-  const srdVolumes = _.get(config, 'tee.srd_paths', [])
+async function genSworkerComposeConfig(config) {
+  const srdVolumes = _.get(config, 'sworker.srd_paths', [])
         .map((p) => `${p}:${p}`)
 
   let tempVolumes = [
-    `${config.tee.base_path}:${config.tee.base_path}`,
+    `${config.sworker.base_path}:${config.sworker.base_path}`,
     ...srdVolumes,
-    './tee:/config'
+    './sworker:/config'
   ]
 
   if (config.karst.base_path) {
@@ -37,21 +37,21 @@ async function genTeeComposeConfig(config) {
   }
 
   return {
-    image: 'crustio/crust-tee:0.5.0',
+    image: 'crustio/crust-sworker:0.5.0',
     network_mode: 'host',
     devices: [
       '/dev/isgx:/dev/isgx'
     ],
     volumes: tempVolumes,
     environment: {
-      ARGS: '-c /config/tee_config.json --debug',
+      ARGS: '-c /config/sworker_config.json --debug',
     },
-    container_name: 'crust-tee-0.5.0',
+    container_name: 'crust-sworker-0.5.0',
     restart: 'always',
   }
 }
 
 module.exports = {
-  genTeeConfig,
-  genTeeComposeConfig,
+  genSworkerConfig,
+  genSworkerComposeConfig,
 }

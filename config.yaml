@@ -23,10 +23,10 @@ api:
   ## the port
   port: 56666
 
-## tee configurations
-tee:
-  ## tee base data will be saved in this path, need absolute path
-  base_path: "/crust/tee"
+## sworker configurations
+sworker:
+  ## sworker base data will be saved in this path, need absolute path
+  base_path: "/crust/sworker"
   ## the srd data will be saved in those paths, need absolute path
   srd_paths:
     - "/crust/srd1"
