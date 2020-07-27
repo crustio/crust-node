@@ -71,7 +71,7 @@ async function genComposeConfig(config) {
   //
   // docker compose config generation
   let output = {
-    version: '3.8',
+    version: '2.0',
     services: {},
   }
 
