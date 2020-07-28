@@ -13,7 +13,7 @@ async function genChainConfig(config, outputCfg) {
 async function genChainComposeConfig(config) {
   const args = [
     `--base-path ${config.chain.base_path}`,
-    '--chain rocky',
+    '--chain maxwell',
     '--validator',
     `--port ${config.chain.port}`,
     `--name ${config.chain.name}`,
