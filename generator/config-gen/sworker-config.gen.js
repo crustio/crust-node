@@ -37,7 +37,7 @@ async function genSworkerComposeConfig(config) {
   }
 
   return {
-    image: 'crustio/crust-sworker:0.5.0',
+    image: 'crustio/crust-sworker:latest',
     network_mode: 'host',
     devices: [
       '/dev/isgx:/dev/isgx'
@@ -46,8 +46,7 @@ async function genSworkerComposeConfig(config) {
     environment: {
       ARGS: '-c /config/sworker_config.json --debug',
     },
-    container_name: 'crust-sworker-0.5.0',
-    restart: 'always',
+    container_name: 'crust-sworker',
   }
 }
 
