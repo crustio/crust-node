@@ -22,7 +22,7 @@ async function genChainComposeConfig(config) {
     '--pruning archive'
   ].join(' ')
   return {
-    image: 'crustio/crust:0.7.0',
+    image: 'crustio/crust:latest',
     network_mode: 'host',
     volumes: [
       `${config.chain.base_path}:${config.chain.base_path}`
@@ -30,8 +30,7 @@ async function genChainComposeConfig(config) {
     environment: {
       ARGS: args,
     },
-    container_name: 'crust-0.7.0',
-    restart: 'always',
+    container_name: 'crust',
   }
 }
 

@@ -1,4 +1,4 @@
-From "node:12-buster" 
+FROM "node:12-buster" 
 
 RUN apt-get update && apt-get install -y wget
 RUN wget https://github.com/paritytech/substrate/releases/download/v2.0.0-rc4/subkey -O /usr/local/bin/subkey

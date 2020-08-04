@@ -28,7 +28,7 @@ async function genKarstComposeConfig(config) {
   const baseVolume = _.isEmpty(config.karst.base_path) ? [] : [ `${basePath}:${basePath}` ]
 
   return {
-    image: 'crustio/karst:0.2.0',
+    image: 'crustio/karst:latest',
     network_mode: 'host',
     volumes: [
       ...baseVolume,
@@ -38,8 +38,7 @@ async function genKarstComposeConfig(config) {
       KARST_PATH: basePath,
       INIT_ARGS: '-c /config/karst_config.json'
     },
-    container_name: 'karst-0.2.0',
-    restart: 'always',
+    container_name: 'karst',
   }
 }
 

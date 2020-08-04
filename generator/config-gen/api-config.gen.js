@@ -16,13 +16,12 @@ async function genApiComposeConfig(config) {
     `ws://127.0.0.1:${config.chain.ws_port}`,
   ].join(' ')
   return {
-    image: 'crustio/crust-api:0.5.0',
+    image: 'crustio/crust-api:latest',
     network_mode: 'host',
     environment: {
       ARGS: args,
     },
-    container_name: 'crust-api-0.5.0',
-    restart: 'always',
+    container_name: 'crust-api',
   }
 }
 
