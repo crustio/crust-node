@@ -4,7 +4,7 @@ basedir=$(cd $scriptdir/..;pwd)
 source $scriptdir/utils.sh
 
 log_info "preparing necessary tools"
-CG_IMAGE="crustio/config-generator:0.1.0"
+CG_IMAGE="crustio/config-generator:latest"
 
 if [[ "$(docker images -q ${CG_IMAGE} 2> /dev/null)" == "" ]]; then
     log_info "retrieving config generator..."
