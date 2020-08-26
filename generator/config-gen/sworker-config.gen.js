@@ -44,9 +44,8 @@ async function genSworkerComposeConfig(config) {
     ],
     volumes: tempVolumes,
     environment: {
-      ARGS: '-c /config/sworker_config.json --debug',
+      ARGS: '-c /config/sworker_config.json --debug $EX_SWORKER_ARGS',
     },
-    container_name: 'crust-sworker',
   }
 }
 
