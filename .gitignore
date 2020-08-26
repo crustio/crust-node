@@ -3,5 +3,5 @@
 resource/
 *.o
 .tmp
-/build
+/build*
 sgx_linux_x64_driver*
