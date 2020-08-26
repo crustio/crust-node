@@ -21,7 +21,6 @@ async function genApiComposeConfig(config) {
     environment: {
       ARGS: args,
     },
-    container_name: 'crust-api',
   }
 }
 

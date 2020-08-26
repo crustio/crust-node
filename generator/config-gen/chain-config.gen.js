@@ -30,7 +30,6 @@ async function genChainComposeConfig(config) {
     environment: {
       ARGS: args,
     },
-    container_name: 'crust',
   }
 }
 

@@ -38,7 +38,6 @@ async function genKarstComposeConfig(config) {
       KARST_PATH: basePath,
       INIT_ARGS: '-c /config/karst_config.json'
     },
-    container_name: 'karst',
   }
 }
 

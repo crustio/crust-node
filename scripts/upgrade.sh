@@ -4,8 +4,9 @@ scriptdir=$(cd `dirname $0`;pwd)
 basedir=$(cd $scriptdir/..;pwd)
 config_file=$basedir/build/sworker/sworker_config.json
 compose_file=$basedir/build/docker-compose.yaml
+builddir=$basedir/build
 
-function upgrade_swoker()
+function upgrade_sworker()
 {
     echo "Start upgrade...."
     docker pull crustio/crust-sworker:latest
@@ -13,6 +14,17 @@ function upgrade_swoker()
         echo "download docker image failed"
         return -1
     fi
+
+    time_now=`date +%s%3N`
+    upgrade_builddir=$builddir$time_now
+    cp -r $builddir $upgrade_builddir
+    EX_SWORKER_ARGS=--upgrade docker-compose -f $upgrade_builddir/docker-compose.yaml -d crust-sworker
+    if [ $? -ne 0 ]; then
+        echo "setup new sworker failed"
+        return -1
+    fi
+
+    echo "setup new sworker in $upgrade_builddir"
 }
 
 if [ x"$config_file" = x"" ]; then
