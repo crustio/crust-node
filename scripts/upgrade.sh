@@ -8,17 +8,24 @@ builddir=$basedir/build
 
 function upgrade_sworker()
 {
-    echo "Start upgrade...."
+    echo "Upgrade...."
+    old_image=(`docker images | grep 'crustio/crust-sworker          latest'`)
+    old_image=${old_image[3]}
     docker pull crustio/crust-sworker:latest
     if [ $? -ne 0 ]; then
         echo "download docker image failed"
         return -1
     fi
+    new_image=(`docker images | grep 'crustio/crust-sworker          latest'`)
+    new_image=${new_image[3]}
+    if [ x"$old_image" = x"$new_image" ]; then
+        return 0
+    fi
 
     time_now=`date +%s%3N`
     upgrade_builddir=$builddir$time_now
     cp -r $builddir $upgrade_builddir
-    EX_SWORKER_ARGS=--upgrade docker-compose -f $upgrade_builddir/docker-compose.yaml -d crust-sworker
+    EX_SWORKER_ARGS=--upgrade docker-compose -f $upgrade_builddir/docker-compose.yaml up -d crust-sworker
     if [ $? -ne 0 ]; then
         echo "setup new sworker failed"
         return -1
@@ -43,7 +50,8 @@ fi
 api_base_url=`echo "$api_base_url" | sed -e 's/^"//' -e 's/"$//'`
 sworker_base_url=`echo "$sworker_base_url" | sed -e 's/^"//' -e 's/"$//'`
 
-sleep 30
+echo "Wait 60s for sworker to start"
+sleep 60
 while :
 do
 
@@ -94,7 +102,7 @@ mrenclave=`echo ${mrenclave: 1: 64}`
 echo "sWorker self code: $mrenclave"
 
 if [ x"$mrenclave" != x"$code" ]; then
-    upgrade_swoker
+    upgrade_sworker
 fi
 
 sleep 10
