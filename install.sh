@@ -39,19 +39,17 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
-log_info "---------Uninstall old crust node------------"
+log_info "--------------Install crust node-------------"
+
+echo "uninstall old crust node"
 ./scripts/uninstall.sh
 
-log_info "--------------Install crust node-------------"
+echo "Install crust node data"
 mkdir -p $installdir
 cp -r scripts $installdir/
 cp config.yaml $installdir/
-mkdir -p $installdir/logs
-touch $installdir/logs/start.log
-touch $installdir/logs/stop.log
-touch $installdir/logs/reload.log
 
-log_info "------------Install crust service-------------"
+echo "Install crust service"
 cp services/crust.service /lib/systemd/system/
 systemctl daemon-reload
 
