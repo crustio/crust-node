@@ -11,15 +11,22 @@ else
     driverurl=https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu16.04-server/$driverbin
 fi
 
+. $scriptdir/utils.sh
+
+log_info "Download sgx driver"
+wget $driverurl
+
 if [ $? -ne 0 ]; then
     echo "Download sgx dirver failed"
     exit 1
 fi
 
-. $scriptdir/utils.sh
-
-log_info "Download sgx driver"
-wget $driverurl
+log_info "Installing denpendencies..."
+apt-get install -y wget build-essential kmod linux-headers-`uname -r`
+if [ $? -ne 0 ]; then
+    echo "Install sgx driver dependencies failed"
+    exit 1
+fi
 
 log_info "Give sgx driver executable permission"
 chmod +x $driverbin
