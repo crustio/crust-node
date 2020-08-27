@@ -7,6 +7,9 @@ if [ $(id -u) -ne 0 ]; then
     exit -1
 fi
 
+echo "Uninstall old crust node"
+./scripts/uninstall.sh
+
 echo "Install crust node"
 mkdir -p $installdir
 cp -r scripts $installdir/

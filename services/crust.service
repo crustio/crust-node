@@ -3,9 +3,9 @@ Description=Crust node
 
 [Service]
 Type=oneshot
-ExecStart=/opt/crust/crust-node/scripts/crust.sh start >> /opt/crust/crust-node/logs/start.log
-ExecStop=/opt/crust/crust-node/scripts/crust.sh stop >> /opt/crust/crust-node/logs/stop.log
-ExecReload=/opt/crust/crust-node/scripts/crust.sh reload >> /opt/crust/crust-node/logs/reload.log
+ExecStart=sh -c "/opt/crust/crust-node/scripts/crust.sh start >> /opt/crust/crust-node/logs/start.log"
+ExecStop=sh -c "/opt/crust/crust-node/scripts/crust.sh stop >> /opt/crust/crust-node/logs/stop.log"
+ExecReload=sh -c "/opt/crust/crust-node/scripts/crust.sh reload >> /opt/crust/crust-node/logs/reload.log"
 
 [Install]
 WantedBy=multi-user.target
