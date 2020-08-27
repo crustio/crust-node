@@ -13,24 +13,10 @@ fi
 
 if [ $? -ne 0 ]; then
     echo "Download sgx dirver failed"
-    exit -1
+    exit 1
 fi
 
 . $scriptdir/utils.sh
-
-log_info "Apt-get update..."
-apt-get update
-if [ $? -ne 0 ]; then
-    echo "Apt-get update failed"
-    exit -1
-fi
-
-log_info "Installing denpendencies..."
-apt-get install -y wget build-essential kmod linux-headers-`uname -r`
-if [ $? -ne 0 ]; then
-    echo "Install sgx dirver denpendencies failed"
-    exit -1
-fi
 
 log_info "Download sgx driver"
 wget $driverurl
@@ -40,6 +26,11 @@ chmod +x $driverbin
 
 log_info "Installing sgx driver..."
 ./$driverbin
+
+if [ $? -ne 0 ]; then
+    echo "Install sgx dirver bin failed"
+    exit 1
+fi
 
 log_info "Clear resource"
 rm $driverbin
