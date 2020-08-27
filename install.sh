@@ -39,6 +39,13 @@ if [ $? -ne 0 ]; then
     fi
 fi
 
+log_info "-------Download crust docker images----------"
+sudo docker pull crustio/config-generator
+sudo docker pull crustio/crust
+sudo docker pull crustio/crust-api
+sudo docker pull crustio/crust-sworker
+sudo docker pull crustio/karst
+
 log_info "--------------Install crust node-------------"
 
 echo "uninstall old crust node"
