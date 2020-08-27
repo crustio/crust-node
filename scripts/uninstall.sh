@@ -8,4 +8,5 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 rm -rf $installdir
-rm /etc/init.d/crust.sh
+rm /lib/systemd/system/crust.service
+sudo systemctl daemon-reload
