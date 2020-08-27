@@ -11,6 +11,10 @@ echo "Install crust node"
 mkdir -p $installdir
 cp -r scripts $installdir/
 cp config.yaml $installdir/
+mkdir -p $installdir/logs
+touch $installdir/logs/start.log
+touch $installdir/logs/stop.log
+touch $installdir/logs/reload.log
 
 echo "Install crust service"
 cp services/crust.service /lib/systemd/system/

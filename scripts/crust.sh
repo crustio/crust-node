@@ -11,20 +11,10 @@ stop()
 {
 	echo "stop"
 }
-
-status()
-{
-	echo "status"
-}
  
-restart() {
+reload() {
 	stop
 	start
-}
-
-config()
-{
-	echo "config"
 }
  
 case "$1" in
@@ -34,17 +24,11 @@ case "$1" in
 	stop)
 		stop
 		;;
-	restart)
-		restart
-		;;
-	status)
-        status
-		;;
-    config)
-        config
+	reload)
+		reload
 		;;
 	*)
-		echo $"Usage: $0 {start|stop|restart|status|config}"
-		RES=-1
+		echo $"Usage: $0 {start|stop|reload}"
+		RES=1
 esac
 exit $RES
