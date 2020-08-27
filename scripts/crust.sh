@@ -1,10 +1,22 @@
 #!/bin/bash
 
-RES=0
+scriptdir=$(cd `dirname $0`;pwd)
+basedir=$(cd $scriptdir/..;pwd)
  
 start()
 {
-	echo "start"
+	echo "Start"
+    $scriptdir/install_sgx_driver.sh
+    if [ $? -ne 0 ]; then
+        echo "Install sgx dirver failed"
+        exit 1
+    fi
+
+    $scriptdir/gen_config.sh
+    if [ $? -ne 0 ]; then
+        echo "Generate configuration files failed"
+        exit 1
+    fi
 }
  
 stop()
@@ -29,6 +41,5 @@ case "$1" in
 		;;
 	*)
 		echo $"Usage: $0 {start|stop|reload}"
-		RES=1
 esac
-exit $RES
+exit 0
