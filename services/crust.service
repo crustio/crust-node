@@ -2,7 +2,7 @@
 Description=Crust node
 
 [Service]
-Type=oneshot
+Type=sample
 ExecStart=/opt/crust/crust-node/scripts/crust.sh start
 ExecStop=/opt/crust/crust-node/scripts/crust.sh stop
 ExecReload=/opt/crust/crust-node/scripts/crust.sh reload

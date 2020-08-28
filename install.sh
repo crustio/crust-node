@@ -40,11 +40,11 @@ if [ $? -ne 0 ]; then
 fi
 
 log_info "-------Download crust docker images----------"
-sudo docker pull crustio/config-generator
-sudo docker pull crustio/crust
-sudo docker pull crustio/crust-api
-sudo docker pull crustio/crust-sworker
-sudo docker pull crustio/karst
+docker pull crustio/config-generator
+docker pull crustio/crust
+docker pull crustio/crust-api
+docker pull crustio/crust-sworker
+docker pull crustio/karst
 
 log_info "--------------Install crust node-------------"
 
