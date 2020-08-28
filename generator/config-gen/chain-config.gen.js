@@ -11,16 +11,23 @@ async function genChainConfig(config, outputCfg) {
 }
 
 async function genChainComposeConfig(config) {
-  const args = [
+  let args = [
     `--base-path ${config.chain.base_path}`,
     '--chain maxwell',
-    '--validator',
     `--port ${config.chain.port}`,
     `--name ${config.chain.name}`,
     `--rpc-port ${config.chain.rpc_port}`,
     `--ws-port ${config.chain.ws_port}`,
-    '--pruning archive'
-  ].join(' ')
+  ]
+
+  if (config.node.chain == "authorty") {
+    args.push('--validator', '--pruning archive')
+  } else if (config.node.chain == "light") {
+    args.push('--light')
+  }
+
+  args=args.join(' ')
+
   return {
     image: 'crustio/crust:latest',
     network_mode: 'host',
