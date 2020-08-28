@@ -19,11 +19,15 @@ async function loadConfig(file) {
   const configSchema = getConfigSchema(config)
   const value = await configSchema.validateAsync(config, {
     allowUnknown: true,
+    stripUnknown: true,
   })
   logger.debug('get config: %o', value)
-  const keyInfo = await inspectKey(value.identity.backup.address)
-  logger.info('key info: %o', keyInfo)
-  value.identity.account_id = keyInfo.accountId
+
+  if (value.node.chain == "authorty" && value.node.sworker == "enable") {
+    const keyInfo = await inspectKey(value.identity.backup.address)
+    logger.info('key info: %o', keyInfo)
+    value.identity.account_id = keyInfo.accountId
+  }
 
   const data = await genConfig(value, {
     baseDir: '.tmp',

@@ -55,6 +55,9 @@ async function genConfig(config, outputOpts) {
   let outputs = []
   const { baseDir } = outputOpts
   for (const cg of configGenerators) {
+    if (!config[cg.name]) {
+      continue
+    }
     logger.info('generating config for %s', cg.name)
     const ret = await cg.configFunc(config, outputOpts)
     await writeConfig(path.join(baseDir, cg.to), ret.config)
@@ -76,6 +79,9 @@ async function genComposeConfig(config) {
   }
 
   for (const cg of configGenerators) {
+    if (!config[cg.name]) {
+      continue
+    }
     logger.info('generating compose config for %s', cg.name)
     const cfg = await cg.composeFunc(config)
     output = {

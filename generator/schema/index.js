@@ -16,18 +16,18 @@ function getConfigSchema(config) {
   if (config.node.chain != "authority") {
     return Joi.object(sMap)
   } 
-  sMap[api] = apiSchema.required()
+  sMap["api"] = apiSchema.required()
 
   if (config.node.sworker != "enable") {
     return Joi.object(sMap)
   }
-  sMap[identity] = identitySchema.required()
-  sMap[sworker] = sworkerSchema.required()
+  sMap["identity"] = identitySchema.required()
+  sMap["sworker"] = sworkerSchema.required()
 
   if (config.node.karst != "enable") {
     return Joi.object(sMap)
   }
-  sMap[karst] = karstSchema.required()
+  sMap["karst"] = karstSchema.required()
 
   return Joi.object(sMap)
 }
