@@ -1,3 +1,12 @@
+## node configurations
+node:
+  ## the type of crust, for example: authority, full, light
+  chain: "authority"
+  ## enable or disable sworker
+  sworker: "enable"
+  ## enable or disable karst
+  karst: "disable"
+
 ## identity configurations
 identity:
   ## the backup of chain controller account
