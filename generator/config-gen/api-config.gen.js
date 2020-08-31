@@ -21,7 +21,7 @@ async function genApiComposeConfig(config) {
     environment: {
       ARGS: args,
     },
-    depends_on: crust,
+    depends_on: 'crust',
   }
 }
 
