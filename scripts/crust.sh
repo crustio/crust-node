@@ -7,18 +7,18 @@ builddir=$basedir/build
 start()
 {
 	echo "Start"
-    $scriptdir/gen_config.sh
-    if [ $? -ne 0 ]; then
-        echo "Generate configuration files failed"
-        exit 1
-    fi
+	$scriptdir/gen_config.sh
+	if [ $? -ne 0 ]; then
+		echo "Generate configuration files failed"
+		exit 1
+	fi
 
 	if [ -d "$builddir/sworker" ]; then
 		$scriptdir/install_sgx_driver.sh
-    	if [ $? -ne 0 ]; then
-        	echo "Install sgx dirver failed"
-        	exit 1
-    	fi
+		if [ $? -ne 0 ]; then
+			echo "Install sgx dirver failed"
+			exit 1
+		fi
 	fi
 
 	docker-compose -f $builddir/docker-compose.yaml up -d
