@@ -13,14 +13,10 @@ function getConfigSchema(config) {
     chain: chainSchema.required(),
   }
 
-  if (config.node.chain != "authority") {
-    return Joi.object(sMap)
-  } 
-  sMap["api"] = apiSchema.required()
-
   if (config.node.sworker != "enable") {
     return Joi.object(sMap)
   }
+  sMap["api"] = apiSchema.required()
   sMap["identity"] = identitySchema.required()
   sMap["sworker"] = sworkerSchema.required()
 

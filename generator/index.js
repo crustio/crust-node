@@ -23,7 +23,7 @@ async function loadConfig(file) {
   })
   logger.debug('get config: %o', value)
 
-  if (value.node.chain == "authorty" && value.node.sworker == "enable") {
+  if (value.node.sworker == "enable") {
     const keyInfo = await inspectKey(value.identity.backup.address)
     logger.info('key info: %o', keyInfo)
     value.identity.account_id = keyInfo.accountId
