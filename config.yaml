@@ -50,7 +50,6 @@ karst:
   ## karst data will be saved in this path, need absolute path
   base_path: "/opt/crust/data/karst"
   ## the thacker address
-  tracker_addrs:
-    - "127.0.0.1:22122"
+  tracker_addrs: "127.0.0.1:22122"
   ## the port
   port: 17000
