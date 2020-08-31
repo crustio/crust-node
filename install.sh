@@ -40,11 +40,21 @@ if [ $? -ne 0 ]; then
 fi
 
 log_info "-------Download crust docker images----------"
+res=0
 docker pull crustio/config-generator
+res=$(($?|$res))
 docker pull crustio/crust
+res=$(($?|$res))
 docker pull crustio/crust-api
+res=$(($?|$res))
 docker pull crustio/crust-sworker
+res=$(($?|$res))
 docker pull crustio/karst
+res=$(($?|$res))
+if [ $res -ne 0 ]; then
+    log_err "Install docker failed"
+    exit 1
+fi
 
 log_info "--------------Install crust node-------------"
 
