@@ -19,9 +19,10 @@ Official crust node service for running crust protocol.
 
 ### Install lib
 ```shell
+sudo apt install -y git jq curl wget build-essential kmod
 curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
 sudo apt install docker-compose
-sudo apt install jq
+sudo apt install -y linux-headers-`uname -r`
 ```
 
 ### Install sgx driver

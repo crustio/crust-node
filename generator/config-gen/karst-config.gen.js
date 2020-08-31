@@ -4,14 +4,20 @@ const { getSharedChainConfigForKarst } = require('./chain-config.gen')
 async function genKarstConfig(config, outputCfg) {
   const karstConfig = {
     base_path: config.karst.base_path,
-    base_url: `0.0.0.0:${config.karst.port}`,
+    port: config.karst.port,
+    debug: true,
     crust: getSharedChainConfigForKarst(config),
-    fastdfs: {
-      max_conns: 100,
-      tracker_addrs: config.karst.tracker_addrs,
+    sworker: {
+      base_url: `127.0.0.1:${config.sworker.port}`
     },
-    log_level: 'debug',
-    tee_base_url: `127.0.0.1:${config.sworker.port}/api/v0`,
+    file_system: {
+      fastdfs: {
+        tracker_addrs: config.karst.tracker_addrs
+      },
+      ipfs: {
+        base_url: ""
+      }
+    }
   }
   const basePaths = _.isEmpty(config.karst.base_path) ? [] : [{
     required: true,

@@ -1,7 +1,7 @@
 const Joi = require('joi')
 
 const apiSchema = Joi.object({
-  port: Joi.number().port().default(5666),
+  port: Joi.number().port().default(56666),
 })
 
 module.exports = {

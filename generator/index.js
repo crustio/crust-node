@@ -4,7 +4,7 @@ const fs = require('fs-extra')
 const path = require('path')
 const yaml = require('js-yaml')
 const { genConfig, genComposeConfig } = require('./config-gen')
-const { configSchema } = require('./schema')
+const { getConfigSchema } = require('./schema')
 const { validate } = require('./config-validator')
 const { logger } = require('./logger')
 const { inspectKey } = require('./key-utils')
@@ -16,13 +16,18 @@ async function loadConfig(file) {
   logger.debug('loading config file: %s', file)
   const c = await fs.readFile('config.yaml', 'utf8')
   const config = yaml.safeLoad(c)
+  const configSchema = getConfigSchema(config)
   const value = await configSchema.validateAsync(config, {
     allowUnknown: true,
+    stripUnknown: true,
   })
-  logger.debug('got config: %o', value)
-  const keyInfo = await inspectKey(value.identity.backup.address)
-  logger.info('key info: %o', keyInfo)
-  value.identity.account_id = keyInfo.accountId
+  logger.debug('get config: %o', value)
+
+  if (value.node.sworker == "enable") {
+    const keyInfo = await inspectKey(value.identity.backup.address)
+    logger.info('key info: %o', keyInfo)
+    value.identity.account_id = keyInfo.accountId
+  }
 
   const data = await genConfig(value, {
     baseDir: '.tmp',

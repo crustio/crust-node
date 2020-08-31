@@ -1,0 +1,13 @@
+[Unit]
+Description=Crust node
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/crust/crust-node/scripts/crust.sh start
+ExecStop=/opt/crust/crust-node/scripts/crust.sh stop
+ExecReload=/opt/crust/crust-node/scripts/crust.sh reload
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

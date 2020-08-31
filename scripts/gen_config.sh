@@ -26,16 +26,14 @@ fi
 
 BUILD_DIR=$basedir/build
 log_info "prepare build directory"
+rm -rf $BUILD_DIR
 mkdir -p $BUILD_DIR
-
-log_info "cleanup .tmp directory"
-rm -rf $BUILD_DIR/.tmp
 
 cp -f $basedir/config.yaml $basedir/build/
 CIDFILE=`mktemp`
 rm $CIDFILE
 log_info "run config generator..."
-docker run --cidfile $CIDFILE -i -t --workdir /opt/output -v $BUILD_DIR:/opt/output $CG_IMAGE node /opt/app/index.js
+docker run --cidfile $CIDFILE -i --workdir /opt/output -v $BUILD_DIR:/opt/output $CG_IMAGE node /opt/app/index.js
 SUCCESS="$?"
 CID=`cat $CIDFILE`
 docker rm $CID

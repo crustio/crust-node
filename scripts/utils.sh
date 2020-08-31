@@ -1,4 +1,3 @@
-
 function echo_c {
     printf "\033[0;$1m$2\033[0m\n"
 }

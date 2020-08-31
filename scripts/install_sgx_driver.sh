@@ -13,14 +13,20 @@ fi
 
 . $scriptdir/utils.sh
 
-log_info "Apt-get update..."
-apt-get update 
+log_info "Download sgx driver"
+wget $driverurl
+
+if [ $? -ne 0 ]; then
+    echo "Download sgx dirver failed"
+    exit 1
+fi
 
 log_info "Installing denpendencies..."
 apt-get install -y wget build-essential kmod linux-headers-`uname -r`
-
-log_info "Download sgx driver"
-wget $driverurl
+if [ $? -ne 0 ]; then
+    echo "Install sgx driver dependencies failed"
+    exit 1
+fi
 
 log_info "Give sgx driver executable permission"
 chmod +x $driverbin
@@ -28,5 +34,12 @@ chmod +x $driverbin
 log_info "Installing sgx driver..."
 ./$driverbin
 
+if [ $? -ne 0 ]; then
+    echo "Install sgx dirver bin failed"
+    exit 1
+fi
+
 log_info "Clear resource"
 rm $driverbin
+
+exit 0
