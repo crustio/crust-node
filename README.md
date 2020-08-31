@@ -17,35 +17,22 @@ Official crust node service for running crust protocol.
 
 ## Install dependencies
 
-### Install lib
+### Install crust service
 ```shell
-sudo apt install -y git jq curl wget build-essential kmod
-curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-sudo apt install docker-compose
-sudo apt install -y linux-headers-`uname -r`
-```
-
-### Install sgx driver
-```shell
-sudo ./scripts/install_sgx_driver.sh
+sudo ./install.sh
 ```
 
 ### Generate application configuration
 
 #### Modify config.yaml
-You need to modify config.yaml
+```shell
+sudo vim /opt/crust/crust-node/config.yaml
+```
 
-### Run the config gen script
-Run ```sudo ./scripts/gen_config.sh``` Configrations and docker compose will generated in the build directory.
-
-### Run docker
+### Run crust service
 
 ```shell
-cd build
-sudo docker-compose up crust
-sudo docker-compose up crust-api
-sudo docker-compose up crust-sworker
-sudo docker-compose up karst # if your want to start karst, please make sure fastdfs is running in your computer
+sudo systemctl start crust
 ```
 
 ## License
