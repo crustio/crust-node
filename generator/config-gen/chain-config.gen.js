@@ -20,7 +20,7 @@ async function genChainComposeConfig(config) {
     `--ws-port ${config.chain.ws_port}`,
   ]
 
-  if (config.node.chain == "authorty") {
+  if (config.node.chain == "authority") {
     args.push('--validator', '--pruning archive')
   } else if (config.node.chain == "light") {
     args.push('--light')
