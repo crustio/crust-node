@@ -22,7 +22,7 @@ start()
 	fi
 
 	docker-compose -f $builddir/docker-compose.yaml up -d crust
-	sleep 20
+	sleep 15
 	docker-compose -f $builddir/docker-compose.yaml up -d
 }
  
