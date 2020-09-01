@@ -22,8 +22,18 @@ start()
 	fi
 
 	docker-compose -f $builddir/docker-compose.yaml up -d crust
-	sleep 20
+	if [ $? -ne 0 ]; then
+		echo "Start crust chain failed"
+		exit 1
+	fi
+
+	sleep 15
+	
 	docker-compose -f $builddir/docker-compose.yaml up -d
+	if [ $? -ne 0 ]; then
+		echo "Start other modules failed"
+		exit 1
+	fi
 }
  
 stop()
