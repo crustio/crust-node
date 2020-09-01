@@ -28,7 +28,7 @@ async function genChainComposeConfig(config) {
   ]
 
   if (config.node.chain == "authority") {
-    args.push('--validator', '--pruning archive')
+    args.push('--validator', '--pruning', 'archive')
   } else if (config.node.chain == "light") {
     args.push('--light')
   }
