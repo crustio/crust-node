@@ -14,17 +14,17 @@ async function genChainComposeConfig(config) {
   let args = [
     './crust',
     '--base-path',
-    config.chain.base_path,
+    `${config.chain.base_path}`,
     '--chain',
     'maxwell',
     '--port',
-    config.chain.port,
+    `${config.chain.port}`,
     '--name',
-    config.chain.name,
+    `${config.chain.name}`,
     '--rpc-port',
-    config.chain.rpc_port,
+    `${config.chain.rpc_port}`,
     '--ws-port',
-    config.chain.ws_port,
+    `${config.chain.ws_port}`,
   ]
 
   if (config.node.chain == "authority") {
