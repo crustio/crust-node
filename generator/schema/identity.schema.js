@@ -7,7 +7,7 @@ const backupSchema = Joi.object({
   encoded: Joi.string().required(),
   encoding: Joi.object({
     content: Joi.array().items(Joi.string()).min(1).required(),
-    type: Joi.array().items(Joi.string()).required(),
+    type: [Joi.array().items(Joi.string()).required(), Joi.string().required()],
     version: Joi.string().required(),
   }).required(),
   meta: Joi.object({
