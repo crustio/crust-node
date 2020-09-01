@@ -12,12 +12,19 @@ async function genChainConfig(config, outputCfg) {
 
 async function genChainComposeConfig(config) {
   let args = [
-    `--base-path ${config.chain.base_path}`,
-    '--chain maxwell',
-    `--port ${config.chain.port}`,
-    `--name ${config.chain.name}`,
-    `--rpc-port ${config.chain.rpc_port}`,
-    `--ws-port ${config.chain.ws_port}`,
+    './crust',
+    '--base-path',
+    `${config.chain.base_path}`,
+    '--chain',
+    'maxwell',
+    '--port',
+    `${config.chain.port}`,
+    '--name',
+    `${config.chain.name}`,
+    '--rpc-port',
+    `${config.chain.rpc_port}`,
+    '--ws-port',
+    `${config.chain.ws_port}`,
   ]
 
   if (config.node.chain == "authority") {
@@ -26,17 +33,13 @@ async function genChainComposeConfig(config) {
     args.push('--light')
   }
 
-  args=args.join(' ')
-
   return {
     image: 'crustio/crust:latest',
     network_mode: 'host',
     volumes: [
       `${config.chain.base_path}:${config.chain.base_path}`
     ],
-    environment: {
-      ARGS: args,
-    },
+    command: args,
   }
 }
 
