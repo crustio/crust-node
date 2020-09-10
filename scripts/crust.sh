@@ -41,6 +41,9 @@ start()
 			echo "Start crust-sworker-$a_or_b failed"
 			exit 1
 		fi
+
+		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
+		echo $! > $scriptdir/upgrade.pid
 	fi
 
 	if [ -d "$builddir/karst" ]; then
@@ -51,11 +54,14 @@ start()
 		fi
 	fi
 }
- 
+
 stop()
 {
 	echo "stop"
 	docker-compose -f $builddir/docker-compose.yaml down
+	if [ -d "$builddir/sworker" ]; then
+		kill `cat $scriptdir/upgrade.pid`
+	fi
 }
  
 reload() {

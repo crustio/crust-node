@@ -90,6 +90,7 @@ async function genComposeConfig(config) {
     }
     logger.info('generating compose config for %s', cg.name)
     const cfg = await cg.composeFunc(config)
+    cfg["container_name"] = cg.composeName
     output = {
       ...output,
       services: {

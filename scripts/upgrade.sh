@@ -3,7 +3,6 @@
 scriptdir=$(cd `dirname $0`;pwd)
 basedir=$(cd $scriptdir/..;pwd)
 config_file=$basedir/build/sworker/sworker_config.json
-compose_file=$basedir/build/docker-compose.yaml
 builddir=$basedir/build
 
 function upgrade_sworker()
@@ -22,16 +21,22 @@ function upgrade_sworker()
         return 0
     fi
 
-    time_now=`date +%s%3N`
-    upgrade_builddir=$builddir$time_now
-    cp -r $builddir $upgrade_builddir
-    EX_SWORKER_ARGS=--upgrade docker-compose -f $upgrade_builddir/docker-compose.yaml up -d crust-sworker
+    a_or_b=`cat $basedir/etc/sWorker.ab`
+    if [ x"$a_or_b" = x"a" ]; then
+        a_or_b='b'
+        sed -i 's/a/b/g' $basedir/etc/sWorker.ab
+    else
+        a_or_b='a'
+        sed -i 's/b/a/g' $basedir/etc/sWorker.ab
+    fi
+
+    EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
     if [ $? -ne 0 ]; then
         echo "setup new sworker failed"
         return -1
     fi
 
-    echo "setup new sworker in $upgrade_builddir"
+    echo "setup new sworker 'crust-sworker-$a_or_b'"
 }
 
 if [ x"$config_file" = x"" ]; then
