@@ -35,11 +35,17 @@ const configGenerators = [{
   to: path.join('api', 'api_config.json'),
   composeName: 'crust-api',
   composeFunc: genApiComposeConfig,
-},{
+}, {
   name: 'sworker',
   configFunc: genSworkerConfig,
   to: path.join('sworker', 'sworker_config.json'),
-  composeName: 'crust-sworker',
+  composeName: 'crust-sworker-a',
+  composeFunc: genSworkerComposeConfig,
+}, {
+  name: 'sworker',
+  configFunc: genSworkerConfig,
+  to: path.join('sworker', 'sworker_config.json'),
+  composeName: 'crust-sworker-b',
   composeFunc: genSworkerComposeConfig,
 }, {
   name: 'karst',
