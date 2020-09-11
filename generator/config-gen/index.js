@@ -35,11 +35,17 @@ const configGenerators = [{
   to: path.join('api', 'api_config.json'),
   composeName: 'crust-api',
   composeFunc: genApiComposeConfig,
-},{
+}, {
   name: 'sworker',
   configFunc: genSworkerConfig,
   to: path.join('sworker', 'sworker_config.json'),
-  composeName: 'crust-sworker',
+  composeName: 'crust-sworker-a',
+  composeFunc: genSworkerComposeConfig,
+}, {
+  name: 'sworker',
+  configFunc: genSworkerConfig,
+  to: path.join('sworker', 'sworker_config.json'),
+  composeName: 'crust-sworker-b',
   composeFunc: genSworkerComposeConfig,
 }, {
   name: 'karst',
@@ -84,6 +90,7 @@ async function genComposeConfig(config) {
     }
     logger.info('generating compose config for %s', cg.name)
     const cfg = await cg.composeFunc(config)
+    cfg["container_name"] = cg.composeName
     output = {
       ...output,
       services: {

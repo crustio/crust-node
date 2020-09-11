@@ -64,6 +64,7 @@ echo "uninstall old crust node"
 echo "Install crust node data"
 mkdir -p $installdir
 cp -r scripts $installdir/
+cp -r etc $installdir/
 cp config.yaml $installdir/
 
 echo "Install crust service"

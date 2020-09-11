@@ -27,19 +27,41 @@ start()
 		exit 1
 	fi
 
-	sleep 15
-	
-	docker-compose -f $builddir/docker-compose.yaml up -d
-	if [ $? -ne 0 ]; then
-		echo "Start other modules failed"
-		exit 1
+	if [ -d "$builddir/sworker" ]; then
+		sleep 15
+		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
+		if [ $? -ne 0 ]; then
+			echo "Start crust-api failed"
+			exit 1
+		fi
+
+		a_or_b=`cat $basedir/etc/sWorker.ab`
+		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		if [ $? -ne 0 ]; then
+			echo "Start crust-sworker-$a_or_b failed"
+			exit 1
+		fi
+
+		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
+		echo $! > $scriptdir/upgrade.pid
+	fi
+
+	if [ -d "$builddir/karst" ]; then
+		docker-compose -f $builddir/docker-compose.yaml up -d karst
+		if [ $? -ne 0 ]; then
+			echo "Start karst failed"
+			exit 1
+		fi
 	fi
 }
- 
+
 stop()
 {
 	echo "stop"
 	docker-compose -f $builddir/docker-compose.yaml down
+	if [ -d "$builddir/sworker" ]; then
+		kill `cat $scriptdir/upgrade.pid`
+	fi
 }
  
 reload() {
