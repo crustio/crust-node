@@ -1,0 +1,13 @@
+[Unit]
+Description=Karst node
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/crust/crust-node/scripts/karst.sh start
+ExecStop=/opt/crust/crust-node/scripts/karst.sh stop
+ExecReload=/opt/crust/crust-node/scripts/karst.sh reload
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
