@@ -1,6 +1,6 @@
 [Unit]
 Description=Karst node
-After=network.target
+After=network.target crust.service
 
 [Service]
 Type=oneshot

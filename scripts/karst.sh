@@ -7,6 +7,17 @@ builddir=$basedir/build
 start()
 {
 	echo "Start"
+    $scriptdir/gen_config.sh
+	if [ $? -ne 0 ]; then
+		echo "Generate configuration files failed"
+		exit 1
+	fi
+
+    if [ ! -d "$builddir/sworker" ]; then
+		echo "No sworker"
+		exit 1
+	fi
+
 	if [ -d "$builddir/karst" ]; then
 		docker-compose -f $builddir/docker-compose.yaml up -d karst
 		if [ $? -ne 0 ]; then
