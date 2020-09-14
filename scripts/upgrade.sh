@@ -63,27 +63,27 @@ do
 system_health=`curl $api_base_url/system/health 2>/dev/null`
 if [ x"$system_health" = x"" ]; then
     echo "please run crust chain and api"
-    sleep 10
+    sleep 60
     continue
 fi
 
 is_syncing=`echo $system_health | jq .isSyncing`
 if [ x"$is_syncing" = x"" ]; then
     echo "crust api dose not connet to crust chain"
-    sleep 10
+    sleep 60
     continue
 fi
 
 if [ x"$is_syncing" = x"true" ]; then
     echo "crust chain is syncing"
-    sleep 10
+    sleep 60
     continue
 fi
 
 code=`curl $api_base_url/tee/code 2>/dev/null`
 if [ x"$code" = x"" ]; then
     echo "please run chain and api"
-    sleep 10
+    sleep 60
     continue
 fi
 code=`echo ${code: 3: 64}`
@@ -92,14 +92,14 @@ echo "sWorker code on chain: $code"
 id_info=`curl $sworker_base_url/enclave/id_info 2>/dev/null`
 if [ x"$id_info" = x"" ]; then
     echo "please run sworker"
-    sleep 10
+    sleep 60
     continue
 fi
 
 mrenclave=`echo $id_info | jq .mrenclave`
 if [ x"$mrenclave" = x"" ]; then
     echo "waiting sworker ready"
-    sleep 10
+    sleep 60
     continue
 fi
 mrenclave=`echo ${mrenclave: 1: 64}`
@@ -110,5 +110,5 @@ if [ x"$mrenclave" != x"$code" ]; then
     upgrade_sworker
 fi
 
-sleep 10
+sleep 60
 done
