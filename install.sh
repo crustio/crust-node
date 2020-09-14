@@ -67,8 +67,9 @@ cp -r scripts $installdir/
 cp -r etc $installdir/
 cp config.yaml $installdir/
 
-echo "Install crust service"
+echo "Install crust and karst service"
 cp services/crust.service /lib/systemd/system/
+cp services/karst.service /lib/systemd/system/
 systemctl daemon-reload
 
 log_success "------------Install success-------------"

@@ -28,7 +28,6 @@ start()
 	fi
 
 	if [ -d "$builddir/sworker" ]; then
-		sleep 15
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
 		if [ $? -ne 0 ]; then
 			echo "Start crust-api failed"
@@ -45,21 +44,16 @@ start()
 		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
 		echo $! > $scriptdir/upgrade.pid
 	fi
-
-	if [ -d "$builddir/karst" ]; then
-		docker-compose -f $builddir/docker-compose.yaml up -d karst
-		if [ $? -ne 0 ]; then
-			echo "Start karst failed"
-			exit 1
-		fi
-	fi
 }
 
 stop()
 {
-	echo "stop"
-	docker-compose -f $builddir/docker-compose.yaml down
+	echo "Stop"
+	docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
 	if [ -d "$builddir/sworker" ]; then
+		docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-api
+		docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-sworker-a
+		docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-sworker-b
 		kill `cat $scriptdir/upgrade.pid`
 	fi
 }
