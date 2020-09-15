@@ -1,6 +1,6 @@
 ## node configurations
 node:
-  ## the type of crust, for example: authority, full, light
+  ## the type of crust, for example: authority, full
   chain: "authority"
   ## enable or disable sworker
   sworker: "enable"

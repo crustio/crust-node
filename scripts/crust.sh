@@ -7,6 +7,8 @@ builddir=$basedir/build
 start()
 {
 	echo "Start"
+	check_port 30333 && check_port 9933 && check_port 9944
+
 	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
 		echo "Generate configuration files failed"
@@ -28,6 +30,8 @@ start()
 	fi
 
 	if [ -d "$builddir/sworker" ]; then
+		check_port 56666 && check_port 12222 && check_port 17000
+
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
 		if [ $? -ne 0 ]; then
 			echo "Start crust-api failed"
@@ -61,6 +65,14 @@ stop()
 reload() {
 	stop
 	start
+}
+
+check_port() {
+    port=$1
+    grep_port=`netstat -tlpn | grep "\b$port\b"`
+    if [ -n "$grep_port" ]; then
+        echo "Please make sure port $port is not occupied"
+    fi
 }
  
 case "$1" in
