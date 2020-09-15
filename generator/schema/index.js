@@ -7,7 +7,7 @@ const { sworkerSchema } = require('./sworker.schema')
 const { nodeSchema } = require('./node.schema')
 
 function getConfigSchema(config) {
-  sMap = {
+  let sMap = {
     node: nodeSchema.required(),
     chain: chainSchema.required(),
   }
