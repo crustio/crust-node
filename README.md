@@ -29,10 +29,16 @@ sudo ./install.sh
 sudo vim /opt/crust/crust-node/config.yaml
 ```
 
-### Run crust service
+### Run crust service and karst service
+Please make sure the following ports are not occupied before starting：
+- 30333 9933 9944 (for crust chain)
+- 56666 (for crust API)
+- 12222 (for crust sWorker)
+- 17000 (for karst)
 
 ```shell
 sudo systemctl start crust
+sudo systemctl start karst
 ```
 
 ## License
