@@ -1,7 +1,7 @@
 
 async function genApiConfig(config, outputCfg) {
   const apiConfig = {
-    ...config.api,
+    port: 56666,
     chain_ws_url: `ws://127.0.0.1:${config.chain.ws_port}`,
   }
   return {
@@ -12,7 +12,7 @@ async function genApiConfig(config, outputCfg) {
 
 async function genApiComposeConfig(config) {
   const args = [
-    `${config.api.port}`,
+    '56666',
     `ws://127.0.0.1:${config.chain.ws_port}`,
   ].join(' ')
   return {

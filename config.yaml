@@ -16,40 +16,19 @@ identity:
 
 ## chain configurations
 chain:
-  ## chain data will be saved in this path, need absolute path
-  base_path: "/opt/crust/data/chain"
   ## the name of chain node
   name: "vnode"
-  ## the port
-  port: 30333
-  ## the rpc port
-  rpc_port: 9933
-  ## the ws port
-  ws_port: 9944
-
-## api configurations
-api:
-  ## the port
-  port: 56666
 
 ## sworker configurations
 sworker:
-  ## sworker base data will be saved in this path, need absolute path
-  base_path: "/opt/crust/data/sworker"
   ## the srd data will be saved in those paths, need absolute path
   srd_paths:
     - "/opt/crust/data/sworker/srd1"
     - "/opt/crust/data/sworker/srd2"
   ## the number of srd in GB, input must be an integer greater than 0
   srd_init_capacity: 1
-  ## the port
-  port: 12222
 
 ## karst configurations
 karst:
-  ## karst data will be saved in this path, need absolute path
-  base_path: "/opt/crust/data/karst"
   ## the thacker address
   tracker_addrs: "127.0.0.1:22122"
-  ## the port
-  port: 17000

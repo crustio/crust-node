@@ -3,12 +3,12 @@ const { getSharedChainConfigForKarst } = require('./chain-config.gen')
 
 async function genKarstConfig(config, outputCfg) {
   const karstConfig = {
-    base_path: config.karst.base_path,
-    port: config.karst.port,
+    base_path: '/opt/crust/data/karst',
+    port: 17000,
     debug: true,
     crust: getSharedChainConfigForKarst(config),
     sworker: {
-      base_url: `127.0.0.1:${config.sworker.port}`
+      base_url: `127.0.0.1:12222`
     },
     file_system: {
       fastdfs: {
@@ -19,9 +19,9 @@ async function genKarstConfig(config, outputCfg) {
       }
     }
   }
-  const basePaths = _.isEmpty(config.karst.base_path) ? [] : [{
+  const basePaths = [{
     required: true,
-    path: config.karst.base_path,
+    path: '/opt/crust/data/karst',
   }]
   return {
     config: karstConfig,
@@ -30,8 +30,8 @@ async function genKarstConfig(config, outputCfg) {
 }
 
 async function genKarstComposeConfig(config) {
-  const basePath = _.isEmpty(config.karst.base_path) ? '/home/crust/crust/karst' : config.karst.base_path
-  const baseVolume = _.isEmpty(config.karst.base_path) ? [] : [ `${basePath}:${basePath}` ]
+  const basePath = '/opt/crust/data/karst'
+  const baseVolume =[ `${basePath}:${basePath}` ]
 
   return {
     image: 'crustio/karst:latest',

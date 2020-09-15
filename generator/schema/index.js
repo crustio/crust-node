@@ -16,7 +16,6 @@ function getConfigSchema(config) {
   if (config.node.sworker != "enable") {
     return Joi.object(sMap)
   }
-  sMap["api"] = apiSchema.required()
   sMap["identity"] = identitySchema.required()
   sMap["sworker"] = sworkerSchema.required()
 
