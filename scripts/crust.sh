@@ -68,11 +68,11 @@ reload() {
 }
 
 check_port() {
-    port=$1
-    grep_port=`netstat -tlpn | grep "\b$port\b"`
-    if [ -n "$grep_port" ]; then
-        echo "Please make sure port $port is not occupied"
-    fi
+	port=$1
+	grep_port=`netstat -tlpn | grep "\b$port\b"`
+	if [ -n "$grep_port" ]; then
+		echo "Please make sure port $port is not occupied"
+	fi
 }
  
 case "$1" in

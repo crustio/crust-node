@@ -7,13 +7,13 @@ builddir=$basedir/build
 start()
 {
 	echo "Start"
-    $scriptdir/gen_config.sh
+	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
 		echo "Generate configuration files failed"
 		exit 1
 	fi
 
-    if [ ! -d "$builddir/sworker" ]; then
+	if [ ! -d "$builddir/sworker" ]; then
 		echo "No sworker"
 		exit 1
 	fi
@@ -24,6 +24,9 @@ start()
 			echo "Start karst failed"
 			exit 1
 		fi
+	else
+		echo "Please enable karst in /opt/crust/crust-node/config.yaml"
+		exit 1
 	fi
 }
 

@@ -29,10 +29,11 @@ sudo ./install.sh
 sudo vim /opt/crust/crust-node/config.yaml
 ```
 
-### Run crust service
+### Run crust service and karst service
 
 ```shell
 sudo systemctl start crust
+sudo systemctl start karst
 ```
 
 ## License
