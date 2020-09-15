@@ -13,7 +13,7 @@ async function genApiConfig(config, outputCfg) {
 async function genApiComposeConfig(config) {
   const args = [
     '56666',
-    `ws://127.0.0.1:${config.chain.ws_port}`,
+    `ws://127.0.0.1:9944`,
   ].join(' ')
   return {
     image: 'crustio/crust-api:latest',
