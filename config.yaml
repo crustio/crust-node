@@ -30,5 +30,7 @@ sworker:
 
 ## karst configurations
 karst:
-  ## the thacker address
+  ## the tracker address
   tracker_addrs: "127.0.0.1:22122"
+  ## the tracker's external network address
+  outer_tracker_addrs: ""
