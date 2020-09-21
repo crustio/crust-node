@@ -12,10 +12,12 @@ async function genKarstConfig(config, outputCfg) {
     },
     file_system: {
       fastdfs: {
-        tracker_addrs: config.karst.tracker_addrs
+        tracker_addrs: config.karst.tracker_addrs,
+        outer_tracker_addrs: config.karst.outer_tracker_addrs
       },
       ipfs: {
-        base_url: ""
+        base_url: "",
+        outer_base_url: ""
       }
     }
   }
