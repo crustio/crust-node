@@ -7,7 +7,17 @@ builddir=$basedir/build
 start()
 {
 	echo "Start"
-	check_port 30333 && check_port 9933 && check_port 9944 && check_port 56666 && check_port 12222 && check_port 17000
+
+	local res=0
+	check_port 30333
+	res=$(($?|$res))
+	check_port 9933
+	res=$(($?|$res))
+	check_port 9944
+	res=$(($?|$res))
+	if [ $res -ne 0 ]; then
+		exit 1
+	fi
 
 	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
@@ -30,6 +40,16 @@ start()
 	fi
 
 	if [ -d "$builddir/sworker" ]; then
+		local res=0
+		check_port 56666
+		res=$(($?|$res))
+		check_port 12222
+		res=$(($?|$res))
+		if [ $res -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
+			exit 1
+		fi
+
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
 		if [ $? -ne 0 ]; then
 			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
@@ -73,7 +93,7 @@ check_port() {
 	grep_port=`netstat -tlpn | grep "\b$port\b"`
 	if [ -n "$grep_port" ]; then
 		echo "Please make sure port $port is not occupied"
-		exit 1
+		return 1
 	fi
 }
  

@@ -7,6 +7,11 @@ builddir=$basedir/build
 start()
 {
 	echo "Start"
+	check_port 17000
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
+
 	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
 		echo "Generate configuration files failed"
@@ -41,6 +46,15 @@ stop()
 reload() {
 	stop
 	start
+}
+
+check_port() {
+	port=$1
+	grep_port=`netstat -tlpn | grep "\b$port\b"`
+	if [ -n "$grep_port" ]; then
+		echo "Please make sure port $port is not occupied"
+		return 1
+	fi
 }
  
 case "$1" in
