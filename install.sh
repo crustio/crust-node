@@ -59,17 +59,17 @@ fi
 log_info "--------------Install crust node-------------"
 
 echo "uninstall old crust node"
-./scripts/uninstall.sh
+$scriptdir/uninstall.sh
 
 echo "Install crust node data"
 mkdir -p $installdir
-cp -r scripts $installdir/
-cp -r etc $installdir/
-cp config.yaml $installdir/
+cp -r $basedir/scripts $installdir/
+cp -r $basedir/etc $installdir/
+cp $basedir/config.yaml $installdir/
 
 echo "Install crust and karst service"
-cp services/crust.service /lib/systemd/system/
-cp services/karst.service /lib/systemd/system/
+cp $basedir/services/crust.service /lib/systemd/system/
+cp $basedir/services/karst.service /lib/systemd/system/
 systemctl daemon-reload
 
 log_success "------------Install success-------------"

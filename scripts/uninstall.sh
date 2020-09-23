@@ -8,6 +8,8 @@ if [ $(id -u) -ne 0 ]; then
 fi
 
 sudo systemctl stop crust
+sudo systemctl stop karst
 rm -rf $installdir
 rm /lib/systemd/system/crust.service
+rm /lib/systemd/system/karst.service
 sudo systemctl daemon-reload
