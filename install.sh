@@ -59,7 +59,7 @@ fi
 log_info "--------------Install crust node-------------"
 
 echo "uninstall old crust node"
-$scriptdir/scripts/uninstall.sh
+$scriptdir/uninstall.sh
 
 echo "Install crust node data"
 mkdir -p $installdir
