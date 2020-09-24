@@ -1,7 +1,7 @@
 #!/bin/bash
 
-scriptdir=$(cd `dirname $0`;pwd)
-basedir=$(cd $scriptdir/..;pwd)
+basedir=/opt/crust/crust-node
+scriptdir=$basedir/scripts
 builddir=$basedir/build
  
 start()

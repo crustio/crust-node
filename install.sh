@@ -67,9 +67,7 @@ cp -r $basedir/scripts $installdir/
 cp -r $basedir/etc $installdir/
 cp $basedir/config.yaml $installdir/
 
-echo "Install crust and karst service"
-cp $basedir/services/crust.service /lib/systemd/system/
-cp $basedir/services/karst.service /lib/systemd/system/
-systemctl daemon-reload
+echo "Install crust command line tool"
+cp $scriptdir/crust.sh /usr/bin/crust
 
 log_success "------------Install success-------------"

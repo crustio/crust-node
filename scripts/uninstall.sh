@@ -7,9 +7,6 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi
 
-sudo systemctl stop crust
-sudo systemctl stop karst
+sudo crust stop
 rm -rf $installdir
-rm /lib/systemd/system/crust.service
-rm /lib/systemd/system/karst.service
-sudo systemctl daemon-reload
+rm /usr/bin/crust
