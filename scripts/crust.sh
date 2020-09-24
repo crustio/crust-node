@@ -88,6 +88,17 @@ reload() {
 	start
 }
 
+function help()
+{
+cat << EOF
+Usage:
+    help            show help information   
+    start           start all crust service
+    stop            stop all crust service
+    reload          reload all crust service                                    
+EOF
+}
+
 check_port() {
 	port=$1
 	grep_port=`netstat -tlpn | grep "\b$port\b"`
@@ -108,6 +119,6 @@ case "$1" in
 		reload
 		;;
 	*)
-		echo $"Usage: $0 {start|stop|reload}"
+		help
 esac
 exit 0
