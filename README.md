@@ -39,16 +39,13 @@ sudo vim /opt/crust/crust-node/config.yaml
 
 
 ```shell
-sudo systemctl start karst # if you set karst 'enable' in config.yaml
-sudo systemctl start crust
+sudo crust start
 ```
 
 ### Stop crust service and karst service
-- Need to stop crust first, then stop karst
 
 ```shell
-sudo systemctl stop crust
-sudo systemctl stop karst # if you set karst 'enable' in config.yaml
+sudo crust stop
 ```
 
 ## License

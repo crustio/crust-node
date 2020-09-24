@@ -8,7 +8,7 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi
 
-if [ ! -f "$bin_file" ]; then
+if [ -f "$bin_file" ]; then
     crust stop
     rm /usr/bin/crust
 fi

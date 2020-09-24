@@ -41,6 +41,21 @@ start()
 		exit 1
 	fi
 
+	if [ -d "$builddir/karst" ]; then
+		check_port 17000
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
+		docker-compose -f $builddir/docker-compose.yaml up -d karst
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Start karst failed"
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+	fi
+
 	if [ -d "$builddir/sworker" ]; then
 		local res=0
 		check_port 56666
@@ -71,21 +86,6 @@ start()
 		echo $! > $scriptdir/upgrade.pid
 	fi
 
-	if [ -d "$builddir/karst" ]; then
-		check_port 17000
-		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
-			exit 1
-		fi
-
-		docker-compose -f $builddir/docker-compose.yaml up -d karst
-		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start karst failed"
-			docker-compose -f $builddir/docker-compose.yaml down
-			exit 1
-		fi
-	fi
-
 	log_success "Start crust success"
 }
 
@@ -93,11 +93,12 @@ stop()
 {
 	log_info "Stop crust"
 
-	if [ -d "$builddir/sworker" ]; then
-		kill `cat $scriptdir/upgrade.pid`
-	fi
-
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ -f "$builddir/docker-compose.yaml" ]; then
+		if [ -d "$builddir/sworker" ]; then
+			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-sworker-a	
+			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-sworker-b
+			kill `cat $scriptdir/upgrade.pid`
+		fi
 		docker-compose -f $builddir/docker-compose.yaml down
 	fi
 
