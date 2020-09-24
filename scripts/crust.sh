@@ -69,18 +69,25 @@ start()
 		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
 		echo $! > $scriptdir/upgrade.pid
 	fi
+
+	if [ -d "$builddir/karst" ]; then
+		check_port 17000
+		docker-compose -f $builddir/docker-compose.yaml up -d karst
+		if [ $? -ne 0 ]; then
+			echo "Start karst failed"
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+	fi
 }
 
 stop()
 {
 	echo "Stop"
-	docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
 	if [ -d "$builddir/sworker" ]; then
-		docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-api
-		docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-sworker-a
-		docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-sworker-b
 		kill `cat $scriptdir/upgrade.pid`
 	fi
+	docker-compose -f $builddir/docker-compose.yaml down
 }
  
 reload() {
