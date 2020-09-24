@@ -3,17 +3,19 @@
 basedir=/opt/crust/crust-node
 scriptdir=$basedir/scripts
 builddir=$basedir/build
+
+source $scriptdir/utils.sh
  
 start()
 {
-	echo "Start"
+	log_info "Start crust"
 
 	local res=0
-	check_port 30333
+	check_port 30888
 	res=$(($?|$res))
-	check_port 9933
+	check_port 19933
 	res=$(($?|$res))
-	check_port 9944
+	check_port 19944
 	res=$(($?|$res))
 	if [ $res -ne 0 ]; then
 		exit 1
@@ -21,21 +23,21 @@ start()
 
 	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
-		echo "Generate configuration files failed"
+		log_err "[ERROR] Generate configuration files failed"
 		exit 1
 	fi
 
 	if [ -d "$builddir/sworker" ]; then
 		$scriptdir/install_sgx_driver.sh
 		if [ $? -ne 0 ]; then
-			echo "Install sgx dirver failed"
+			log_err "[ERROR] Install sgx dirver failed"
 			exit 1
 		fi
 	fi
 
 	docker-compose -f $builddir/docker-compose.yaml up -d crust
 	if [ $? -ne 0 ]; then
-		echo "Start crust chain failed"
+		log_err "[ERROR] Start crust chain failed"
 		exit 1
 	fi
 
@@ -46,23 +48,22 @@ start()
 		check_port 12222
 		res=$(($?|$res))
 		if [ $res -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
+			docker-compose -f $builddir/docker-compose.yaml down
 			exit 1
 		fi
 
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
-			echo "Start crust-api failed"
+			docker-compose -f $builddir/docker-compose.yaml down
+			log_err "[ERROR] Start crust-api failed"
 			exit 1
 		fi
 
 		a_or_b=`cat $basedir/etc/sWorker.ab`
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust
-			docker-compose -f $builddir/docker-compose.yaml rm -fsv crust-api
-			echo "Start crust-sworker-$a_or_b failed"
+			docker-compose -f $builddir/docker-compose.yaml down
+			log_err "[ERROR] Start crust-sworker-$a_or_b failed"
 			exit 1
 		fi
 
@@ -72,22 +73,35 @@ start()
 
 	if [ -d "$builddir/karst" ]; then
 		check_port 17000
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
 		docker-compose -f $builddir/docker-compose.yaml up -d karst
 		if [ $? -ne 0 ]; then
-			echo "Start karst failed"
+			log_err "[ERROR] Start karst failed"
 			docker-compose -f $builddir/docker-compose.yaml down
 			exit 1
 		fi
 	fi
+
+	log_success "Start crust success"
 }
 
 stop()
 {
-	echo "Stop"
+	log_info "Stop crust"
+
 	if [ -d "$builddir/sworker" ]; then
 		kill `cat $scriptdir/upgrade.pid`
 	fi
-	docker-compose -f $builddir/docker-compose.yaml down
+
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+	fi
+
+	log_success "Stop crust success"
 }
  
 reload() {
@@ -110,7 +124,7 @@ check_port() {
 	port=$1
 	grep_port=`netstat -tlpn | grep "\b$port\b"`
 	if [ -n "$grep_port" ]; then
-		echo "Please make sure port $port is not occupied"
+		echo "[ERROR] please make sure port $port is not occupied"
 		return 1
 	fi
 }
