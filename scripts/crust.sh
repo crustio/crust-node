@@ -5,9 +5,15 @@ scriptdir=$basedir/scripts
 builddir=$basedir/build
 
 source $scriptdir/utils.sh
+export EX_SWORKER_ARGS=''
  
 start()
 {
+	is_running=`cat $basedir/etc/is_running.flag`
+	if [ x"$is_running" = x"t" ]; then
+    	log_info "Crust service has started. You can stop it, then start it"
+	fi
+
 	log_info "Start crust"
 
 	local res=0
@@ -86,6 +92,7 @@ start()
 		echo $! > $scriptdir/upgrade.pid
 	fi
 
+	sed -i 's/f/t/g' $basedir/etc/is_running.flag
 	log_success "Start crust success"
 }
 
@@ -102,6 +109,7 @@ stop()
 		docker-compose -f $builddir/docker-compose.yaml down
 	fi
 
+	sed -i 's/t/f/g' $basedir/etc/is_running.flag
 	log_success "Stop crust success"
 }
  
