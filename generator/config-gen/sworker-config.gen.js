@@ -4,6 +4,7 @@ const { getSharedChainConfig } = require('./chain-config.gen')
 async function genSworkerConfig(config, outputCfg) {
   const sworkerConfig = {
     ..._.omit(config.sworker, ['port']),
+    base_path: `/opt/crust/data/sworker`,
     base_url: `http://0.0.0.0:12222/api/v0`,
     karst_url: `ws://127.0.0.1:17000/api/v0/node/data`,
     chain: getSharedChainConfig(config),

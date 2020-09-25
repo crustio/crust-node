@@ -9,8 +9,6 @@ export EX_SWORKER_ARGS=''
  
 start()
 {
-	log_info "Start crust"
-
 	check_docker_status crust
 	if [ $? -ne 1 ]; then
 		log_info "Crust service has started. You need to stop it, then start it"
@@ -46,8 +44,6 @@ start()
 
 stop()
 {
-	log_info "Stop crust"
-
 	stop_chain
 	stop_sworker
 	stop_karst
@@ -58,13 +54,33 @@ stop()
 logs()
 {
 	if [ x"$1" == x"chain" ]; then
+		check_docker_status crust
+		if [ $? -eq 1 ]; then
+			log_info "Service crust chain is not started now"
+			return 0
+		fi
         docker logs -f crust
 	elif [ x"$1" == x"api" ]; then
+		check_docker_status crust-api
+		if [ $? -eq 1 ]; then
+			log_info "Service crust API is not started now"
+			return 0
+		fi
 		docker logs -f crust-api
 	elif [ x"$1" == x"sworker" ]; then
 		local a_or_b=`cat $basedir/etc/sWorker.ab`
+		check_docker_status crust-sworker-$a_or_b
+		if [ $? -eq 1 ]; then
+			log_info "Service crust sworker is not started now"
+			return 0
+		fi
 		docker logs -f crust-sworker-$a_or_b
 	elif [ x"$1" == x"karst" ]; then
+		check_docker_status karst
+		if [ $? -eq 1 ]; then
+			log_info "Service karst is not started now"
+			return 0
+		fi
 		docker logs -f karst
 	else
 		help
@@ -101,8 +117,9 @@ stop_chain()
 {
 	check_docker_status crust
 	if [ $? -ne 1 ]; then
-		docker stop crust
-		docker rm crust
+		log_info "Stopping crust chain service"
+		docker stop crust &>/dev/null
+		docker rm crust &>/dev/null
 	fi
 	return 0
 }
@@ -111,7 +128,7 @@ start_sworker()
 {
 	if [ -d "$builddir/sworker" ]; then
 		check_docker_status crust-api
-			if [ $? -ne 1 ]; then
+		if [ $? -ne 1 ]; then
 			return 0
 		fi
 
@@ -161,25 +178,29 @@ stop_sworker()
 {
 	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
     if [ x"$upgrade_pid" != x"" ]; then
-        kill -9 $upgrade_pid
+		log_info "Stopping crust sworker upgrade shell"
+        kill -9 $upgrade_pid &>/dev/null
     fi
 
 	check_docker_status crust-sworker-a
 	if [ $? -ne 1 ]; then
-		docker stop crust-sworker-a
-		docker rm crust-sworker-a
+		log_info "Stopping crust sworker A service"
+		docker stop crust-sworker-a &>/dev/null
+		docker rm crust-sworker-a &>/dev/null
 	fi
 
 	check_docker_status crust-sworker-b
 	if [ $? -ne 1 ]; then
-		docker stop crust-sworker-b
-		docker rm crust-sworker-b
+		log_info "Stopping crust sworker B service"
+		docker stop crust-sworker-b &>/dev/null
+		docker rm crust-sworker-b &>/dev/null
 	fi
 
 	check_docker_status crust-api
 	if [ $? -ne 1 ]; then
-		docker stop crust-api
-		docker rm crust-api
+		log_info "Stopping crust API service"
+		docker stop crust-api &>/dev/null
+		docker rm crust-api &>/dev/null
 	fi
 
 	return 0
@@ -210,6 +231,7 @@ stop_karst()
 {
 	check_docker_status karst
 	if [ $? -ne 1 ]; then
+		log_info "Stopping karst service"
 		docker stop karst
 		docker rm karst
 	fi
@@ -242,6 +264,14 @@ reload() {
 
 	if [ x"$1" = x"sworker" ]; then
 		log_info "Reload sworker service"
+		
+		stop_sworker
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_sworker
 
 		log_success "Reload sworker service success"
 		return 0
@@ -249,6 +279,14 @@ reload() {
 
 	if [ x"$1" = x"karst" ]; then
 		log_info "Reload karst service"
+
+		stop_karst
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_karst
 
 		log_success "Reload karst service success"
 		return 0
@@ -260,7 +298,13 @@ reload() {
 
 status()
 {
-
+cat << EOF
+Status:
+	chain                            1
+	api                           1
+	sworker                            1
+	karst                          1
+EOF
 }
 
 help()
