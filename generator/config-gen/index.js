@@ -64,7 +64,6 @@ async function genConfig(config, outputOpts) {
     if (!config[cg.name]) {
       continue
     }
-    logger.info('generating config for %s', cg.name)
     const ret = await cg.configFunc(config, outputOpts)
     await writeConfig(path.join(baseDir, cg.to), ret.config)
     outputs.push({
@@ -72,7 +71,8 @@ async function genConfig(config, outputOpts) {
       ...ret,
     })
   }
-  logger.info('done generating application configs')
+
+  logger.info('Generating configurations done')
   return outputs
 }
 
@@ -88,7 +88,6 @@ async function genComposeConfig(config) {
     if (!config[cg.name]) {
       continue
     }
-    logger.info('generating compose config for %s', cg.name)
     const cfg = await cg.composeFunc(config)
     cfg["container_name"] = cg.composeName
     output = {
@@ -100,7 +99,8 @@ async function genComposeConfig(config) {
     }
   }
 
-  logger.info('done generating compose configs')
+  logger.info('Generating docker compose file done')
+
   return output
 }
 

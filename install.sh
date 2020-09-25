@@ -32,7 +32,7 @@ if [ $? -ne 0 ]; then
         log_err "Install docker failed"
         exit 1
     fi
-    apt install docker-compose
+    apt install -y docker-compose
     if [ $? -ne 0 ]; then
         log_err "Install docker compose failed"
         exit 1
@@ -67,9 +67,7 @@ cp -r $basedir/scripts $installdir/
 cp -r $basedir/etc $installdir/
 cp $basedir/config.yaml $installdir/
 
-echo "Install crust and karst service"
-cp $basedir/services/crust.service /lib/systemd/system/
-cp $basedir/services/karst.service /lib/systemd/system/
-systemctl daemon-reload
+echo "Install crust command line tool"
+cp $scriptdir/crust.sh /usr/bin/crust
 
 log_success "------------Install success-------------"

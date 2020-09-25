@@ -18,13 +18,13 @@ async function genChainComposeConfig(config) {
     '--chain',
     'maxwell',
     '--port',
-    '30333',
+    '30888',
     '--name',
     `${config.chain.name}`,
     '--rpc-port',
-    '9933',
+    '19933',
     '--ws-port',
-    '9944',
+    '19944',
   ]
 
   if (config.node.chain == "authority") {

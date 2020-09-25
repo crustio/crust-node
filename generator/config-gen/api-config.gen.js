@@ -13,15 +13,14 @@ async function genApiConfig(config, outputCfg) {
 async function genApiComposeConfig(config) {
   const args = [
     '56666',
-    `ws://127.0.0.1:9944`,
+    `ws://127.0.0.1:19944`,
   ].join(' ')
   return {
     image: 'crustio/crust-api:latest',
     network_mode: 'host',
     environment: {
       ARGS: args,
-    },
-    depends_on: ['crust']
+    }
   }
 }
 
