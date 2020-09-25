@@ -32,7 +32,7 @@ if [ $? -ne 0 ]; then
         log_err "Install docker failed"
         exit 1
     fi
-    apt install docker-compose
+    apt install -y docker-compose
     if [ $? -ne 0 ]; then
         log_err "Install docker compose failed"
         exit 1
