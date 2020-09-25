@@ -72,7 +72,6 @@ async function genConfig(config, outputOpts) {
       ...ret,
     })
   }
-  logger.info('done generating application configs')
   return outputs
 }
 
@@ -100,7 +99,6 @@ async function genComposeConfig(config) {
     }
   }
 
-  logger.info('done generating compose configs')
   return output
 }
 

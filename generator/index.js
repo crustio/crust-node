@@ -21,28 +21,21 @@ async function loadConfig(file) {
     allowUnknown: true,
     stripUnknown: true,
   })
-  logger.debug('get config: %o', value)
 
   if (value.node.sworker == "enable") {
     const keyInfo = await inspectKey(value.identity.backup.address)
-    logger.info('key info: %o', keyInfo)
     value.identity.account_id = keyInfo.accountId
   }
 
   const data = await genConfig(value, {
     baseDir: '.tmp',
   })
-  logger.info('application configs generated, %o', data)
   const composeConfig = await genComposeConfig(value)
-  logger.info('compose config generated: %o', composeConfig)
-  logger.info('writing compose config')
   await writeYaml(path.join('.tmp','docker-compose.yaml'), composeConfig)
-  logger.info('compose config generated')
   await dumpConfigPaths(path.join('.tmp', '.paths'), data)
 }
 
 async function dumpConfigPaths(toFile, data) {
-  logger.info("data", data)
   const paths = _(data).map(d => _.get(d, 'paths', [])).flatten().map(p => {
     let mark = '|'
     if (p.required) {

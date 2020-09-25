@@ -21,7 +21,6 @@ const backupSchema = Joi.object({
 const identitySchema = Joi.object({
   backup: Joi.string().custom((value, helpers) => {
     try {
-      logger.info('value: %s', value)
       const result = backupSchema.validate(JSON.parse(value))
       if (result.error) {
         return helpers.error(result.error)
