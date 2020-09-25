@@ -11,7 +11,7 @@ const backupSchema = Joi.object({
     version: Joi.string().required(),
   }).required(),
   meta: Joi.object({
-    genesisHash: Joi.string().length(66).regex(/^0x[0-9a-f]+$/).required(),
+    genesisHash: Joi.string().length(66).regex(/^0x[0-9a-f]+$/).allow(null),
     name: Joi.string().required(),
     tags: Joi.array().items(Joi.string()),
     whenCreated: Joi.date().timestamp().raw(),

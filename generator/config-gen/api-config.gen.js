@@ -20,8 +20,7 @@ async function genApiComposeConfig(config) {
     network_mode: 'host',
     environment: {
       ARGS: args,
-    },
-    depends_on: ['crust']
+    }
   }
 }
 
