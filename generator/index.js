@@ -10,10 +10,10 @@ const { logger } = require('./logger')
 const { inspectKey } = require('./key-utils')
 const { writeYaml } = require('./utils')
 
-console.log('crust config generator')
+console.log('Crust config generator')
 
 async function loadConfig(file) {
-  logger.debug('loading config file: %s', file)
+  logger.debug('Loading config file: %s', file)
   const c = await fs.readFile('config.yaml', 'utf8')
   const config = yaml.safeLoad(c)
   const configSchema = getConfigSchema(config)
@@ -43,7 +43,6 @@ async function dumpConfigPaths(toFile, data) {
     }
     return `${mark} ${p.path}`
   }).uniq()
-  logger.debug('paths to validate', paths.value())
 
   await fs.outputFile(toFile, paths.join('\n'))
 }

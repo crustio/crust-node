@@ -27,8 +27,8 @@ const identitySchema = Joi.object({
       }
       return result.value
     } catch(ex) {
-      logger.error('failed to parse json: %s', ex)
-      return helpers.error('backup is not a valid json string')
+      logger.error('Failed to parse json: %s', ex)
+      return helpers.error('Backup is not a valid json string')
     }
   }).required(),
   password: Joi.string().min(1).required(),

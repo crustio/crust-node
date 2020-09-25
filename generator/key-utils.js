@@ -7,15 +7,13 @@ async function inspectKey(address) {
   if (!keyTool) {
     throw 'key tool path not specified'
   }
-  logger.info('checking identity information, using keytool: %s', keyTool)
+  logger.info('Checking identity information, using keytool: %s', keyTool)
 	const {stdout} = await execa(keyTool, ['inspect', address]);
-  logger.debug('keytool output: %s', stdout)
 
   const rows = _.chain(stdout).split('\n').map(_.trim)
   const accountId = extractAccountId(rows)
-  logger.info('accountId: %s', accountId)
   if (!accountId) {
-    logger.warn('invalid address: %s!', address)
+    logger.warn('Invalid address: %s!', address)
     throw `address is invalid ${address}`
   }
   return {

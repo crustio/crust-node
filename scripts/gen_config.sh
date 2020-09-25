@@ -3,18 +3,18 @@ scriptdir=$(cd `dirname $0`;pwd)
 basedir=$(cd $scriptdir/..;pwd)
 source $scriptdir/utils.sh
 
-log_info "Start generate configurations"
+log_info "Start generate configurations and docker compose file"
 CG_IMAGE="crustio/config-generator:latest"
 
 if [[ "$(docker images -q ${CG_IMAGE} 2> /dev/null)" == "" ]]; then
     log_info "retrieving config generator..."
     docker pull $CG_IMAGE
     if [ $? -ne 0 ]; then
-        log_err "failed to retrieve config generator"
+        log_err "Failed to retrieve config generator"
         exit 1
     fi
 
-    log_info "done retrieve config generator"
+    log_info "Done retrieve config generator"
 fi
 
 if [ ! -f "$basedir/config.yaml" ]; then
@@ -35,7 +35,7 @@ CID=`cat $CIDFILE`
 docker rm $CID
 
 if [ "$SUCCESS" -ne "0" ]; then
-    log_err "failed to generate application configs, please check your config.yaml"
+    log_err "Failed to generate application configs, please check your config.yaml"
     exit 1
 fi
 
@@ -65,4 +65,4 @@ rm -f $BUILD_DIR/config.yaml
 cp -r $BUILD_DIR/.tmp/* $BUILD_DIR/
 rm -rf $BUILD_DIR/.tmp
 
-log_success "configs generated at: $BUILD_DIR"
+log_success "Configurations generated at: $BUILD_DIR"
