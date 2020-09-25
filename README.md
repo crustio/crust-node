@@ -29,7 +29,7 @@ sudo ./install.sh
 sudo vim /opt/crust/crust-node/config.yaml
 ```
 
-### Run crust service and karst service
+### Run service
 
 - Please make sure the following ports are not occupied before starting：
   - 30888 19933 19944 (for crust chain)
@@ -40,9 +40,10 @@ sudo vim /opt/crust/crust-node/config.yaml
 
 ```shell
 sudo crust start
+sudo crust status
 ```
 
-### Stop crust service and karst service
+### Stop service
 
 ```shell
 sudo crust stop

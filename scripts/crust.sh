@@ -232,8 +232,8 @@ stop_karst()
 	check_docker_status karst
 	if [ $? -ne 1 ]; then
 		log_info "Stopping karst service"
-		docker stop karst
-		docker rm karst
+		docker stop karst &>/dev/null
+		docker rm karst &>/dev/null
 	fi
 	return 0
 }
@@ -298,12 +298,52 @@ reload() {
 
 status()
 {
+	local chain_status="stop"
+	local api_status="stop"
+	local sworker_status="stop"
+	local karst_status="stop"
+
+	check_docker_status crust
+	
+	if [ $? -eq 0 ]; then
+		chain_status="running"
+	elif [ $? -eq -1 ]; then
+		chain_status="exited"
+	fi
+
+	check_docker_status crust-api
+	
+	if [ $? -eq 0 ]; then
+		api_status="running"
+	elif [ $? -eq -1 ]; then
+		api_status="exited"
+	fi
+
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	
+	if [ $? -eq 0 ]; then
+		sworker_status="running"
+	elif [ $? -eq -1 ]; then
+		sworker_status="exited"
+	fi
+	
+	check_docker_status karst
+	if [ $? -eq 0 ]; then
+		karst_status="running"
+	elif [ $? -eq -1 ]; then
+		karst_status="exited"
+	fi
+
 cat << EOF
-Status:
-	chain                            1
-	api                           1
-	sworker                            1
-	karst                          1
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    chain                      ${chain_status}
+    api                        ${api_status}
+    sworker                    ${sworker_status}
+    karst                      ${karst_status}
+-----------------------------------------
 EOF
 }
 
@@ -311,13 +351,13 @@ help()
 {
 cat << EOF
 Usage:
-	help                            show help information
-	start                           start all crust service
-	stop                            stop all crust service
-	status                          check status
+    help                            show help information
+    start                           start all crust service
+    stop                            stop all crust service
+    status                          check status
 
-	reload {chain|sworker|karst}    reload all service or reload one service
-	logs {chain|api|sworker|karst}  track service logs, ctrl-c to exit
+    reload {chain|sworker|karst}    reload all service or reload one service
+    logs {chain|api|sworker|karst}  track service logs, ctrl-c to exit
 EOF
 }
 

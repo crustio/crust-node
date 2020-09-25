@@ -7,7 +7,6 @@ async function inspectKey(address) {
   if (!keyTool) {
     throw 'key tool path not specified'
   }
-  logger.info('Checking identity information, using keytool: %s', keyTool)
 	const {stdout} = await execa(keyTool, ['inspect', address]);
 
   const rows = _.chain(stdout).split('\n').map(_.trim)
