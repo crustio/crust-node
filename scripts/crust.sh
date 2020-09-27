@@ -358,6 +358,7 @@ Usage:
 
     reload {chain|sworker|karst}    reload all service or reload one service
     logs {chain|api|sworker|karst}  track service logs, ctrl-c to exit
+    sworker {...}                   use 'crust sworker help' for more details
 EOF
 }
 
@@ -382,6 +383,62 @@ check_docker_status()
 		return 1
 	fi
 }
+
+sworker_help()
+{
+cat << EOF
+sWorker usage:
+    help                            show help information
+    srd-change {number}             change sworker's srd capacity(GB), for example: 'crust sworker srd-change 100', 'crust sworker srd-change -50'
+EOF
+}
+
+sworker_srd_change()
+{
+	if [ x"$1" == x"" ] || [[ ! $1 =~ ^[1-9][0-9]*$|^[-][1-9][0-9]*$|^0$ ]]; then 
+		log_err "The input of srd change must be integer number"
+		return 1
+	fi
+
+	if [ x"$1" == x"0" ]; then 
+		log_err "Srd change number can't be zero"
+		return 1
+	fi
+
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	if [ $? -ne 0 ]; then
+		log_info "Service crust sworker is not started or exited now"
+		return 0
+	fi
+
+	if [ ! -f "$builddir/sworker/sworker_config.json" ]; then
+		log_err "No sworker configuration file"
+		return 1
+	fi
+
+	local backup=`cat $builddir/sworker/sworker_config.json | jq .chain.backup`
+	backup=${backup//\\/}
+	backup=${backup%?}
+	backup=${backup:1}
+
+	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+	base_url=${base_url%?}
+	base_url=${base_url:1}
+
+	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
+}
+
+sworker()
+{
+	case "$1" in
+		srd-change)
+			sworker_srd_change $2
+			;;
+		*)
+			sworker_help
+	esac
+}
  
 case "$1" in
 	start)
@@ -398,6 +455,10 @@ case "$1" in
 		;;
 	logs)
 		logs $2
+		;;
+	sworker)
+		shift
+		sworker $@
 		;;
 	*)
 		help

@@ -2,7 +2,7 @@
 async function genApiConfig(config, outputCfg) {
   const apiConfig = {
     port: 56666,
-    chain_ws_url: `ws://127.0.0.1:${config.chain.ws_port}`,
+    chain_ws_url: `ws://127.0.0.1:19944`,
   }
   return {
     config: apiConfig,
