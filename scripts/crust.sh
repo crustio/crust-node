@@ -422,7 +422,11 @@ sworker_srd_change()
 	backup=${backup%?}
 	backup=${backup:1}
 
-	curl -XPOST 'http://localhost:12222/api/v0/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
+	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+	base_url=${base_url%?}
+	base_url=${base_url:1}
+
+	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
 }
 
 sworker()
