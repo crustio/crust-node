@@ -80,7 +80,7 @@ if [ x"$is_syncing" = x"true" ]; then
     continue
 fi
 
-code=`curl $api_base_url/tee/code 2>/dev/null`
+code=`curl $api_base_url/swork/code 2>/dev/null`
 if [ x"$code" = x"" ]; then
     echo "please run chain and api"
     sleep 60
