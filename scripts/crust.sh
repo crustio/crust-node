@@ -389,7 +389,7 @@ sworker_help()
 cat << EOF
 sWorker usage:
     help                            show help information
-	status                          show status
+    status                          show status
     srd-change {number}             change sworker's srd capacity(GB), for example: 'crust sworker srd-change 100', 'crust sworker srd-change -50'
 EOF
 }
@@ -435,6 +435,7 @@ sworker_status()
 	local sworker_a_status="stop"
 	local sworker_b_status="stop"
 	local upgrade_shell_status="stop"
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
 
 	check_docker_status crust-sworker-a
 	if [ $? -eq 0 ]; then
