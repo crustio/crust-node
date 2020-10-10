@@ -161,9 +161,9 @@ start_sworker()
 		fi
 
 		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-    	if [ x"$upgrade_pid" != x"" ]; then
-        	kill -9 $upgrade_pid
-    	fi
+		if [ x"$upgrade_pid" != x"" ]; then
+			kill -9 $upgrade_pid
+		fi
 
 		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
 		if [ $? -ne 0 ]; then
@@ -389,6 +389,7 @@ sworker_help()
 cat << EOF
 sWorker usage:
     help                            show help information
+    status                          show status
     srd-change {number}             change sworker's srd capacity(GB), for example: 'crust sworker srd-change 100', 'crust sworker srd-change -50'
 EOF
 }
@@ -429,11 +430,52 @@ sworker_srd_change()
 	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
 }
 
+sworker_status()
+{
+	local sworker_a_status="stop"
+	local sworker_b_status="stop"
+	local upgrade_shell_status="stop"
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+
+	check_docker_status crust-sworker-a
+	if [ $? -eq 0 ]; then
+		sworker_a_status="running"
+	elif [ $? -eq -1 ]; then
+		sworker_a_status="exited"
+	fi
+
+	check_docker_status crust-sworker-b
+	if [ $? -eq 0 ]; then
+		sworker_b_status="running"
+	elif [ $? -eq -1 ]; then
+		sworker_b_status="exited"
+	fi
+
+	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
+	if [ x"$upgrade_pid" != x"" ]; then
+		upgrade_shell_status="running->${upgrade_pid}"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    sworker-a                  ${sworker_a_status}
+    sworker-b                  ${sworker_b_status}
+    upgrade-shell              ${upgrade_shell_status}
+    main-progress              ${a_or_b}
+-----------------------------------------
+EOF
+}
+
 sworker()
 {
 	case "$1" in
 		srd-change)
 			sworker_srd_change $2
+			;;
+		status)
+			sworker_status
 			;;
 		*)
 			sworker_help
