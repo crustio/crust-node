@@ -52,7 +52,7 @@ download_docker_images()
     log_info "-------Download crust docker images----------"
     res=0
 
-    if [ x"$region" == x"" ] || [ ! x"$region" == x"en" ]; then
+    if [ x"$region" == x"cn" ]; then
         local aliyun_address=registry.cn-hangzhou.aliyuncs.com
 
         docker pull $aliyun_address/crustio/config-generator
@@ -123,10 +123,14 @@ fi
 
 case "$1" in
     --registry)
-        if [ x"$2" == x"" ] || [ ! x"$2" == x"cn" ] || [ ! x"$2" == x"en" ]; then
+        if [ x"$2" == x"" ] || [[ x"$2" != x"cn" && x"$2" != x"en" ]]; then
             help
         fi
+
         region=$2
+        ;;
+    "")
+        region="en"
         ;;
     *)
         help
