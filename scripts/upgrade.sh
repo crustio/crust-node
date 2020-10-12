@@ -8,14 +8,26 @@ builddir=$basedir/build
 function upgrade_sworker()
 {
     echo "Upgrade...."
-    old_image=(`docker images | grep 'crustio/crust-sworker          latest'`)
+    old_image=(`docker images | grep '^\bcrustio/crust-sworker\b ' | grep 'latest'`)
     old_image=${old_image[3]}
-    docker pull crustio/crust-sworker:latest
-    if [ $? -ne 0 ]; then
+
+    region=`cat $basedir/etc/region.conf`
+    res=0
+    if [ x"$region" == x"cn" ]; then
+        local aliyun_address=registry.cn-hangzhou.aliyuncs.com
+        docker pull $aliyun_address/crustio/crust-sworker
+        res=$(($?|$res))
+        docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
+    else
+        docker pull crustio/crust-sworker
+    fi
+
+    if [ $res -ne 0 ]; then
         echo "download docker image failed"
         return -1
     fi
-    new_image=(`docker images | grep 'crustio/crust-sworker          latest'`)
+
+    new_image=(`docker images | grep '^\bcrustio/crust-sworker\b ' | grep 'latest'`)
     new_image=${new_image[3]}
     if [ x"$old_image" = x"$new_image" ]; then
         return 0

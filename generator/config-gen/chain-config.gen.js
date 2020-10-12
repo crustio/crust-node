@@ -31,6 +31,10 @@ async function genChainComposeConfig(config) {
     args.push('--validator', '--pruning', 'archive')
   }
 
+  if (config.node.chain == "full") {
+    args.push('--pruning', '5400')
+  }
+
   return {
     image: 'crustio/crust:latest',
     network_mode: 'host',
