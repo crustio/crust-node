@@ -66,7 +66,7 @@ logs()
 			log_info "Service crust chain is not started now"
 			return 0
 		fi
-        docker logs -f crust
+		docker logs -f crust
 	elif [ x"$1" == x"api" ]; then
 		check_docker_status crust-api
 		if [ $? -eq 1 ]; then
@@ -91,7 +91,7 @@ logs()
 		docker logs -f karst
 	else
 		help
-    fi
+	fi
 }
 
 start_chain()
@@ -336,6 +336,23 @@ reload() {
 
 status()
 {
+	if [ x"$1" == x"chain" ]; then
+		chain_status
+	elif [ x"$1" == x"api" ]; then
+		api_status
+	elif [ x"$1" == x"sworker" ]; then
+		sworker_status
+	elif [ x"$1" == x"karst" ]; then
+		karst_status
+	elif [ x"$1" == x"" ]; then
+		all_status
+	else
+		help
+	fi
+}
+
+all_status()
+{
 	local chain_status="stop"
 	local api_status="stop"
 	local sworker_status="stop"
@@ -386,87 +403,46 @@ cat << EOF
 EOF
 }
 
-help()
+chain_status()
 {
-cat << EOF
-Usage:
-    help                            	show help information
-    start                           	start all crust service
-    stop                            	stop all crust service
-    status                          	check status
+	local chain_status="stop"
 
-    reload {chain|api|sworker|karst}    reload all service or reload one service
-    logs {chain|api|sworker|karst}  	track service logs, ctrl-c to exit
-    sworker {...}                   	use 'crust sworker help' for more details
+	check_docker_status crust
+	local res=$?
+	if [ $res -eq 0 ]; then
+		chain_status="running"
+	elif [ $res -eq 2 ]; then
+		chain_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    chain                      ${chain_status}
+-----------------------------------------
 EOF
 }
 
-check_port() {
-	port=$1
-	grep_port=`netstat -tlpn | grep "\b$port\b"`
-	if [ -n "$grep_port" ]; then
-		echo "[ERROR] please make sure port $port is not occupied"
-		return 1
-	fi
-}
-
-## 0 for running, 2 for error, 1 for stop
-check_docker_status()
+api_status()
 {
-	local exist=`docker inspect --format '{{.State.Running}}' $1 2>/dev/null`
-	if [ x"${exist}" == x"true" ]; then
-		return 0
-	elif [ "${exist}" == "false" ]; then
-		return 2
-	else
-		return 1
-	fi
-}
+	local api_status="stop"
 
-sworker_help()
-{
+	check_docker_status crust-api
+	res=$?
+	if [ $res -eq 0 ]; then
+		api_status="running"
+	elif [ $res -eq 2 ]; then
+		api_status="exited"
+	fi
+
 cat << EOF
-sWorker usage:
-    help                            show help information
-    status                          show status
-    srd-change {number}             change sworker's srd capacity(GB), for example: 'crust sworker srd-change 100', 'crust sworker srd-change -50'
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    api                        ${api_status}
+-----------------------------------------
 EOF
-}
-
-sworker_srd_change()
-{
-	if [ x"$1" == x"" ] || [[ ! $1 =~ ^[1-9][0-9]*$|^[-][1-9][0-9]*$|^0$ ]]; then 
-		log_err "The input of srd change must be integer number"
-		return 1
-	fi
-
-	if [ x"$1" == x"0" ]; then 
-		log_err "Srd change number can't be zero"
-		return 1
-	fi
-
-	local a_or_b=`cat $basedir/etc/sWorker.ab`
-	check_docker_status crust-sworker-$a_or_b
-	if [ $? -ne 0 ]; then
-		log_info "Service crust sworker is not started or exited now"
-		return 0
-	fi
-
-	if [ ! -f "$builddir/sworker/sworker_config.json" ]; then
-		log_err "No sworker configuration file"
-		return 1
-	fi
-
-	local backup=`cat $builddir/sworker/sworker_config.json | jq .chain.backup`
-	backup=${backup//\\/}
-	backup=${backup%?}
-	backup=${backup:1}
-
-	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
-	base_url=${base_url%?}
-	base_url=${base_url:1}
-
-	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
 }
 
 sworker_status()
@@ -509,17 +485,117 @@ cat << EOF
 EOF
 }
 
-sworker()
+karst_status()
+{
+	local karst_status="stop"
+	
+	check_docker_status karst
+	res=$?
+	if [ $res -eq 0 ]; then
+		karst_status="running"
+	elif [ $res -eq 2 ]; then
+		karst_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    karst                      ${karst_status}
+-----------------------------------------
+EOF
+}
+
+help()
+{
+cat << EOF
+Usage:
+    help                            	show help information
+    start                           	start all crust service
+    stop                            	stop all crust service
+
+    status {chain|api|sworker|karst}    check status or reload one service status
+    reload {chain|api|sworker|karst}    reload all service or reload one service
+    logs {chain|api|sworker|karst}      track service logs, ctrl-c to exit
+    tool {...}                          use 'crust tool help' for more details
+EOF
+}
+
+check_port() {
+	port=$1
+	grep_port=`netstat -tlpn | grep "\b$port\b"`
+	if [ -n "$grep_port" ]; then
+		echo "[ERROR] please make sure port $port is not occupied"
+		return 1
+	fi
+}
+
+## 0 for running, 2 for error, 1 for stop
+check_docker_status()
+{
+	local exist=`docker inspect --format '{{.State.Running}}' $1 2>/dev/null`
+	if [ x"${exist}" == x"true" ]; then
+		return 0
+	elif [ "${exist}" == "false" ]; then
+		return 2
+	else
+		return 1
+	fi
+}
+
+tool_help()
+{
+cat << EOF
+tool usage:
+    help                            show help information
+    change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tool change-srd 100', 'crust tool change-srd -50'
+EOF
+}
+
+change_srd()
+{
+	if [ x"$1" == x"" ] || [[ ! $1 =~ ^[1-9][0-9]*$|^[-][1-9][0-9]*$|^0$ ]]; then 
+		log_err "The input of srd change must be integer number"
+		return 1
+	fi
+
+	if [ x"$1" == x"0" ]; then 
+		log_err "Srd change number can't be zero"
+		return 1
+	fi
+
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	if [ $? -ne 0 ]; then
+		log_info "Service crust sworker is not started or exited now"
+		return 0
+	fi
+
+	if [ ! -f "$builddir/sworker/sworker_config.json" ]; then
+		log_err "No sworker configuration file"
+		return 1
+	fi
+
+	local backup=`cat $builddir/sworker/sworker_config.json | jq .chain.backup`
+	backup=${backup//\\/}
+	backup=${backup%?}
+	backup=${backup:1}
+
+	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+	base_url=${base_url%?}
+	base_url=${base_url:1}
+
+	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
+}
+
+tool()
 {
 	case "$1" in
-		srd-change)
-			sworker_srd_change $2
-			;;
-		status)
-			sworker_status
+		change-srd)
+			change_srd $2
 			;;
 		*)
-			sworker_help
+			tool_help
 	esac
 }
  
@@ -534,14 +610,14 @@ case "$1" in
 		reload $2
 		;;
 	status)
-		status
+		status $2
 		;;
 	logs)
 		logs $2
 		;;
-	sworker)
+	tool)
 		shift
-		sworker $@
+		tool $@
 		;;
 	*)
 		help
