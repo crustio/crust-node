@@ -548,8 +548,20 @@ tool_help()
 cat << EOF
 tool usage:
     help                            show help information
+    rotate-keys                     generate session key of chain node
     change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tool change-srd 100', 'crust tool change-srd -50'
 EOF
+}
+
+rotate_keys()
+{
+	local res=`curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "author_rotateKeys", "params":[]}' http://localhost:19933 2>/dev/null`
+	session_key=`echo $res | jq .result`
+	if [ x"$session_key" = x"" ]; then
+		log_err "Generate session key failed"
+		return 1
+	fi
+	echo $session_key
 }
 
 change_srd()
@@ -593,6 +605,9 @@ tool()
 	case "$1" in
 		change-srd)
 			change_srd $2
+			;;
+		rotate-keys)
+			rotate_keys
 			;;
 		*)
 			tool_help
