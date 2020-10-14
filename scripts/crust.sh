@@ -307,7 +307,7 @@ status()
 	
 	if [ $? -eq 0 ]; then
 		chain_status="running"
-	elif [ $? -eq -1 ]; then
+	elif [ $? -eq 2 ]; then
 		chain_status="exited"
 	fi
 
@@ -315,7 +315,7 @@ status()
 	
 	if [ $? -eq 0 ]; then
 		api_status="running"
-	elif [ $? -eq -1 ]; then
+	elif [ $? -eq 2 ]; then
 		api_status="exited"
 	fi
 
@@ -324,14 +324,14 @@ status()
 	
 	if [ $? -eq 0 ]; then
 		sworker_status="running"
-	elif [ $? -eq -1 ]; then
+	elif [ $? -eq 2 ]; then
 		sworker_status="exited"
 	fi
 	
 	check_docker_status karst
 	if [ $? -eq 0 ]; then
 		karst_status="running"
-	elif [ $? -eq -1 ]; then
+	elif [ $? -eq 2 ]; then
 		karst_status="exited"
 	fi
 
@@ -371,14 +371,14 @@ check_port() {
 	fi
 }
 
-## 0 for running, -1 for error, 1 for stop
+## 0 for running, 2 for error, 1 for stop
 check_docker_status()
 {
 	local exist=`docker inspect --format '{{.State.Running}}' $1 2>/dev/null`
 	if [ x"${exist}" == x"true" ]; then
 		return 0
 	elif [ "${exist}" == "false" ]; then
-		return -1
+		return 2
 	else
 		return 1
 	fi
@@ -440,14 +440,14 @@ sworker_status()
 	check_docker_status crust-sworker-a
 	if [ $? -eq 0 ]; then
 		sworker_a_status="running"
-	elif [ $? -eq -1 ]; then
+	elif [ $? -eq 2 ]; then
 		sworker_a_status="exited"
 	fi
 
 	check_docker_status crust-sworker-b
 	if [ $? -eq 0 ]; then
 		sworker_b_status="running"
-	elif [ $? -eq -1 ]; then
+	elif [ $? -eq 2 ]; then
 		sworker_b_status="exited"
 	fi
 

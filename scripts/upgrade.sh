@@ -24,7 +24,7 @@ function upgrade_sworker()
 
     if [ $res -ne 0 ]; then
         echo "download docker image failed"
-        return -1
+        return 1
     fi
 
     new_image=(`docker images | grep '^\bcrustio/crust-sworker\b ' | grep 'latest'`)
@@ -45,7 +45,7 @@ function upgrade_sworker()
     EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
     if [ $? -ne 0 ]; then
         echo "setup new sworker failed"
-        return -1
+        return 1
     fi
 
     echo "setup new sworker 'crust-sworker-$a_or_b'"
@@ -53,7 +53,7 @@ function upgrade_sworker()
 
 if [ x"$config_file" = x"" ]; then
     echo "please give right config file"
-    exit -1
+    exit 1
 fi
 
 api_base_url=`cat $config_file | jq .chain.base_url`
@@ -61,7 +61,7 @@ sworker_base_url=`cat $config_file | jq .base_url`
 
 if [ x"$api_base_url" = x"" ] || [ x"$sworker_base_url" = x"" ]; then
     echo "please give right config file"
-    exit -1
+    exit 1
 fi
 
 api_base_url=`echo "$api_base_url" | sed -e 's/^"//' -e 's/"$//'`
