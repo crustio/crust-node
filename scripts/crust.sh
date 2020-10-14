@@ -39,12 +39,19 @@ start()
 		exit 1
 	fi
 
+	start_api
+	if [ $? -ne 0 ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+		exit 1
+	fi
+
 	log_success "Start crust success"
 }
 
 stop()
 {
 	stop_chain
+	stop_api
 	stop_sworker
 	stop_karst
 	
@@ -127,17 +134,14 @@ stop_chain()
 start_sworker()
 {
 	if [ -d "$builddir/sworker" ]; then
-		check_docker_status crust-api
+		local a_or_b=`cat $basedir/etc/sWorker.ab`
+		check_docker_status crust-sworker-$a_or_b
 		if [ $? -ne 1 ]; then
 			return 0
 		fi
 
-		local res=0
-		check_port 56666
-		res=$(($?|$res))
 		check_port 12222
-		res=$(($?|$res))
-		if [ $res -ne 0 ]; then
+		if [ $? -ne 0 ]; then
 			return 1
 		fi
 
@@ -147,13 +151,6 @@ start_sworker()
 			return 1
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
-		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start crust-api failed"
-			return 1
-		fi
-
-		local a_or_b=`cat $basedir/etc/sWorker.ab`
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "[ERROR] Start crust-sworker-$a_or_b failed"
@@ -196,13 +193,39 @@ stop_sworker()
 		docker rm crust-sworker-b &>/dev/null
 	fi
 
+	return 0
+}
+
+start_api()
+{
+	if [ -d "$builddir/sworker" ]; then
+		check_docker_status crust-api
+		if [ $? -ne 1 ]; then
+			return 0
+		fi
+
+		check_port 56666
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+
+		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Start crust-api failed"
+			return 1
+		fi
+	fi
+	return 0
+}
+
+stop_api()
+{
 	check_docker_status crust-api
 	if [ $? -ne 1 ]; then
 		log_info "Stopping crust API service"
 		docker stop crust-api &>/dev/null
 		docker rm crust-api &>/dev/null
 	fi
-
 	return 0
 }
 
@@ -259,6 +282,21 @@ reload() {
 		start_chain
 
 		log_success "Reload chain service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"api" ]; then
+		log_info "Reload api service"
+		
+		stop_api
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_api
+
+		log_success "Reload api service success"
 		return 0
 	fi
 
@@ -352,14 +390,14 @@ help()
 {
 cat << EOF
 Usage:
-    help                            show help information
-    start                           start all crust service
-    stop                            stop all crust service
-    status                          check status
+    help                            	show help information
+    start                           	start all crust service
+    stop                            	stop all crust service
+    status                          	check status
 
-    reload {chain|sworker|karst}    reload all service or reload one service
-    logs {chain|api|sworker|karst}  track service logs, ctrl-c to exit
-    sworker {...}                   use 'crust sworker help' for more details
+    reload {chain|api|sworker|karst}    reload all service or reload one service
+    logs {chain|api|sworker|karst}  	track service logs, ctrl-c to exit
+    sworker {...}                   	use 'crust sworker help' for more details
 EOF
 }
 
