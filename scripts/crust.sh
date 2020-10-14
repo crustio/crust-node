@@ -304,34 +304,35 @@ status()
 	local karst_status="stop"
 
 	check_docker_status crust
-	
-	if [ $? -eq 0 ]; then
+	local res=$?
+	if [ $res -eq 0 ]; then
 		chain_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		chain_status="exited"
 	fi
 
 	check_docker_status crust-api
-	
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		api_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		api_status="exited"
 	fi
 
 	local a_or_b=`cat $basedir/etc/sWorker.ab`
 	check_docker_status crust-sworker-$a_or_b
-	
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		sworker_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		sworker_status="exited"
 	fi
 	
 	check_docker_status karst
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		karst_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		karst_status="exited"
 	fi
 
@@ -438,16 +439,18 @@ sworker_status()
 	local a_or_b=`cat $basedir/etc/sWorker.ab`
 
 	check_docker_status crust-sworker-a
-	if [ $? -eq 0 ]; then
+	local res=$?
+	if [ $res -eq 0 ]; then
 		sworker_a_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		sworker_a_status="exited"
 	fi
 
 	check_docker_status crust-sworker-b
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		sworker_b_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		sworker_b_status="exited"
 	fi
 
