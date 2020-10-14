@@ -39,12 +39,19 @@ start()
 		exit 1
 	fi
 
+	start_api
+	if [ $? -ne 0 ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+		exit 1
+	fi
+
 	log_success "Start crust success"
 }
 
 stop()
 {
 	stop_chain
+	stop_api
 	stop_sworker
 	stop_karst
 	
@@ -59,7 +66,7 @@ logs()
 			log_info "Service crust chain is not started now"
 			return 0
 		fi
-        docker logs -f crust
+		docker logs -f crust
 	elif [ x"$1" == x"api" ]; then
 		check_docker_status crust-api
 		if [ $? -eq 1 ]; then
@@ -84,7 +91,7 @@ logs()
 		docker logs -f karst
 	else
 		help
-    fi
+	fi
 }
 
 start_chain()
@@ -127,17 +134,14 @@ stop_chain()
 start_sworker()
 {
 	if [ -d "$builddir/sworker" ]; then
-		check_docker_status crust-api
+		local a_or_b=`cat $basedir/etc/sWorker.ab`
+		check_docker_status crust-sworker-$a_or_b
 		if [ $? -ne 1 ]; then
 			return 0
 		fi
 
-		local res=0
-		check_port 56666
-		res=$(($?|$res))
 		check_port 12222
-		res=$(($?|$res))
-		if [ $res -ne 0 ]; then
+		if [ $? -ne 0 ]; then
 			return 1
 		fi
 
@@ -147,13 +151,6 @@ start_sworker()
 			return 1
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
-		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start crust-api failed"
-			return 1
-		fi
-
-		local a_or_b=`cat $basedir/etc/sWorker.ab`
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "[ERROR] Start crust-sworker-$a_or_b failed"
@@ -196,13 +193,39 @@ stop_sworker()
 		docker rm crust-sworker-b &>/dev/null
 	fi
 
+	return 0
+}
+
+start_api()
+{
+	if [ -d "$builddir/sworker" ]; then
+		check_docker_status crust-api
+		if [ $? -ne 1 ]; then
+			return 0
+		fi
+
+		check_port 56666
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+
+		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Start crust-api failed"
+			return 1
+		fi
+	fi
+	return 0
+}
+
+stop_api()
+{
 	check_docker_status crust-api
 	if [ $? -ne 1 ]; then
 		log_info "Stopping crust API service"
 		docker stop crust-api &>/dev/null
 		docker rm crust-api &>/dev/null
 	fi
-
 	return 0
 }
 
@@ -262,6 +285,21 @@ reload() {
 		return 0
 	fi
 
+	if [ x"$1" = x"api" ]; then
+		log_info "Reload api service"
+		
+		stop_api
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_api
+
+		log_success "Reload api service success"
+		return 0
+	fi
+
 	if [ x"$1" = x"sworker" ]; then
 		log_info "Reload sworker service"
 		
@@ -298,40 +336,58 @@ reload() {
 
 status()
 {
+	if [ x"$1" == x"chain" ]; then
+		chain_status
+	elif [ x"$1" == x"api" ]; then
+		api_status
+	elif [ x"$1" == x"sworker" ]; then
+		sworker_status
+	elif [ x"$1" == x"karst" ]; then
+		karst_status
+	elif [ x"$1" == x"" ]; then
+		all_status
+	else
+		help
+	fi
+}
+
+all_status()
+{
 	local chain_status="stop"
 	local api_status="stop"
 	local sworker_status="stop"
 	local karst_status="stop"
 
 	check_docker_status crust
-	
-	if [ $? -eq 0 ]; then
+	local res=$?
+	if [ $res -eq 0 ]; then
 		chain_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		chain_status="exited"
 	fi
 
 	check_docker_status crust-api
-	
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		api_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		api_status="exited"
 	fi
 
 	local a_or_b=`cat $basedir/etc/sWorker.ab`
 	check_docker_status crust-sworker-$a_or_b
-	
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		sworker_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		sworker_status="exited"
 	fi
 	
 	check_docker_status karst
-	if [ $? -eq 0 ]; then
+	res=$?
+	if [ $res -eq 0 ]; then
 		karst_status="running"
-	elif [ $? -eq 2 ]; then
+	elif [ $res -eq 2 ]; then
 		karst_status="exited"
 	fi
 
@@ -347,18 +403,121 @@ cat << EOF
 EOF
 }
 
+chain_status()
+{
+	local chain_status="stop"
+
+	check_docker_status crust
+	local res=$?
+	if [ $res -eq 0 ]; then
+		chain_status="running"
+	elif [ $res -eq 2 ]; then
+		chain_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    chain                      ${chain_status}
+-----------------------------------------
+EOF
+}
+
+api_status()
+{
+	local api_status="stop"
+
+	check_docker_status crust-api
+	res=$?
+	if [ $res -eq 0 ]; then
+		api_status="running"
+	elif [ $res -eq 2 ]; then
+		api_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    api                        ${api_status}
+-----------------------------------------
+EOF
+}
+
+sworker_status()
+{
+	local sworker_a_status="stop"
+	local sworker_b_status="stop"
+	local upgrade_shell_status="stop"
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+
+	check_docker_status crust-sworker-a
+	local res=$?
+	if [ $res -eq 0 ]; then
+		sworker_a_status="running"
+	elif [ $res -eq 2 ]; then
+		sworker_a_status="exited"
+	fi
+
+	check_docker_status crust-sworker-b
+	res=$?
+	if [ $res -eq 0 ]; then
+		sworker_b_status="running"
+	elif [ $res -eq 2 ]; then
+		sworker_b_status="exited"
+	fi
+
+	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
+	if [ x"$upgrade_pid" != x"" ]; then
+		upgrade_shell_status="running->${upgrade_pid}"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    sworker-a                  ${sworker_a_status}
+    sworker-b                  ${sworker_b_status}
+    upgrade-shell              ${upgrade_shell_status}
+    main-progress              ${a_or_b}
+-----------------------------------------
+EOF
+}
+
+karst_status()
+{
+	local karst_status="stop"
+	
+	check_docker_status karst
+	res=$?
+	if [ $res -eq 0 ]; then
+		karst_status="running"
+	elif [ $res -eq 2 ]; then
+		karst_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    karst                      ${karst_status}
+-----------------------------------------
+EOF
+}
+
 help()
 {
 cat << EOF
 Usage:
-    help                            show help information
-    start                           start all crust service
-    stop                            stop all crust service
-    status                          check status
+    help                            	show help information
+    start                           	start all crust service
+    stop                            	stop all crust service
 
-    reload {chain|sworker|karst}    reload all service or reload one service
-    logs {chain|api|sworker|karst}  track service logs, ctrl-c to exit
-    sworker {...}                   use 'crust sworker help' for more details
+    status {chain|api|sworker|karst}    check status or reload one service status
+    reload {chain|api|sworker|karst}    reload all service or reload one service
+    logs {chain|api|sworker|karst}      track service logs, ctrl-c to exit
+    tool {...}                          use 'crust tool help' for more details
 EOF
 }
 
@@ -384,17 +543,28 @@ check_docker_status()
 	fi
 }
 
-sworker_help()
+tool_help()
 {
 cat << EOF
-sWorker usage:
+tool usage:
     help                            show help information
-    status                          show status
-    srd-change {number}             change sworker's srd capacity(GB), for example: 'crust sworker srd-change 100', 'crust sworker srd-change -50'
+    rotate-keys                     generate session key of chain node
+    change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tool change-srd 100', 'crust tool change-srd -50'
 EOF
 }
 
-sworker_srd_change()
+rotate_keys()
+{
+	local res=`curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "author_rotateKeys", "params":[]}' http://localhost:19933 2>/dev/null`
+	session_key=`echo $res | jq .result`
+	if [ x"$session_key" = x"" ]; then
+		log_err "Generate session key failed"
+		return 1
+	fi
+	echo $session_key
+}
+
+change_srd()
 {
 	if [ x"$1" == x"" ] || [[ ! $1 =~ ^[1-9][0-9]*$|^[-][1-9][0-9]*$|^0$ ]]; then 
 		log_err "The input of srd change must be integer number"
@@ -430,55 +600,17 @@ sworker_srd_change()
 	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
 }
 
-sworker_status()
-{
-	local sworker_a_status="stop"
-	local sworker_b_status="stop"
-	local upgrade_shell_status="stop"
-	local a_or_b=`cat $basedir/etc/sWorker.ab`
-
-	check_docker_status crust-sworker-a
-	if [ $? -eq 0 ]; then
-		sworker_a_status="running"
-	elif [ $? -eq 2 ]; then
-		sworker_a_status="exited"
-	fi
-
-	check_docker_status crust-sworker-b
-	if [ $? -eq 0 ]; then
-		sworker_b_status="running"
-	elif [ $? -eq 2 ]; then
-		sworker_b_status="exited"
-	fi
-
-	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-	if [ x"$upgrade_pid" != x"" ]; then
-		upgrade_shell_status="running->${upgrade_pid}"
-	fi
-
-cat << EOF
------------------------------------------
-    Service                    Status
------------------------------------------
-    sworker-a                  ${sworker_a_status}
-    sworker-b                  ${sworker_b_status}
-    upgrade-shell              ${upgrade_shell_status}
-    main-progress              ${a_or_b}
------------------------------------------
-EOF
-}
-
-sworker()
+tool()
 {
 	case "$1" in
-		srd-change)
-			sworker_srd_change $2
+		change-srd)
+			change_srd $2
 			;;
-		status)
-			sworker_status
+		rotate-keys)
+			rotate_keys
 			;;
 		*)
-			sworker_help
+			tool_help
 	esac
 }
  
@@ -493,14 +625,14 @@ case "$1" in
 		reload $2
 		;;
 	status)
-		status
+		status $2
 		;;
 	logs)
 		logs $2
 		;;
-	sworker)
+	tool)
 		shift
-		sworker $@
+		tool $@
 		;;
 	*)
 		help
