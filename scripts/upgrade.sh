@@ -101,6 +101,13 @@ if [ x"$code" = x"" ]; then
     sleep 60
     continue
 fi
+
+if [[ ! "$code" =~ ^\"0x.* ]]; then
+    echo "please run chain and api"
+    sleep 60
+    continue
+fi
+
 code=`echo ${code: 3: 64}`
 echo "sWorker code on chain: $code"
 
