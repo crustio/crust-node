@@ -128,7 +128,7 @@ mrenclave=`echo ${mrenclave: 1: 64}`
 
 echo "sWorker self code: $mrenclave"
 
-if [ x"$mrenclave" != x"$code" ]; then
+if [ x"$mrenclave" != x"$code" ] && [ ${#mrenclave} -eq ${#code} ]; then
     upgrade_sworker
 fi
 
