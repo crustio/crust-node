@@ -517,7 +517,7 @@ Usage:
     status {chain|api|sworker|karst}    check status or reload one service status
     reload {chain|api|sworker|karst}    reload all service or reload one service
     logs {chain|api|sworker|karst}      track service logs, ctrl-c to exit
-    tool {...}                          use 'crust tool help' for more details
+    tools {...}                          use 'crust tools help' for more details
 EOF
 }
 
@@ -543,18 +543,25 @@ check_docker_status()
 	fi
 }
 
-tool_help()
+tools_help()
 {
 cat << EOF
-tool usage:
+tools usage:
     help                            show help information
     rotate-keys                     generate session key of chain node
-    change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tool change-srd 100', 'crust tool change-srd -50'
+    workload                        show workload information
+    change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }
 
 rotate_keys()
 {
+	check_docker_status crust
+	if [ $? -ne 0 ]; then
+		log_info "Service chain is not started or exited now"
+		return 0
+	fi
+
 	local res=`curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "author_rotateKeys", "params":[]}' http://localhost:19933 2>/dev/null`
 	session_key=`echo $res | jq .result`
 	if [ x"$session_key" = x"" ]; then
@@ -600,7 +607,23 @@ change_srd()
 	curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
 }
 
-tool()
+workload()
+{
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	if [ $? -ne 0 ]; then
+		log_info "Service crust sworker is not started or exited now"
+		return 0
+	fi
+
+	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+	base_url=${base_url%?}
+	base_url=${base_url:1}
+
+	curl $base_url/workload
+}
+
+tools()
 {
 	case "$1" in
 		change-srd)
@@ -609,8 +632,11 @@ tool()
 		rotate-keys)
 			rotate_keys
 			;;
+		workload)
+			workload
+			;;
 		*)
-			tool_help
+			tools_help
 	esac
 }
  
@@ -630,9 +656,9 @@ case "$1" in
 	logs)
 		logs $2
 		;;
-	tool)
+	tools)
 		shift
-		tool $@
+		tools $@
 		;;
 	*)
 		help
