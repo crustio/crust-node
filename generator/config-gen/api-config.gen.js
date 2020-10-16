@@ -18,6 +18,7 @@ async function genApiComposeConfig(config) {
   return {
     image: 'crustio/crust-api:latest',
     network_mode: 'host',
+    restart: 'always',
     environment: {
       ARGS: args,
     }
