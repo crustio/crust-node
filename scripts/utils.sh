@@ -1,6 +1,6 @@
-scriptdir=$(cd `dirname $0`;pwd)
-basedir=$(cd $scriptdir/..;pwd)
-builddir=$basedir/build
+local scriptdir=$(cd `dirname $0`;pwd)
+local basedir=$(cd $scriptdir/..;pwd)
+local builddir=$basedir/build
 
 function echo_c()
 {
@@ -55,8 +55,8 @@ function upgrade_docker_image()
 }
 
 check_port() {
-	port=$1
-	grep_port=`netstat -tlpn | grep "\b$port\b"`
+	local port=$1
+	local grep_port=`netstat -tlpn | grep "\b$port\b"`
 	if [ -n "$grep_port" ]; then
 		echo "[ERROR] please make sure port $port is not occupied"
 		return 1

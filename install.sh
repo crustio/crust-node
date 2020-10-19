@@ -102,10 +102,11 @@ install_crust_node()
         echo "uninstall old crust node"
         rm $bin_file
         rm -rf $installdir/scripts
+        cp -r $basedir/scripts $installdir/
         local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
         if [ x"$upgrade_pid" != x"" ]; then
             kill -9 $upgrade_pid
-            nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
+            nohup $installdir/scripts/upgrade.sh &>$installdir/logs/upgrade.log &
             if [ $? -ne 0 ]; then
                 log_err "[ERROR] Start crust-sworker upgrade failed"
                 return 1
@@ -117,11 +118,9 @@ install_crust_node()
         mkdir -p $installdir/logs
         cp -r $basedir/etc $installdir/
         cp $basedir/config.yaml $installdir/
+        cp -r $basedir/scripts $installdir/
     fi
-
-    echo "Install crust scripts"
-    cp -r $basedir/scripts $installdir/
-
+    
     echo "Change some configurations"
     sed -i 's/en/'$region'/g' $installdir/etc/region.conf
 
