@@ -517,7 +517,7 @@ Usage:
     status {chain|api|sworker|karst}    check status or reload one service status
     reload {chain|api|sworker|karst}    reload all service or reload one service
     logs {chain|api|sworker|karst}      track service logs, ctrl-c to exit
-    tools {...}                          use 'crust tools help' for more details
+    tools {...}                         use 'crust tools help' for more details
 EOF
 }
 
@@ -525,10 +525,11 @@ tools_help()
 {
 cat << EOF
 tools usage:
-    help                            show help information
-    rotate-keys                     generate session key of chain node
-    workload                        show workload information
-    change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+    help                                show help information
+    rotate-keys                         generate session key of chain node
+    workload                            show workload information
+    upgrade-reload {chain|api|karst}    upgrade one docker image and reload the service
+    change-srd {number}                 change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }
 
@@ -599,6 +600,31 @@ workload()
 	base_url=${base_url:1}
 
 	curl $base_url/workload
+}
+
+upgrade_reload()
+{
+	if [ x"$1" == x"chain" ]; then
+		upgrade_docker_image crustio/crust
+		if [ $res -ne 0 ]; then
+			return 1
+		fi
+		reload chain
+	elif [ x"$1" == x"api" ]; then
+		upgrade_docker_image crustio/crust-api
+		if [ $res -ne 0 ]; then
+			return 1
+		fi
+		reload api
+	elif [ x"$1" == x"karst" ]; then
+		upgrade_docker_image crustio/karst
+		if [ $res -ne 0 ]; then
+			return 1
+		fi
+		reload karst
+	else
+		tools_help
+	fi
 }
 
 tools()
