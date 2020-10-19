@@ -639,7 +639,7 @@ tools()
 		workload)
 			workload
 			;;
-		workload)
+		upgrade-reload)
 			upgrade_reload $2
 			;;
 		*)
