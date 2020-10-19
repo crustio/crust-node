@@ -162,7 +162,7 @@ start_sworker()
 			kill -9 $upgrade_pid
 		fi
 
-		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
+		nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
 		if [ $? -ne 0 ]; then
 			log_err "[ERROR] Start crust-sworker upgrade failed"
 			return 1

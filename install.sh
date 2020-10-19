@@ -96,15 +96,31 @@ download_docker_images()
 install_crust_node()
 {
     log_info "--------------Install crust node-------------"
+    
+    local bin_file=/usr/bin/crust
+    if [ -f "$bin_file" ]; then
+        echo "uninstall old crust node"
+        rm $bin_file
+        rm -rf $installdir/scripts
+        local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
+        if [ x"$upgrade_pid" != x"" ]; then
+            kill -9 $upgrade_pid
+            nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
+            if [ $? -ne 0 ]; then
+                log_err "[ERROR] Start crust-sworker upgrade failed"
+                return 1
+            fi
+        fi
+    else
+        echo "Install crust node data"
+        mkdir -p $installdir
+        mkdir -p $installdir/logs
+        cp -r $basedir/etc $installdir/
+        cp $basedir/config.yaml $installdir/
+    fi
 
-    echo "uninstall old crust node"
-    $scriptdir/uninstall.sh
-
-    echo "Install crust node data"
-    mkdir -p $installdir
+    echo "Install crust scripts"
     cp -r $basedir/scripts $installdir/
-    cp -r $basedir/etc $installdir/
-    cp $basedir/config.yaml $installdir/
 
     echo "Change some configurations"
     sed -i 's/en/'$region'/g' $installdir/etc/region.conf
