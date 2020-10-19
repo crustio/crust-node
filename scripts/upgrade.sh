@@ -5,36 +5,18 @@ basedir=$(cd $scriptdir/..;pwd)
 config_file=$basedir/build/sworker/sworker_config.json
 builddir=$basedir/build
 
+source $scriptdir/utils.sh
+
 function upgrade_sworker()
 {
     echo "Upgrade...."
-    old_image=(`docker images | grep '^\bcrustio/crust-sworker\b ' | grep 'latest'`)
-    old_image=${old_image[3]}
-
-    region=`cat $basedir/etc/region.conf`
-    res=0
-    if [ x"$region" == x"cn" ]; then
-        local aliyun_address=registry.cn-hangzhou.aliyuncs.com
-        docker pull $aliyun_address/crustio/crust-sworker
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
-    else
-        docker pull crustio/crust-sworker
-    fi
-
+    
+    upgrade_docker_image crustio/crust-sworker
     if [ $res -ne 0 ]; then
-        echo "download docker image failed"
         return 1
     fi
 
-    new_image=(`docker images | grep '^\bcrustio/crust-sworker\b ' | grep 'latest'`)
-    new_image=${new_image[3]}
-    if [ x"$old_image" = x"$new_image" ]; then
-        return 0
-    fi
-
-    a_or_b=`cat $basedir/etc/sWorker.ab`
-
+    local a_or_b=`cat $basedir/etc/sWorker.ab`
     docker-compose -f $builddir/docker-compose.yaml stop crust-sworker-$a_or_b &>/dev/null
     docker-compose -f $builddir/docker-compose.yaml rm crust-sworker-$a_or_b &>/dev/null
     EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
