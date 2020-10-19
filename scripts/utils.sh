@@ -1,7 +1,3 @@
-local scriptdir=$(cd `dirname $0`;pwd)
-local basedir=$(cd $scriptdir/..;pwd)
-local builddir=$basedir/build
-
 function echo_c()
 {
     printf "\033[0;$1m$2\033[0m\n"
@@ -24,6 +20,9 @@ function log_err()
 
 function upgrade_docker_image()
 {
+    local scriptdir=$(cd `dirname $0`;pwd)
+    local basedir=$(cd $scriptdir/..;pwd)
+    
     local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
     old_image=${old_image[3]}
 
