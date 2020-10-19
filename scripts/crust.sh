@@ -639,6 +639,9 @@ tools()
 		workload)
 			workload
 			;;
+		workload)
+			upgrade_reload $2
+			;;
 		*)
 			tools_help
 	esac

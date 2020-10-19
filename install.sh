@@ -10,6 +10,7 @@ help()
 cat << EOF
 Usage:
     help                            show help information
+    --update                        update crust node
     --registry {cn|en}              use registry to accelerate docker pull
 EOF
 exit 0
@@ -96,10 +97,10 @@ download_docker_images()
 install_crust_node()
 {
     log_info "--------------Install crust node-------------"
-    
     local bin_file=/usr/bin/crust
-    if [ -f "$bin_file" ]; then
-        echo "uninstall old crust node"
+     
+    if [ -f "$bin_file" ] && [ x"$update" == x"true" ]; then
+        echo "Update crust node"
         rm $bin_file
         rm -rf $installdir/scripts
         cp -r $basedir/scripts $installdir/
@@ -113,7 +114,12 @@ install_crust_node()
             fi
         fi
     else
-        echo "Install crust node data"
+        if [ -f "$installdir/scripts/uninstall.sh" ]; then
+            echo "Uninstall old crust node"
+            $installdir/scripts/uninstall.sh
+        fi
+
+        echo "Install new crust node"
         mkdir -p $installdir
         mkdir -p $installdir/logs
         cp -r $basedir/etc $installdir/
@@ -121,7 +127,7 @@ install_crust_node()
         cp -r $basedir/scripts $installdir/
     fi
     
-    echo "Change some configurations"
+    echo "Change crust node configurations"
     sed -i 's/en/'$region'/g' $installdir/etc/region.conf
 
     echo "Install crust command line tool"
@@ -136,20 +142,31 @@ if [ $(id -u) -ne 0 ]; then
     exit 1
 fi
 
-case "$1" in
-    --registry)
-        if [ x"$2" == x"" ] || [[ x"$2" != x"cn" && x"$2" != x"en" ]]; then
-            help
-        fi
+region="en"
+update="false"
 
-        region=$2
-        ;;
-    "")
-        region="en"
-        ;;
-    *)
-        help
-esac
+while true ; do
+    case "$1" in
+        --registry)
+            if [ x"$2" == x"" ] || [[ x"$2" != x"cn" && x"$2" != x"en" ]]; then
+                help
+            fi
+            region=$2
+            shift 2
+            ;;
+        --update)
+            update="true"
+            shift 1
+            ;;
+        "")
+            shift ;
+            break ;;
+        *)
+            help
+            break;
+            ;;
+    esac
+done
 
 install_depenencies
 download_docker_images
