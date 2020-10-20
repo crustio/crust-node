@@ -174,10 +174,10 @@ start_sworker()
 stop_sworker()
 {
 	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-    if [ x"$upgrade_pid" != x"" ]; then
+	if [ x"$upgrade_pid" != x"" ]; then
 		log_info "Stopping crust sworker upgrade shell"
-        kill -9 $upgrade_pid &>/dev/null
-    fi
+		kill -9 $upgrade_pid &>/dev/null
+	fi
 
 	check_docker_status crust-sworker-a
 	if [ $? -ne 1 ]; then
@@ -524,12 +524,14 @@ EOF
 tools_help()
 {
 cat << EOF
-tools usage:
+crust tools usage:
     help                                      show help information
     rotate-keys                               generate session key of chain node
     workload                                  show workload information
     upgrade-reload {chain|api|karst|c-gen}    upgrade one docker image and reload the service
     change-srd {number}                       change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+    show-files                                show all stored files
+    clear-outdate-files                       clean up expired files
 EOF
 }
 
@@ -632,6 +634,26 @@ upgrade_reload()
 	fi
 }
 
+show_files()
+{
+	check_docker_status karst
+	if [ $? -ne 0 ]; then
+		log_info "Service karst is not started or exited now"
+		return 0
+	fi
+	docker exec -it karst /bin/bash -c 'karst list'
+}
+
+clear_outdate_files()
+{
+	check_docker_status karst
+	if [ $? -ne 0 ]; then
+		log_info "Service karst is not started or exited now"
+		return 0
+	fi
+	docker exec -it karst /bin/bash -c 'karst delete'
+}
+
 tools()
 {
 	case "$1" in
@@ -646,6 +668,12 @@ tools()
 			;;
 		upgrade-reload)
 			upgrade_reload $2
+			;;
+		show-files)
+			show_files
+			;;
+		clear-outdate-files)
+			clear_outdate_files
 			;;
 		*)
 			tools_help

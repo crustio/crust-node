@@ -104,10 +104,10 @@ install_crust_node()
         rm $bin_file
         rm -rf $installdir/scripts
         cp -r $basedir/scripts $installdir/
+        mkdir -p $installdir/logs
         local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
         if [ x"$upgrade_pid" != x"" ]; then
             kill -9 $upgrade_pid
-            mkdir -p $installdir/logs
             nohup $installdir/scripts/upgrade.sh &>$installdir/logs/upgrade.log &
             if [ $? -ne 0 ]; then
                 log_err "[ERROR] Start crust-sworker upgrade failed"
