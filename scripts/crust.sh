@@ -606,19 +606,19 @@ upgrade_reload()
 {
 	if [ x"$1" == x"chain" ]; then
 		upgrade_docker_image crustio/crust
-		if [ $res -ne 0 ]; then
+		if [ $? -ne 0 ]; then
 			return 1
 		fi
 		reload chain
 	elif [ x"$1" == x"api" ]; then
 		upgrade_docker_image crustio/crust-api
-		if [ $res -ne 0 ]; then
+		if [ $? -ne 0 ]; then
 			return 1
 		fi
 		reload api
 	elif [ x"$1" == x"karst" ]; then
 		upgrade_docker_image crustio/karst
-		if [ $res -ne 0 ]; then
+		if [ $? -ne 0 ]; then
 			return 1
 		fi
 		reload karst
