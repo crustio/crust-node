@@ -99,7 +99,7 @@ install_crust_node()
     log_info "--------------Install crust node-------------"
     local bin_file=/usr/bin/crust
      
-    if [ -f "$bin_file" ] && [ x"$update" == x"true" ]; then
+    if [ -d "$installdir" ] && [ -f "$bin_file" ] && [ x"$update" == x"true" ]; then
         echo "Update crust node"
         rm $bin_file
         rm -rf $installdir/scripts
