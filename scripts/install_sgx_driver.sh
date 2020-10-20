@@ -14,6 +14,9 @@ fi
 . $scriptdir/utils.sh
 
 log_info "Download sgx driver"
+if [ -f "$driverbin" ]; then
+    rm $driverbin
+fi
 wget $driverurl
 
 if [ $? -ne 0 ]; then

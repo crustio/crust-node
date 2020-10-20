@@ -162,7 +162,7 @@ start_sworker()
 			kill -9 $upgrade_pid
 		fi
 
-		nohup $scriptdir/upgrade.sh &>$scriptdir/upgrade.log &
+		nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
 		if [ $? -ne 0 ]; then
 			log_err "[ERROR] Start crust-sworker upgrade failed"
 			return 1
@@ -517,40 +517,19 @@ Usage:
     status {chain|api|sworker|karst}    check status or reload one service status
     reload {chain|api|sworker|karst}    reload all service or reload one service
     logs {chain|api|sworker|karst}      track service logs, ctrl-c to exit
-    tools {...}                          use 'crust tools help' for more details
+    tools {...}                         use 'crust tools help' for more details
 EOF
-}
-
-check_port() {
-	port=$1
-	grep_port=`netstat -tlpn | grep "\b$port\b"`
-	if [ -n "$grep_port" ]; then
-		echo "[ERROR] please make sure port $port is not occupied"
-		return 1
-	fi
-}
-
-## 0 for running, 2 for error, 1 for stop
-check_docker_status()
-{
-	local exist=`docker inspect --format '{{.State.Running}}' $1 2>/dev/null`
-	if [ x"${exist}" == x"true" ]; then
-		return 0
-	elif [ "${exist}" == "false" ]; then
-		return 2
-	else
-		return 1
-	fi
 }
 
 tools_help()
 {
 cat << EOF
 tools usage:
-    help                            show help information
-    rotate-keys                     generate session key of chain node
-    workload                        show workload information
-    change-srd {number}             change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+    help                                      show help information
+    rotate-keys                               generate session key of chain node
+    workload                                  show workload information
+    upgrade-reload {chain|api|karst|c-gen}    upgrade one docker image and reload the service
+    change-srd {number}                       change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }
 
@@ -623,6 +602,36 @@ workload()
 	curl $base_url/workload
 }
 
+upgrade_reload()
+{
+	if [ x"$1" == x"chain" ]; then
+		upgrade_docker_image crustio/crust
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload chain
+	elif [ x"$1" == x"api" ]; then
+		upgrade_docker_image crustio/crust-api
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload api
+	elif [ x"$1" == x"karst" ]; then
+		upgrade_docker_image crustio/karst
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload karst
+	elif [ x"$1" == x"c-gen" ]; then
+		upgrade_docker_image crustio/config-generator
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+	else
+		tools_help
+	fi
+}
+
 tools()
 {
 	case "$1" in
@@ -634,6 +643,9 @@ tools()
 			;;
 		workload)
 			workload
+			;;
+		upgrade-reload)
+			upgrade_reload $2
 			;;
 		*)
 			tools_help
