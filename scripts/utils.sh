@@ -20,9 +20,8 @@ function log_err()
 
 function upgrade_docker_image()
 {
-    local scriptdir=$(cd `dirname $0`;pwd)
-    local basedir=$(cd $scriptdir/..;pwd)
-    
+    local basedir=/opt/crust/crust-node
+
     local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
     old_image=${old_image[3]}
 
