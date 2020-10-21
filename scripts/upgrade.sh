@@ -12,11 +12,17 @@ function upgrade_sworker()
     echo "Upgrade...."
     
     upgrade_docker_image crustio/crust-sworker
-    if [ $res -ne 0 ]; then
+    if [ $? -ne 0 ]; then
         return 1
     fi
 
     local a_or_b=`cat $basedir/etc/sWorker.ab`
+    if [ x"$a_or_b" = x"a" ]; then
+        a_or_b='b'
+    else
+        a_or_b='a'
+    fi
+
     docker-compose -f $builddir/docker-compose.yaml stop crust-sworker-$a_or_b &>/dev/null
     docker-compose -f $builddir/docker-compose.yaml rm crust-sworker-$a_or_b &>/dev/null
     EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
@@ -26,11 +32,9 @@ function upgrade_sworker()
     fi
     
     if [ x"$a_or_b" = x"a" ]; then
-        a_or_b='b'
-        sed -i 's/a/b/g' $basedir/etc/sWorker.ab
-    else
-        a_or_b='a'
         sed -i 's/b/a/g' $basedir/etc/sWorker.ab
+    else
+        sed -i 's/a/b/g' $basedir/etc/sWorker.ab
     fi
 
     echo "setup new sworker 'crust-sworker-$a_or_b'"
