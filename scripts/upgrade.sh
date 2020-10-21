@@ -16,13 +16,13 @@ function upgrade_sworker()
         return 1
     fi
 
+    local a_or_b=`cat $basedir/etc/sWorker.ab`
     if [ x"$a_or_b" = x"a" ]; then
         a_or_b='b'
     else
         a_or_b='a'
     fi
 
-    local a_or_b=`cat $basedir/etc/sWorker.ab`
     docker-compose -f $builddir/docker-compose.yaml stop crust-sworker-$a_or_b &>/dev/null
     docker-compose -f $builddir/docker-compose.yaml rm crust-sworker-$a_or_b &>/dev/null
     EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
