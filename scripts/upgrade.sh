@@ -12,8 +12,14 @@ function upgrade_sworker()
     echo "Upgrade...."
     
     upgrade_docker_image crustio/crust-sworker
-    if [ $res -ne 0 ]; then
+    if [ $? -ne 0 ]; then
         return 1
+    fi
+
+    if [ x"$a_or_b" = x"a" ]; then
+        a_or_b='b'
+    else
+        a_or_b='a'
     fi
 
     local a_or_b=`cat $basedir/etc/sWorker.ab`
@@ -26,11 +32,9 @@ function upgrade_sworker()
     fi
     
     if [ x"$a_or_b" = x"a" ]; then
-        a_or_b='b'
-        sed -i 's/a/b/g' $basedir/etc/sWorker.ab
-    else
-        a_or_b='a'
         sed -i 's/b/a/g' $basedir/etc/sWorker.ab
+    else
+        sed -i 's/a/b/g' $basedir/etc/sWorker.ab
     fi
 
     echo "setup new sworker 'crust-sworker-$a_or_b'"
