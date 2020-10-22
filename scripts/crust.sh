@@ -82,6 +82,27 @@ logs()
 			return 0
 		fi
 		docker logs -f crust-sworker-$a_or_b
+	elif [ x"$1" == x"sworker-a" ]; then
+		check_docker_status crust-sworker-a
+		if [ $? -eq 1 ]; then
+			log_info "Service crust sworker-a is not started now"
+			return 0
+		fi
+		docker logs -f crust-sworker-a
+	elif [ x"$1" == x"sworker-b" ]; then
+		check_docker_status crust-sworker-a
+		if [ $? -eq 1 ]; then
+			log_info "Service crust sworker-b is not started now"
+			return 0
+		fi
+		docker logs -f crust-sworker-b
+	elif [ x"$1" == x"sworker-upshell" ]; then
+		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
+		if [ x"$upgrade_pid" == x"" ]; then
+			log_info "Service crust sworker upgrade shell is not started now"
+			return 0
+		fi
+		tail -f $basedir/logs/upgrade.log	
 	elif [ x"$1" == x"karst" ]; then
 		check_docker_status karst
 		if [ $? -eq 1 ]; then
