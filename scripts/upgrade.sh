@@ -9,7 +9,7 @@ source $scriptdir/utils.sh
 
 function upgrade_sworker()
 {
-    echo "Upgrade...."
+    echo "upgrade...."
     
     upgrade_docker_image crustio/crust-sworker
     if [ $? -ne 0 ]; then
@@ -21,6 +21,16 @@ function upgrade_sworker()
         a_or_b='b'
     else
         a_or_b='a'
+    fi
+
+    check_docker_status crust-sworker-a
+    local resa=$?
+    check_docker_status crust-sworker-b
+    local resb=$?
+
+    if [ $resa -eq 0 ] && [ $resb -eq 0 ] ; then
+        log_info "sworker A/B upgrade is running..."
+        return 0
     fi
 
     docker-compose -f $builddir/docker-compose.yaml stop crust-sworker-$a_or_b &>/dev/null
@@ -37,7 +47,7 @@ function upgrade_sworker()
         sed -i 's/a/b/g' $basedir/etc/sWorker.ab
     fi
 
-    echo "setup new sworker 'crust-sworker-$a_or_b'"
+    echo "update start..., setup new sworker 'crust-sworker-$a_or_b'"
 }
 
 if [ x"$config_file" = x"" ]; then
@@ -56,8 +66,8 @@ fi
 api_base_url=`echo "$api_base_url" | sed -e 's/^"//' -e 's/"$//'`
 sworker_base_url=`echo "$sworker_base_url" | sed -e 's/^"//' -e 's/"$//'`
 
-echo "Wait 60s for sworker to start"
-sleep 60
+echo "wait 100s for sworker to start"
+sleep 100s
 while :
 do
 

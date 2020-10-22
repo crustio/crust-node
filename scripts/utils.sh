@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function echo_c()
 {
     printf "\033[0;$1m$2\033[0m\n"
@@ -23,7 +25,7 @@ function upgrade_docker_image()
     local basedir=/opt/crust/crust-node
 
     local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
-    old_image=${old_image[3]}
+    old_image=${old_image[2]}
 
     local region=`cat $basedir/etc/region.conf`
     local res=0
@@ -43,11 +45,13 @@ function upgrade_docker_image()
     fi
 
     local new_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
-    new_image=${new_image[3]}
+    new_image=${new_image[2]}
     if [ x"$old_image" = x"$new_image" ]; then
-        log_info "The current docker $1 version is already the latest"
+        log_info "The current docker image $1 ($old_image) is already the latest"
         return 1
     fi
+    
+    log_info "The docker image of $1 is changed from $old_image to $new_image"
 
     return 0
 }
