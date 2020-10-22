@@ -90,7 +90,7 @@ logs()
 		fi
 		docker logs -f crust-sworker-a
 	elif [ x"$1" == x"sworker-b" ]; then
-		check_docker_status crust-sworker-a
+		check_docker_status crust-sworker-b
 		if [ $? -eq 1 ]; then
 			log_info "Service crust sworker-b is not started now"
 			return 0
