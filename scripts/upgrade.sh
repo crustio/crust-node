@@ -33,8 +33,8 @@ function upgrade_sworker()
         return 0
     fi
 
-    docker-compose -f $builddir/docker-compose.yaml stop crust-sworker-$a_or_b &>/dev/null
-    docker-compose -f $builddir/docker-compose.yaml rm crust-sworker-$a_or_b &>/dev/null
+    docker stop crust-sworker-$a_or_b &>/dev/null
+    docker rm crust-sworker-$a_or_b &>/dev/null
     EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
     if [ $? -ne 0 ]; then
         echo "setup new sworker failed"
