@@ -4,8 +4,6 @@ node:
   chain: "authority"
   ## enable or disable sworker
   sworker: "enable"
-  ## enable or disable karst
-  karst: "disable"
 
 ## identity configurations
 identity:
@@ -27,10 +25,3 @@ sworker:
     - "/opt/crust/data/sworker/srd2"
   ## the number of srd in GB, input must be an integer greater than 0
   srd_init_capacity: 1
-
-## karst configurations
-karst:
-  ## the tracker address
-  tracker_addrs: "127.0.0.1:22122"
-  ## the tracker's external network address
-  outer_tracker_addrs: ""

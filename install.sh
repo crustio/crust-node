@@ -71,10 +71,6 @@ download_docker_images()
         docker pull $aliyun_address/crustio/crust-sworker
         res=$(($?|$res))
         docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
-
-        docker pull $aliyun_address/crustio/karst
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/karst crustio/karst
     else
         docker pull crustio/config-generator
         res=$(($?|$res))
@@ -83,8 +79,6 @@ download_docker_images()
         docker pull crustio/crust-api
         res=$(($?|$res))
         docker pull crustio/crust-sworker
-        res=$(($?|$res))
-        docker pull crustio/karst
         res=$(($?|$res))
     fi
 
