@@ -5,7 +5,6 @@ const path = require('path')
 const { createDir, writeConfig, } = require('../utils')
 const { genApiConfig, genApiComposeConfig } = require('./api-config.gen')
 const { genChainConfig, genChainComposeConfig } = require('./chain-config.gen')
-const { genKarstConfig, genKarstComposeConfig } = require('./karst-config.gen')
 const { genSworkerConfig, genSworkerComposeConfig } = require('./sworker-config.gen')
 const { logger } = require('../logger')
 
@@ -47,12 +46,6 @@ const configGenerators = [{
   to: path.join('sworker', 'sworker_config.json'),
   composeName: 'crust-sworker-b',
   composeFunc: genSworkerComposeConfig,
-}, {
-  name: 'karst',
-  configFunc: genKarstConfig,
-  to: path.join('karst', 'karst_config.json'),
-  composeName: 'karst',
-  composeFunc: genKarstComposeConfig,
 }]
 
 async function genConfig(config, outputOpts) {

@@ -6,7 +6,6 @@ async function genSworkerConfig(config, outputCfg) {
     ..._.omit(config.sworker, ['port']),
     base_path: `/opt/crust/data/sworker`,
     base_url: `http://0.0.0.0:12222/api/v0`,
-    karst_url: `ws://127.0.0.1:17000/api/v0/node/data`,
     chain: getSharedChainConfig(config),
   }
   const srdPaths = _.map(config.sworker.srdPaths, (p) => ({
@@ -29,8 +28,7 @@ async function genSworkerComposeConfig(config) {
   let tempVolumes = [
     '/opt/crust/data/sworker:/opt/crust/data/sworker',
     ...srdVolumes,
-    './sworker:/config',
-    '/opt/crust/data/karst:/opt/crust/data/karst'
+    './sworker:/config'
   ]
 
   return {
