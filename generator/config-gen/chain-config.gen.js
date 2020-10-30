@@ -1,4 +1,3 @@
-
 async function genChainConfig(config, outputCfg) {
   const chainConfig = config.chain
   return {
