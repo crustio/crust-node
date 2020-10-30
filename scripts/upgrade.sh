@@ -71,7 +71,7 @@ sleep 100s
 while :
 do
 
-system_health=`curl $api_base_url/system/health 2>/dev/null`
+system_health=`curl --max-time 30 $api_base_url/system/health 2>/dev/null`
 if [ x"$system_health" = x"" ]; then
     echo "please run crust chain and api"
     sleep 60
@@ -91,7 +91,7 @@ if [ x"$is_syncing" = x"true" ]; then
     continue
 fi
 
-code=`curl $api_base_url/swork/code 2>/dev/null`
+code=`curl --max-time 30 $api_base_url/swork/code 2>/dev/null`
 if [ x"$code" = x"" ]; then
     echo "please run chain and api"
     sleep 60
@@ -107,7 +107,7 @@ fi
 code=`echo ${code: 3: 64}`
 echo "sWorker code on chain: $code"
 
-id_info=`curl $sworker_base_url/enclave/id_info 2>/dev/null`
+id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
 if [ x"$id_info" = x"" ]; then
     echo "please run sworker"
     sleep 60
