@@ -5,7 +5,7 @@ async function genIpfsConfig(config, outputCfg) {
     gateway_port: 18081,
   }
   return {
-    config: apiConfig,
+    config: ipfsConfig,
     paths: [],
   }
 }
