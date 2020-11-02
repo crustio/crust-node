@@ -263,7 +263,7 @@ start_ipfs()
 		res=$(($?|$res))
 		check_port 5001
 		res=$(($?|$res))
-		check_port 18081
+		check_port 37773
 		res=$(($?|$res))
 		if [ $res -ne 0 ]; then
 			return 1
