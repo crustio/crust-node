@@ -71,6 +71,10 @@ download_docker_images()
         docker pull $aliyun_address/crustio/crust-sworker
         res=$(($?|$res))
         docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
+        
+        docker pull $aliyun_address/crustio/go-ipfs
+        res=$(($?|$res))
+        docker tag $aliyun_address/crustio/go-ipfs ipfs/go-ipfs
     else
         docker pull crustio/config-generator
         res=$(($?|$res))
@@ -78,7 +82,7 @@ download_docker_images()
         res=$(($?|$res))
         docker pull crustio/crust-api
         res=$(($?|$res))
-        docker pull crustio/crust-sworker
+        docker pull ipfs/go-ipfs
         res=$(($?|$res))
     fi
 

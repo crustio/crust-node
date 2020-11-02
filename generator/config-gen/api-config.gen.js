@@ -1,4 +1,3 @@
-
 async function genApiConfig(config, outputCfg) {
   const apiConfig = {
     port: 56666,

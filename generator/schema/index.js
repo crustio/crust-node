@@ -11,12 +11,15 @@ function getConfigSchema(config) {
     chain: chainSchema.required(),
   }
 
-  if (config.node.sworker != "enable") {
-    return Joi.object(sMap)
+  if (config.node.sworker == "enable") {
+    sMap["api"] = Joi.object().default()
+    sMap["identity"] = identitySchema.required()
+    sMap["sworker"] = sworkerSchema.required()
   }
-  sMap["api"] = Joi.object().default()
-  sMap["identity"] = identitySchema.required()
-  sMap["sworker"] = sworkerSchema.required()
+
+  if (config.node.ipfs == "enable") {
+    sMap["ipfs"] = Joi.object().default()
+  }
 
   return Joi.object(sMap)
 }

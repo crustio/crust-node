@@ -4,6 +4,7 @@
 const path = require('path')
 const { createDir, writeConfig, } = require('../utils')
 const { genApiConfig, genApiComposeConfig } = require('./api-config.gen')
+const { genIpfsConfig, genIpfsComposeConfig } = require('./ipfs-config.gen')
 const { genChainConfig, genChainComposeConfig } = require('./chain-config.gen')
 const { genSworkerConfig, genSworkerComposeConfig } = require('./sworker-config.gen')
 const { logger } = require('../logger')
@@ -46,6 +47,12 @@ const configGenerators = [{
   to: path.join('sworker', 'sworker_config.json'),
   composeName: 'crust-sworker-b',
   composeFunc: genSworkerComposeConfig,
+}, {
+  name: 'ipfs',
+  configFunc: genIpfsConfig,
+  to: path.join('ipfs', 'ipfs_config.json'),
+  composeName: 'ipfs',
+  composeFunc: genIpfsComposeConfig,
 }]
 
 async function genConfig(config, outputOpts) {
