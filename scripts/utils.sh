@@ -26,7 +26,7 @@ function upgrade_docker_image()
     local crustio_name=$2
     if [ x"$crustio_name" == x"" ]; then
         crustio_name=$1
-    else
+    fi
 
     local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
     old_image=${old_image[2]}
