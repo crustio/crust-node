@@ -39,6 +39,12 @@ start()
 		exit 1
 	fi
 
+	start_ipfs
+	if [ $? -ne 0 ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+		exit 1
+	fi
+
 	log_success "Start crust success"
 }
 
@@ -47,6 +53,7 @@ stop()
 	stop_chain
 	stop_api
 	stop_sworker
+	stop_ipfs
 	
 	log_success "Stop crust success"
 }
@@ -75,6 +82,13 @@ logs()
 			return 0
 		fi
 		docker logs -f crust-sworker-$a_or_b
+	elif [ x"$1" == x"ipfs" ]; then
+		check_docker_status ipfs
+		if [ $? -eq 1 ]; then
+			log_info "Service ipfs is not started now"
+			return 0
+		fi
+		docker logs -f ipfs
 	elif [ x"$1" == x"sworker-a" ]; then
 		check_docker_status crust-sworker-a
 		if [ $? -eq 1 ]; then
@@ -235,6 +249,45 @@ stop_api()
 	fi
 	return 0
 }
+
+start_ipfs()
+{
+	if [ -d "$builddir/ipfs" ]; then
+		check_docker_status ipfs
+		if [ $? -ne 1 ]; then
+			return 0
+		fi
+
+		local res=0
+		check_port 4001
+		res=$(($?|$res))
+		check_port 5001
+		res=$(($?|$res))
+		check_port 18081
+		res=$(($?|$res))
+		if [ $res -ne 0 ]; then
+			return 1
+		fi
+
+		docker-compose -f $builddir/docker-compose.yaml up -d ipfs
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Start ipfs failed"
+			return 1
+		fi
+	fi
+	return 0
+}
+
+stop_ipfs()
+{
+	check_docker_status ipfs
+	if [ $? -ne 1 ]; then
+		log_info "Stopping ipfs service"
+		docker stop ipfs &>/dev/null
+		docker rm ipfs &>/dev/null
+	fi
+	return 0
+}
  
 reload() {
 	if [ x"$1" = x"" ]; then
@@ -290,6 +343,21 @@ reload() {
 		return 0
 	fi
 
+	if [ x"$1" = x"ipfs" ]; then
+		log_info "Reload ipfs service"
+		
+		stop_ipfs
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_ipfs
+
+		log_success "Reload ipfs service success"
+		return 0
+	fi
+
 	help
 	return 0
 }
@@ -302,6 +370,8 @@ status()
 		api_status
 	elif [ x"$1" == x"sworker" ]; then
 		sworker_status
+	elif [ x"$1" == x"ipfs" ]; then
+		ipfs_status
 	elif [ x"$1" == x"" ]; then
 		all_status
 	else
@@ -314,6 +384,7 @@ all_status()
 	local chain_status="stop"
 	local api_status="stop"
 	local sworker_status="stop"
+	local ipfs_status="stop"
 
 	check_docker_status crust
 	local res=$?
@@ -340,6 +411,14 @@ all_status()
 		sworker_status="exited"
 	fi
 
+	check_docker_status ipfs
+	res=$?
+	if [ $res -eq 0 ]; then
+		ipfs_status="running"
+	elif [ $res -eq 2 ]; then
+		ipfs_status="exited"
+	fi
+
 cat << EOF
 -----------------------------------------
     Service                    Status
@@ -347,6 +426,7 @@ cat << EOF
     chain                      ${chain_status}
     api                        ${api_status}
     sworker                    ${sworker_status}
+    ipfs                       ${ipfs_status}
 -----------------------------------------
 EOF
 }
@@ -433,6 +513,27 @@ cat << EOF
 EOF
 }
 
+ipfs_status()
+{
+	local ipfs_status="stop"
+
+	check_docker_status ipfs
+	res=$?
+	if [ $res -eq 0 ]; then
+		ipfs_status="running"
+	elif [ $res -eq 2 ]; then
+		ipfs_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    ipfs                       ${ipfs_status}
+-----------------------------------------
+EOF
+}
+
 help()
 {
 cat << EOF
@@ -441,9 +542,9 @@ Usage:
     start                           	start all crust service
     stop                            	stop all crust service
 
-    status {chain|api|sworker}          check status or reload one service status
-    reload {chain|api|sworker}          reload all service or reload one service
-    logs {chain|api|sworker}            track service logs, ctrl-c to exit
+    status {chain|api|sworker|ipfs}     check status or reload one service status
+    reload {chain|api|sworker|ipfs}     reload all service or reload one service
+    logs {chain|api|sworker|ipfs}       track service logs, ctrl-c to exit
     tools {...}                         use 'crust tools help' for more details
 EOF
 }
@@ -455,7 +556,7 @@ crust tools usage:
     help                                      show help information
     rotate-keys                               generate session key of chain node
     workload                                  show workload information
-    upgrade-reload {chain|api|c-gen}          upgrade one docker image and reload the service
+    upgrade-reload {chain|api|ipfs|c-gen}     upgrade one docker image and reload the service
     change-srd {number}                       change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }

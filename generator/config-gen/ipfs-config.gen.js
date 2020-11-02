@@ -14,9 +14,9 @@ async function genIpfsComposeConfig(config) {
   return {
     image: 'ipfs/go-ipfs:latest',
     ports: [
-      `${config.ipfs.swarm_port}:4001`,
-      `${config.ipfs.api_port}:5001`,
-      `${config.ipfs.gateway_port}:8080`,
+      '4001:4001',
+      '5001:5001',
+      '18081:8080',
     ],
     volumes: [
       '/opt/crust/data/ipfs:/data/ipfs'
