@@ -23,6 +23,10 @@ function log_err()
 function upgrade_docker_image()
 {
     local basedir=/opt/crust/crust-node
+    local crustio_name=$2
+    if [ x"$crustio_name" == x"" ]; then
+        crustio_name=$1
+    else
 
     local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
     old_image=${old_image[2]}
@@ -31,9 +35,9 @@ function upgrade_docker_image()
     local res=0
     if [ x"$region" == x"cn" ]; then
         local aliyun_address=registry.cn-hangzhou.aliyuncs.com
-        docker pull $aliyun_address/$1
+        docker pull $aliyun_address/$crustio_name
         res=$(($?|$res))
-        docker tag $aliyun_address/$1 $1
+        docker tag $aliyun_address/$crustio_name $1
     else
         docker pull $1
         res=$(($?|$res))

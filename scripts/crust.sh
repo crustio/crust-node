@@ -644,6 +644,12 @@ upgrade_reload()
 			return 1
 		fi
 		reload api
+	elif [ x"$1" == x"ipfs" ]; then
+		upgrade_docker_image ipfs/go-ipfs crustio/go-ipfs
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload api
 	elif [ x"$1" == x"c-gen" ]; then
 		upgrade_docker_image crustio/config-generator
 		if [ $? -ne 0 ]; then

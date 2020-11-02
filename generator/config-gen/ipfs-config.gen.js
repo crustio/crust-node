@@ -2,7 +2,7 @@ async function genIpfsConfig(config, outputCfg) {
   const ipfsConfig = {
     swarm_port: 4001,
     api_port: 5001,
-    gateway_port: 18081,
+    gateway_port: 37773,
   }
   return {
     config: ipfsConfig,
@@ -16,7 +16,7 @@ async function genIpfsComposeConfig(config) {
     ports: [
       '4001:4001',
       '5001:5001',
-      '18081:8080',
+      '37773:8080',
     ],
     volumes: [
       '/opt/crust/data/ipfs:/data/ipfs'
