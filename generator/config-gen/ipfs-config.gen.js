@@ -19,7 +19,8 @@ async function genIpfsComposeConfig(config) {
       '37773:8080',
     ],
     volumes: [
-      '/opt/crust/data/ipfs:/data/ipfs'
+      '/opt/crust/data/ipfs:/data/ipfs',
+      '/opt/crust/data/ipfs-export:/export'
     ]
   }
 }
