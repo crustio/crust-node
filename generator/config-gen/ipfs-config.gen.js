@@ -18,7 +18,7 @@ async function genIpfsComposeConfig(config) {
       '/opt/crust/data/ipfs:/data/ipfs'
     ],
     entrypoint: '/sbin/tini --',
-    command: '/bin/sh -c "if [ ! -e \'/data/ipfs/config\' ]; then ipfs init; ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/37773; fi && /usr/local/bin/start_ipfs daemon --migrate=true"',
+    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs daemon --migrate=true"',
   }
 }
 
