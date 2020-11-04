@@ -13,14 +13,12 @@ async function genIpfsConfig(config, outputCfg) {
 async function genIpfsComposeConfig(config) {
   return {
     image: 'ipfs/go-ipfs:latest',
-    ports: [
-      '4001:4001',
-      '5001:5001',
-      '37773:8080',
-    ],
+    network_mode: 'host',
     volumes: [
       '/opt/crust/data/ipfs:/data/ipfs'
-    ]
+    ],
+    entrypoint: '/sbin/tini --',
+    command: '/bin/sh -c "if [ ! -e \'/data/ipfs/config\' ]; then ipfs init; ipfs config Addresses.Gateway /ip4/127.0.0.1/tcp/37773; fi && /usr/local/bin/start_ipfs daemon --migrate=true"',
   }
 }
 
