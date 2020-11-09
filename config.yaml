@@ -4,6 +4,8 @@ node:
   chain: "authority"
   ## enable or disable sworker
   sworker: "enable"
+  ## enable or disable smanager
+  smanager: "disable"
   ## enable or disable ipfs
   ipfs: "disable"
 
