@@ -52,7 +52,7 @@ const configGenerators = [{
   name: 'smanager',
   configFunc: genSmanagerConfig,
   to: path.join('smanager', 'smanager_config.json'),
-  composeName: 'smanager',
+  composeName: 'crust-smanager',
   composeFunc: genSmanagerComposeConfig,
 }, {
   name: 'ipfs',

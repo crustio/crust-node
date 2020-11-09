@@ -39,6 +39,12 @@ start()
 		exit 1
 	fi
 
+	start_smanager
+	if [ $? -ne 0 ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+		exit 1
+	fi
+
 	start_ipfs
 	if [ $? -ne 0 ]; then
 		docker-compose -f $builddir/docker-compose.yaml down
@@ -51,6 +57,7 @@ start()
 stop()
 {
 	stop_chain
+	stop_smanager
 	stop_api
 	stop_sworker
 	stop_ipfs
@@ -89,6 +96,13 @@ logs()
 			return 0
 		fi
 		docker logs -f ipfs
+	elif [ x"$1" == x"smanager" ]; then
+		check_docker_status crust-smanager
+		if [ $? -eq 1 ]; then
+			log_info "Service crust smanager is not started now"
+			return 0
+		fi
+		docker logs -f crust-smanager
 	elif [ x"$1" == x"sworker-a" ]; then
 		check_docker_status crust-sworker-a
 		if [ $? -eq 1 ]; then
@@ -250,6 +264,34 @@ stop_api()
 	return 0
 }
 
+start_smanager()
+{
+	if [ -d "$builddir/smanager" ]; then
+		check_docker_status crust-smanager
+		if [ $? -ne 1 ]; then
+			return 0
+		fi
+
+		docker-compose -f $builddir/docker-compose.yaml up -d crust-smanager
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Start crust-smanager failed"
+			return 1
+		fi
+	fi
+	return 0
+}
+
+stop_smanager()
+{
+	check_docker_status crust-smanager
+	if [ $? -ne 1 ]; then
+		log_info "Stopping crust smanager service"
+		docker stop crust-smanager &>/dev/null
+		docker rm crust-smanager &>/dev/null
+	fi
+	return 0
+}
+
 start_ipfs()
 {
 	if [ -d "$builddir/ipfs" ]; then
@@ -343,6 +385,21 @@ reload() {
 		return 0
 	fi
 
+	if [ x"$1" = x"smanager" ]; then
+		log_info "Reload smanager service"
+		
+		stop_smanager
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_smanager
+
+		log_success "Reload smanager service success"
+		return 0
+	fi
+
 	if [ x"$1" = x"ipfs" ]; then
 		log_info "Reload ipfs service"
 		
@@ -370,6 +427,8 @@ status()
 		api_status
 	elif [ x"$1" == x"sworker" ]; then
 		sworker_status
+	elif [ x"$1" == x"smanager" ]; then
+		smanager_status
 	elif [ x"$1" == x"ipfs" ]; then
 		ipfs_status
 	elif [ x"$1" == x"" ]; then
@@ -384,6 +443,7 @@ all_status()
 	local chain_status="stop"
 	local api_status="stop"
 	local sworker_status="stop"
+	local smanager_status="stop"
 	local ipfs_status="stop"
 
 	check_docker_status crust
@@ -411,6 +471,14 @@ all_status()
 		sworker_status="exited"
 	fi
 
+	check_docker_status crust-smanager
+	res=$?
+	if [ $res -eq 0 ]; then
+		smanager_status="running"
+	elif [ $res -eq 2 ]; then
+		smanager_status="exited"
+	fi
+
 	check_docker_status ipfs
 	res=$?
 	if [ $res -eq 0 ]; then
@@ -426,6 +494,7 @@ cat << EOF
     chain                      ${chain_status}
     api                        ${api_status}
     sworker                    ${sworker_status}
+    smanager                   ${smanager_status}
     ipfs                       ${ipfs_status}
 -----------------------------------------
 EOF
@@ -513,6 +582,27 @@ cat << EOF
 EOF
 }
 
+smanager_status()
+{
+	local smanager_status="stop"
+
+	check_docker_status crust-smanager
+	res=$?
+	if [ $res -eq 0 ]; then
+		smanager_status="running"
+	elif [ $res -eq 2 ]; then
+		smanager_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    smanager                   ${ipfs_status}
+-----------------------------------------
+EOF
+}
+
 ipfs_status()
 {
 	local ipfs_status="stop"
@@ -538,14 +628,14 @@ help()
 {
 cat << EOF
 Usage:
-    help                            	show help information
-    start                           	start all crust service
-    stop                            	stop all crust service
+    help                            	         show help information
+    start                           	         start all crust service
+    stop                            	         stop all crust service
 
-    status {chain|api|sworker|ipfs}     check status or reload one service status
-    reload {chain|api|sworker|ipfs}     reload all service or reload one service
-    logs {chain|api|sworker|ipfs}       track service logs, ctrl-c to exit
-    tools {...}                         use 'crust tools help' for more details
+    status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
+    reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
+    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit
+    tools {...}                                  use 'crust tools help' for more details
 EOF
 }
 
@@ -553,11 +643,11 @@ tools_help()
 {
 cat << EOF
 crust tools usage:
-    help                                      show help information
-    rotate-keys                               generate session key of chain node
-    workload                                  show workload information
-    upgrade-reload {chain|api|ipfs|c-gen}     upgrade one docker image and reload the service
-    change-srd {number}                       change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+    help                                               show help information
+    rotate-keys                                        generate session key of chain node
+    workload                                           show workload information
+    upgrade-reload {chain|api|smanager|ipfs|c-gen}     upgrade one docker image and reload the service
+    change-srd {number}                                change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }
 
@@ -644,6 +734,12 @@ upgrade_reload()
 			return 1
 		fi
 		reload api
+	elif [ x"$1" == x"smanager" ]; then
+		upgrade_docker_image crustio/smanager
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload smanager
 	elif [ x"$1" == x"ipfs" ]; then
 		upgrade_docker_image ipfs/go-ipfs crustio/go-ipfs
 		if [ $? -ne 0 ]; then
