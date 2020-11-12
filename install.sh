@@ -86,6 +86,8 @@ download_docker_images()
         res=$(($?|$res))
         docker pull crustio/crust-api
         res=$(($?|$res))
+        docker pull crustio/crust-sworker
+        res=$(($?|$res))
         docker pull ipfs/go-ipfs
         res=$(($?|$res))
     fi
