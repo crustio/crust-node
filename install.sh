@@ -26,7 +26,7 @@ install_depenencies()
     fi
 
     log_info "------------Install depenencies--------------"
-    apt install -y git jq curl wget build-essential kmod linux-headers-`uname -r`
+    apt install -y git jq curl wget build-essential kmod linux-headers-`uname -r` vim
 
     if [ $? -ne 0 ]; then
         log_err "Install libs failed"
@@ -71,6 +71,10 @@ download_docker_images()
         docker pull $aliyun_address/crustio/crust-sworker
         res=$(($?|$res))
         docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
+
+        docker pull $aliyun_address/crustio/crust-smanager
+        res=$(($?|$res))
+        docker tag $aliyun_address/crustio/crust-smanager crustio/crust-smanager
         
         docker pull $aliyun_address/crustio/go-ipfs
         res=$(($?|$res))
@@ -81,6 +85,10 @@ download_docker_images()
         docker pull crustio/crust
         res=$(($?|$res))
         docker pull crustio/crust-api
+        res=$(($?|$res))
+        docker pull crustio/crust-sworker
+        res=$(($?|$res))
+        docker pull crustio/crust-smanager
         res=$(($?|$res))
         docker pull ipfs/go-ipfs
         res=$(($?|$res))

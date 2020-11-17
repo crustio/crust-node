@@ -17,6 +17,10 @@ function getConfigSchema(config) {
     sMap["sworker"] = sworkerSchema.required()
   }
 
+  if (config.node.smanager == "enable") {
+    sMap["smanager"] = Joi.object().default()
+  }
+
   if (config.node.ipfs == "enable") {
     sMap["ipfs"] = Joi.object().default()
   }
