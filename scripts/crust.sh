@@ -598,7 +598,7 @@ cat << EOF
 -----------------------------------------
     Service                    Status
 -----------------------------------------
-    smanager                   ${ipfs_status}
+    smanager                   ${smanager_status}
 -----------------------------------------
 EOF
 }
@@ -735,7 +735,7 @@ upgrade_reload()
 		fi
 		reload api
 	elif [ x"$1" == x"smanager" ]; then
-		upgrade_docker_image crustio/smanager
+		upgrade_docker_image crustio/crust-smanager
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
