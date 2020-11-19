@@ -1,7 +1,6 @@
 
 const Joi = require('joi')
 const { chainSchema } = require('./chain.schema')
-const { karstSchema } = require('./karst.schema')
 const { identitySchema } = require('./identity.schema')
 const { sworkerSchema } = require('./sworker.schema')
 const { nodeSchema } = require('./node.schema')
@@ -12,17 +11,19 @@ function getConfigSchema(config) {
     chain: chainSchema.required(),
   }
 
-  if (config.node.sworker != "enable") {
-    return Joi.object(sMap)
+  if (config.node.sworker == "enable") {
+    sMap["api"] = Joi.object().default()
+    sMap["identity"] = identitySchema.required()
+    sMap["sworker"] = sworkerSchema.required()
   }
-  sMap["api"] = Joi.object().default()
-  sMap["identity"] = identitySchema.required()
-  sMap["sworker"] = sworkerSchema.required()
 
-  if (config.node.karst != "enable") {
-    return Joi.object(sMap)
+  if (config.node.smanager == "enable") {
+    sMap["smanager"] = Joi.object().default()
   }
-  sMap["karst"] = karstSchema.required()
+
+  if (config.node.ipfs == "enable") {
+    sMap["ipfs"] = Joi.object().default()
+  }
 
   return Joi.object(sMap)
 }

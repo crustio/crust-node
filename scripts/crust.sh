@@ -27,12 +27,6 @@ start()
 		exit 1
 	fi
 
-	start_karst
-	if [ $? -ne 0 ]; then
-		docker-compose -f $builddir/docker-compose.yaml down
-		exit 1
-	fi
-
 	start_sworker
 	if [ $? -ne 0 ]; then
 		docker-compose -f $builddir/docker-compose.yaml down
@@ -45,15 +39,28 @@ start()
 		exit 1
 	fi
 
+	start_smanager
+	if [ $? -ne 0 ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+		exit 1
+	fi
+
+	start_ipfs
+	if [ $? -ne 0 ]; then
+		docker-compose -f $builddir/docker-compose.yaml down
+		exit 1
+	fi
+
 	log_success "Start crust success"
 }
 
 stop()
 {
 	stop_chain
+	stop_smanager
 	stop_api
 	stop_sworker
-	stop_karst
+	stop_ipfs
 	
 	log_success "Stop crust success"
 }
@@ -82,6 +89,20 @@ logs()
 			return 0
 		fi
 		docker logs -f crust-sworker-$a_or_b
+	elif [ x"$1" == x"ipfs" ]; then
+		check_docker_status ipfs
+		if [ $? -eq 1 ]; then
+			log_info "Service ipfs is not started now"
+			return 0
+		fi
+		docker logs -f ipfs
+	elif [ x"$1" == x"smanager" ]; then
+		check_docker_status crust-smanager
+		if [ $? -eq 1 ]; then
+			log_info "Service crust smanager is not started now"
+			return 0
+		fi
+		docker logs -f crust-smanager
 	elif [ x"$1" == x"sworker-a" ]; then
 		check_docker_status crust-sworker-a
 		if [ $? -eq 1 ]; then
@@ -102,14 +123,7 @@ logs()
 			log_info "Service crust sworker upgrade shell is not started now"
 			return 0
 		fi
-		tail -f $basedir/logs/upgrade.log	
-	elif [ x"$1" == x"karst" ]; then
-		check_docker_status karst
-		if [ $? -eq 1 ]; then
-			log_info "Service karst is not started now"
-			return 0
-		fi
-		docker logs -f karst
+		tail -f $basedir/logs/upgrade.log
 	else
 		help
 	fi
@@ -250,34 +264,69 @@ stop_api()
 	return 0
 }
 
-start_karst()
+start_smanager()
 {
-	if [ -d "$builddir/karst" ]; then
-		check_docker_status karst
-			if [ $? -ne 1 ]; then
+	if [ -d "$builddir/smanager" ]; then
+		check_docker_status crust-smanager
+		if [ $? -ne 1 ]; then
 			return 0
 		fi
 
-		check_port 17000
+		docker-compose -f $builddir/docker-compose.yaml up -d crust-smanager
 		if [ $? -ne 0 ]; then
-			return 1
-		fi
-
-		docker-compose -f $builddir/docker-compose.yaml up -d karst
-		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start karst failed"
+			log_err "[ERROR] Start crust-smanager failed"
 			return 1
 		fi
 	fi
+	return 0
 }
 
-stop_karst()
+stop_smanager()
 {
-	check_docker_status karst
+	check_docker_status crust-smanager
 	if [ $? -ne 1 ]; then
-		log_info "Stopping karst service"
-		docker stop karst &>/dev/null
-		docker rm karst &>/dev/null
+		log_info "Stopping crust smanager service"
+		docker stop crust-smanager &>/dev/null
+		docker rm crust-smanager &>/dev/null
+	fi
+	return 0
+}
+
+start_ipfs()
+{
+	if [ -d "$builddir/ipfs" ]; then
+		check_docker_status ipfs
+		if [ $? -ne 1 ]; then
+			return 0
+		fi
+
+		local res=0
+		check_port 4001
+		res=$(($?|$res))
+		check_port 5001
+		res=$(($?|$res))
+		check_port 37773
+		res=$(($?|$res))
+		if [ $res -ne 0 ]; then
+			return 1
+		fi
+
+		docker-compose -f $builddir/docker-compose.yaml up -d ipfs
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Start ipfs failed"
+			return 1
+		fi
+	fi
+	return 0
+}
+
+stop_ipfs()
+{
+	check_docker_status ipfs
+	if [ $? -ne 1 ]; then
+		log_info "Stopping ipfs service"
+		docker stop ipfs &>/dev/null
+		docker rm ipfs &>/dev/null
 	fi
 	return 0
 }
@@ -336,18 +385,33 @@ reload() {
 		return 0
 	fi
 
-	if [ x"$1" = x"karst" ]; then
-		log_info "Reload karst service"
-
-		stop_karst
+	if [ x"$1" = x"smanager" ]; then
+		log_info "Reload smanager service"
+		
+		stop_smanager
 		$scriptdir/gen_config.sh
 		if [ $? -ne 0 ]; then
 			log_err "[ERROR] Generate configuration files failed"
 			exit 1
 		fi
-		start_karst
+		start_smanager
 
-		log_success "Reload karst service success"
+		log_success "Reload smanager service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"ipfs" ]; then
+		log_info "Reload ipfs service"
+		
+		stop_ipfs
+		$scriptdir/gen_config.sh
+		if [ $? -ne 0 ]; then
+			log_err "[ERROR] Generate configuration files failed"
+			exit 1
+		fi
+		start_ipfs
+
+		log_success "Reload ipfs service success"
 		return 0
 	fi
 
@@ -363,8 +427,10 @@ status()
 		api_status
 	elif [ x"$1" == x"sworker" ]; then
 		sworker_status
-	elif [ x"$1" == x"karst" ]; then
-		karst_status
+	elif [ x"$1" == x"smanager" ]; then
+		smanager_status
+	elif [ x"$1" == x"ipfs" ]; then
+		ipfs_status
 	elif [ x"$1" == x"" ]; then
 		all_status
 	else
@@ -377,7 +443,8 @@ all_status()
 	local chain_status="stop"
 	local api_status="stop"
 	local sworker_status="stop"
-	local karst_status="stop"
+	local smanager_status="stop"
+	local ipfs_status="stop"
 
 	check_docker_status crust
 	local res=$?
@@ -403,13 +470,21 @@ all_status()
 	elif [ $res -eq 2 ]; then
 		sworker_status="exited"
 	fi
-	
-	check_docker_status karst
+
+	check_docker_status crust-smanager
 	res=$?
 	if [ $res -eq 0 ]; then
-		karst_status="running"
+		smanager_status="running"
 	elif [ $res -eq 2 ]; then
-		karst_status="exited"
+		smanager_status="exited"
+	fi
+
+	check_docker_status ipfs
+	res=$?
+	if [ $res -eq 0 ]; then
+		ipfs_status="running"
+	elif [ $res -eq 2 ]; then
+		ipfs_status="exited"
 	fi
 
 cat << EOF
@@ -419,7 +494,8 @@ cat << EOF
     chain                      ${chain_status}
     api                        ${api_status}
     sworker                    ${sworker_status}
-    karst                      ${karst_status}
+    smanager                   ${smanager_status}
+    ipfs                       ${ipfs_status}
 -----------------------------------------
 EOF
 }
@@ -506,23 +582,44 @@ cat << EOF
 EOF
 }
 
-karst_status()
+smanager_status()
 {
-	local karst_status="stop"
-	
-	check_docker_status karst
+	local smanager_status="stop"
+
+	check_docker_status crust-smanager
 	res=$?
 	if [ $res -eq 0 ]; then
-		karst_status="running"
+		smanager_status="running"
 	elif [ $res -eq 2 ]; then
-		karst_status="exited"
+		smanager_status="exited"
 	fi
 
 cat << EOF
 -----------------------------------------
     Service                    Status
 -----------------------------------------
-    karst                      ${karst_status}
+    smanager                   ${smanager_status}
+-----------------------------------------
+EOF
+}
+
+ipfs_status()
+{
+	local ipfs_status="stop"
+
+	check_docker_status ipfs
+	res=$?
+	if [ $res -eq 0 ]; then
+		ipfs_status="running"
+	elif [ $res -eq 2 ]; then
+		ipfs_status="exited"
+	fi
+
+cat << EOF
+-----------------------------------------
+    Service                    Status
+-----------------------------------------
+    ipfs                       ${ipfs_status}
 -----------------------------------------
 EOF
 }
@@ -531,14 +628,14 @@ help()
 {
 cat << EOF
 Usage:
-    help                            	show help information
-    start                           	start all crust service
-    stop                            	stop all crust service
+    help                            	         show help information
+    start                           	         start all crust service
+    stop                            	         stop all crust service
 
-    status {chain|api|sworker|karst}    check status or reload one service status
-    reload {chain|api|sworker|karst}    reload all service or reload one service
-    logs {chain|api|sworker|karst}      track service logs, ctrl-c to exit
-    tools {...}                         use 'crust tools help' for more details
+    status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
+    reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
+    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit
+    tools {...}                                  use 'crust tools help' for more details
 EOF
 }
 
@@ -546,13 +643,11 @@ tools_help()
 {
 cat << EOF
 crust tools usage:
-    help                                      show help information
-    rotate-keys                               generate session key of chain node
-    workload                                  show workload information
-    upgrade-reload {chain|api|karst|c-gen}    upgrade one docker image and reload the service
-    change-srd {number}                       change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
-    show-files                                show all stored files
-    clear-outdate-files                       clean up expired files
+    help                                               show help information
+    rotate-keys                                        generate session key of chain node
+    workload                                           show workload information
+    upgrade-reload {chain|api|smanager|ipfs|c-gen}     upgrade one docker image and reload the service
+    change-srd {number}                                change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }
 
@@ -639,12 +734,18 @@ upgrade_reload()
 			return 1
 		fi
 		reload api
-	elif [ x"$1" == x"karst" ]; then
-		upgrade_docker_image crustio/karst
+	elif [ x"$1" == x"smanager" ]; then
+		upgrade_docker_image crustio/crust-smanager
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
-		reload karst
+		reload smanager
+	elif [ x"$1" == x"ipfs" ]; then
+		upgrade_docker_image ipfs/go-ipfs crustio/go-ipfs
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload api
 	elif [ x"$1" == x"c-gen" ]; then
 		upgrade_docker_image crustio/config-generator
 		if [ $? -ne 0 ]; then
@@ -653,26 +754,6 @@ upgrade_reload()
 	else
 		tools_help
 	fi
-}
-
-show_files()
-{
-	check_docker_status karst
-	if [ $? -ne 0 ]; then
-		log_info "Service karst is not started or exited now"
-		return 0
-	fi
-	docker exec -it karst /bin/bash -c 'karst list'
-}
-
-clear_outdate_files()
-{
-	check_docker_status karst
-	if [ $? -ne 0 ]; then
-		log_info "Service karst is not started or exited now"
-		return 0
-	fi
-	docker exec -it karst /bin/bash -c 'karst delete'
 }
 
 tools()
@@ -689,12 +770,6 @@ tools()
 			;;
 		upgrade-reload)
 			upgrade_reload $2
-			;;
-		show-files)
-			show_files
-			;;
-		clear-outdate-files)
-			clear_outdate_files
 			;;
 		*)
 			tools_help
