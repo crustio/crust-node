@@ -33,13 +33,17 @@ install_depenencies()
         exit 1
     fi
 
-    docker-compose -v
+    docker -v
     if [ $? -ne 0 ]; then
         curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
         if [ $? -ne 0 ]; then
             log_err "Install docker failed"
             exit 1
         fi
+    fi
+
+    docker-compose -v
+    if [ $? -ne 0 ]; then
         apt install -y docker-compose
         if [ $? -ne 0 ]; then
             log_err "Install docker compose failed"
