@@ -20,14 +20,14 @@ fi
 wget $driverurl
 
 if [ $? -ne 0 ]; then
-    echo "Download sgx dirver failed"
+    log_err "Download sgx dirver failed"
     exit 1
 fi
 
 log_info "Installing denpendencies..."
 apt-get install -y wget build-essential kmod linux-headers-`uname -r`
 if [ $? -ne 0 ]; then
-    echo "Install sgx driver dependencies failed"
+    log_err "Install sgx driver dependencies failed"
     exit 1
 fi
 
@@ -38,7 +38,7 @@ log_info "Installing sgx driver..."
 ./$driverbin
 
 if [ $? -ne 0 ]; then
-    echo "Install sgx dirver bin failed"
+    log_err "Install sgx dirver bin failed"
     exit 1
 fi
 
