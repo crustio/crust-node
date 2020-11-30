@@ -186,6 +186,11 @@ start_sworker()
 			return 1
 		fi
 
+		if [ ! -f "/dev/isgx" ]; then
+			log_err "[ERROR] Your device can't install sgx dirver, please check your CPU and BIOS"
+			return 1
+		fi
+
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "[ERROR] Start crust-sworker-$a_or_b failed"
