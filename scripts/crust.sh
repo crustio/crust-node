@@ -65,59 +65,88 @@ stop()
 	log_success "Stop crust success"
 }
 
+logs_help()
+{
+cat << EOF
+Usage: crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
+
+Fetch the logs of a service
+
+Options:
+      --details        Show extra details provided to logs
+  -f, --follow         Follow log output
+      --since string   Show logs since timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
+      --tail string    Number of lines to show from the end of the logs (default "all")
+  -t, --timestamps     Show timestamps
+      --until string   Show logs before a timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
+EOF
+}
+
 logs()
 {
-	if [ x"$1" == x"chain" ]; then
+	local name="${!#}"
+	local array=( "$@" )
+	local logs_help_flag=0
+	unset "array[${#array[@]}-1]"
+
+	if [ x"$name" == x"chain" ]; then
 		check_docker_status crust
 		if [ $? -eq 1 ]; then
 			log_info "Service crust chain is not started now"
 			return 0
 		fi
-		docker logs -f crust
-	elif [ x"$1" == x"api" ]; then
+		docker logs ${array[@]} -f crust
+		logs_help_flag=$?
+	elif [ x"$name" == x"api" ]; then
 		check_docker_status crust-api
 		if [ $? -eq 1 ]; then
 			log_info "Service crust API is not started now"
 			return 0
 		fi
-		docker logs -f crust-api
-	elif [ x"$1" == x"sworker" ]; then
+		docker logs ${array[@]} -f crust-api
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker" ]; then
 		local a_or_b=`cat $basedir/etc/sWorker.ab`
 		check_docker_status crust-sworker-$a_or_b
 		if [ $? -eq 1 ]; then
 			log_info "Service crust sworker is not started now"
 			return 0
 		fi
-		docker logs -f crust-sworker-$a_or_b
-	elif [ x"$1" == x"ipfs" ]; then
+		docker logs ${array[@]} -f crust-sworker-$a_or_b
+		logs_help_flag=$?
+	elif [ x"$name" == x"ipfs" ]; then
 		check_docker_status ipfs
 		if [ $? -eq 1 ]; then
 			log_info "Service ipfs is not started now"
 			return 0
 		fi
-		docker logs -f ipfs
-	elif [ x"$1" == x"smanager" ]; then
+		docker logs ${array[@]} -f ipfs
+		logs_help_flag=$?
+	elif [ x"$name" == x"smanager" ]; then
 		check_docker_status crust-smanager
 		if [ $? -eq 1 ]; then
 			log_info "Service crust smanager is not started now"
 			return 0
 		fi
-		docker logs -f crust-smanager
-	elif [ x"$1" == x"sworker-a" ]; then
+		docker logs ${array[@]} -f crust-smanager
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker-a" ]; then
 		check_docker_status crust-sworker-a
 		if [ $? -eq 1 ]; then
 			log_info "Service crust sworker-a is not started now"
 			return 0
 		fi
-		docker logs -f crust-sworker-a
-	elif [ x"$1" == x"sworker-b" ]; then
+		docker logs ${array[@]} -f crust-sworker-a
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker-b" ]; then
 		check_docker_status crust-sworker-b
 		if [ $? -eq 1 ]; then
 			log_info "Service crust sworker-b is not started now"
 			return 0
 		fi
-		docker logs -f crust-sworker-b
-	elif [ x"$1" == x"sworker-upshell" ]; then
+		docker logs ${array[@]} -f crust-sworker-b
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker-upshell" ]; then
 		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
 		if [ x"$upgrade_pid" == x"" ]; then
 			log_info "Service crust sworker upgrade shell is not started now"
@@ -125,7 +154,13 @@ logs()
 		fi
 		tail -f $basedir/logs/upgrade.log
 	else
-		help
+		logs_help
+		return 1
+	fi
+
+	if [ $logs_help_flag -ne 0 ]; then
+		logs_help
+		return 1
 	fi
 }
 
@@ -639,7 +674,7 @@ Usage:
 
     status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
     reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
-    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit
+    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
     tools {...}                                  use 'crust tools help' for more details
 EOF
 }
@@ -795,7 +830,8 @@ case "$1" in
 		status $2
 		;;
 	logs)
-		logs $2
+		shift
+		logs $@
 		;;
 	tools)
 		shift
