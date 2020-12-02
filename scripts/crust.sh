@@ -68,7 +68,7 @@ stop()
 logs_help()
 {
 cat << EOF
-Usage: sudo crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
+Usage: crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
 
 Fetch the logs of a service
 
@@ -674,7 +674,7 @@ Usage:
 
     status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
     reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
-    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit
+    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
     tools {...}                                  use 'crust tools help' for more details
 EOF
 }
