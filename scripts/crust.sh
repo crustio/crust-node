@@ -95,7 +95,7 @@ logs()
 			log_info "Service crust chain is not started now"
 			return 0
 		fi
-		docker logs ${array[@]} -f crust 1>/dev/null
+		docker logs ${array[@]} -f crust
 		logs_help_flag=$?
 	elif [ x"$name" == x"api" ]; then
 		check_docker_status crust-api
