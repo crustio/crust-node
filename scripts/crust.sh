@@ -683,11 +683,11 @@ tools_help()
 {
 cat << EOF
 crust tools usage:
-    help                                               show help information
-    rotate-keys                                        generate session key of chain node
-    workload                                           show workload information
-    upgrade-reload {chain|api|smanager|ipfs|c-gen}     upgrade one docker image and reload the service
-    change-srd {number}                                change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+    help                                                       show help information
+    rotate-keys                                                generate session key of chain node
+    workload                                                   show workload information
+    upgrade-reload {chain|api|smanager|ipfs|c-gen|sworker}     upgrade one docker image and reload the service
+    change-srd {number}                                        change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
 EOF
 }
 
@@ -791,6 +791,12 @@ upgrade_reload()
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
+	elif [ x"$1" == x"sworker" ]; then
+		upgrade_docker_image crustio/crust-sworker
+		if [ $? -ne 0 ]; then
+			return 1
+		fi
+		reload sworker
 	else
 		tools_help
 	fi
