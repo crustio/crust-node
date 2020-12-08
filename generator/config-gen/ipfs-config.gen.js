@@ -18,7 +18,10 @@ async function genIpfsComposeConfig(config) {
       '/opt/crust/data/ipfs:/data/ipfs'
     ],
     entrypoint: '/sbin/tini --',
-    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs daemon -p badgerds --migrate=true"',
+    environment: {
+      IPFS_PROFILE: 'badgerds',
+    },
+    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs daemon --migrate=true"',
   }
 }
 
