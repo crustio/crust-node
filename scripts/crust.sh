@@ -245,7 +245,7 @@ logs()
 start_chain()
 {
 	check_docker_status crust
-	if [ $? -ne 1 ]; then
+	if [ $? -eq 0 ]; then
 		return 0
 	fi
 
@@ -284,7 +284,7 @@ start_sworker()
 	if [ -d "$builddir/sworker" ]; then
 		local a_or_b=`cat $basedir/etc/sWorker.ab`
 		check_docker_status crust-sworker-$a_or_b
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -353,7 +353,7 @@ start_api()
 {
 	if [ -d "$builddir/sworker" ]; then
 		check_docker_status crust-api
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -386,7 +386,7 @@ start_smanager()
 {
 	if [ -d "$builddir/smanager" ]; then
 		check_docker_status crust-smanager
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -414,7 +414,7 @@ start_ipfs()
 {
 	if [ -d "$builddir/ipfs" ]; then
 		check_docker_status ipfs
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
