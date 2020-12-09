@@ -2,7 +2,6 @@
 const Joi = require('joi')
 const { chainSchema } = require('./chain.schema')
 const { identitySchema } = require('./identity.schema')
-const { sworkerSchema } = require('./sworker.schema')
 const { nodeSchema } = require('./node.schema')
 
 function getConfigSchema(config) {
