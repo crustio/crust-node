@@ -9,60 +9,138 @@ export EX_SWORKER_ARGS=''
  
 start()
 {
-	check_docker_status crust
-	if [ $? -ne 1 ]; then
-		log_info "Crust service has started. You need to stop it, then start it"
-		exit 0
-	fi
-
 	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
 		log_err "[ERROR] Generate configuration files failed"
 		exit 1
 	fi
+	
+	if [ x"$1" = x"" ]; then
+		log_info "Start crust"
 
-	start_chain
-	if [ $? -ne 0 ]; then
-		docker-compose -f $builddir/docker-compose.yaml down
-		exit 1
+		start_chain
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
+		start_sworker
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
+		start_api
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
+		start_smanager
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
+		start_ipfs
+		if [ $? -ne 0 ]; then
+			docker-compose -f $builddir/docker-compose.yaml down
+			exit 1
+		fi
+
+		log_success "Start crust success"
+		return 0
 	fi
 
-	start_sworker
-	if [ $? -ne 0 ]; then
-		docker-compose -f $builddir/docker-compose.yaml down
-		exit 1
+	if [ x"$1" = x"chain" ]; then
+		log_info "Start chain service"
+		start_chain
+		log_success "Start chain service success"
+		return 0
 	fi
 
-	start_api
-	if [ $? -ne 0 ]; then
-		docker-compose -f $builddir/docker-compose.yaml down
-		exit 1
+	if [ x"$1" = x"api" ]; then
+		log_info "Start api service"
+		start_api
+		log_success "Start api service success"
+		return 0
 	fi
 
-	start_smanager
-	if [ $? -ne 0 ]; then
-		docker-compose -f $builddir/docker-compose.yaml down
-		exit 1
+	if [ x"$1" = x"sworker" ]; then
+		log_info "Start sworker service"
+		start_sworker
+		log_success "Start sworker service success"
+		return 0
 	fi
 
-	start_ipfs
-	if [ $? -ne 0 ]; then
-		docker-compose -f $builddir/docker-compose.yaml down
-		exit 1
+	if [ x"$1" = x"smanager" ]; then
+		log_info "Start smanager service"
+		start_smanager
+		log_success "Start smanager service success"
+		return 0
 	fi
 
-	log_success "Start crust success"
+	if [ x"$1" = x"ipfs" ]; then
+		log_info "Start ipfs service"
+		start_ipfs
+		log_success "Start ipfs service success"
+		return 0
+	fi
+
+	help
+	return 1
 }
 
 stop()
 {
-	stop_chain
-	stop_smanager
-	stop_api
-	stop_sworker
-	stop_ipfs
-	
-	log_success "Stop crust success"
+	if [ x"$1" = x"" ]; then
+		log_info "Stop crust"
+		stop_chain
+		stop_smanager
+		stop_api
+		stop_sworker
+		stop_ipfs
+		log_success "Stop crust success"
+		return 0
+	fi
+
+	if [ x"$1" = x"chain" ]; then
+		log_info "Stop chain service"
+		stop_chain
+		log_success "Stop chain service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"api" ]; then
+		log_info "Stop api service"
+		stop_api
+		log_success "Stop api service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"sworker" ]; then
+		log_info "Stop sworker service"
+		stop_sworker
+		log_success "Stop sworker service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"smanager" ]; then
+		log_info "Stop smanager service"
+		stop_smanager
+		log_success "Stop smanager service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"ipfs" ]; then
+		log_info "Stop ipfs service"
+		stop_ipfs
+		log_success "Stop ipfs service success"
+		return 0
+	fi
+
+	help
+	return 1
 }
 
 logs_help()
@@ -167,7 +245,7 @@ logs()
 start_chain()
 {
 	check_docker_status crust
-	if [ $? -ne 1 ]; then
+	if [ $? -eq 0 ]; then
 		return 0
 	fi
 
@@ -206,7 +284,7 @@ start_sworker()
 	if [ -d "$builddir/sworker" ]; then
 		local a_or_b=`cat $basedir/etc/sWorker.ab`
 		check_docker_status crust-sworker-$a_or_b
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -275,7 +353,7 @@ start_api()
 {
 	if [ -d "$builddir/sworker" ]; then
 		check_docker_status crust-api
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -308,7 +386,7 @@ start_smanager()
 {
 	if [ -d "$builddir/smanager" ]; then
 		check_docker_status crust-smanager
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -336,7 +414,7 @@ start_ipfs()
 {
 	if [ -d "$builddir/ipfs" ]; then
 		check_docker_status ipfs
-		if [ $? -ne 1 ]; then
+		if [ $? -eq 0 ]; then
 			return 0
 		fi
 
@@ -456,7 +534,7 @@ reload() {
 	fi
 
 	help
-	return 0
+	return 1
 }
 
 status()
@@ -668,9 +746,9 @@ help()
 {
 cat << EOF
 Usage:
-    help                            	         show help information
-    start                           	         start all crust service
-    stop                            	         stop all crust service
+    help                                         show help information
+    start {chain|api|sworker|smanager|ipfs}      start all crust service
+    stop {chain|api|sworker|smanager|ipfs}       stop all crust service or stop one service
 
     status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
     reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
@@ -712,6 +790,7 @@ change_srd()
 {
 	if [ x"$1" == x"" ] || [[ ! $1 =~ ^[1-9][0-9]*$|^[-][1-9][0-9]*$|^0$ ]]; then 
 		log_err "The input of srd change must be integer number"
+		tools_help
 		return 1
 	fi
 
@@ -824,10 +903,10 @@ tools()
  
 case "$1" in
 	start)
-		start
+		start $2
 		;;
 	stop)
-		stop
+		stop $2
 		;;
 	reload)
 		reload $2
