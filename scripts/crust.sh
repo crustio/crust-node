@@ -52,17 +52,60 @@ start()
 	fi
 
 	log_success "Start crust success"
+
+	return 0
 }
 
 stop()
 {
-	stop_chain
-	stop_smanager
-	stop_api
-	stop_sworker
-	stop_ipfs
-	
-	log_success "Stop crust success"
+	if [ x"$1" = x"" ]; then
+		log_info "Stop crust"
+		stop_chain
+		stop_smanager
+		stop_api
+		stop_sworker
+		stop_ipfs
+		log_success "Stop crust success"
+		return 0
+	fi
+
+	if [ x"$1" = x"chain" ]; then
+		log_info "Stop chain service"
+		stop_chain
+		log_success "Stop chain service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"api" ]; then
+		log_info "Stop api service"
+		stop_api
+		log_success "Stop api service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"sworker" ]; then
+		log_info "Stop sworker service"
+		stop_sworker
+		log_success "Stop sworker service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"smanager" ]; then
+		log_info "Stop smanager service"
+		stop_smanager
+		log_success "Stop smanager service success"
+		return 0
+	fi
+
+	if [ x"$1" = x"ipfs" ]; then
+		log_info "Stop ipfs service"
+		stop_ipfs
+		log_success "Stop ipfs service success"
+		return 0
+	fi
+
+	help
+	return 0
 }
 
 logs_help()
@@ -668,9 +711,9 @@ help()
 {
 cat << EOF
 Usage:
-    help                            	         show help information
-    start                           	         start all crust service
-    stop                            	         stop all crust service
+    help                                         show help information
+    start                                        start all crust service
+    stop {chain|api|sworker|smanager|ipfs}       stop all crust service or stop one service
 
     status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
     reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
@@ -827,7 +870,7 @@ case "$1" in
 		start
 		;;
 	stop)
-		stop
+		stop $2
 		;;
 	reload)
 		reload $2
