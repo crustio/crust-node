@@ -12,20 +12,11 @@ node:
 ## identity configurations
 identity:
   ## the backup of chain controller account
-  backup:  ''
+  backup: ''
   ## the password of chain controller account
   password: ""
 
 ## chain configurations
 chain:
   ## the name of chain node
-  name: "vnode"
-
-## sworker configurations
-sworker:
-  ## the srd data will be saved in those paths, need absolute path
-  srd_paths:
-    - "/opt/crust/data/sworker/srd1"
-    - "/opt/crust/data/sworker/srd2"
-  ## the number of srd in GB, input must be an integer greater than 0
-  srd_init_capacity: 1
+  name: "crust-node"

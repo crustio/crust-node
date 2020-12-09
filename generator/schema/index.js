@@ -14,7 +14,7 @@ function getConfigSchema(config) {
   if (config.node.sworker == "enable") {
     sMap["api"] = Joi.object().default()
     sMap["identity"] = identitySchema.required()
-    sMap["sworker"] = sworkerSchema.required()
+    sMap["sworker"] = Joi.object().default()
   }
 
   if (config.node.smanager == "enable") {

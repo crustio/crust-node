@@ -3,31 +3,30 @@ const { getSharedChainConfig } = require('./chain-config.gen')
 
 async function genSworkerConfig(config, outputCfg) {
   const sworkerConfig = {
-    ..._.omit(config.sworker, ['port']),
+    srd_paths: [
+      "/opt/crust/data/files/srd"
+    ],
+    srd_init_capacity: 1,
     base_path: `/opt/crust/data/sworker`,
     base_url: `http://0.0.0.0:12222/api/v0`,
     chain: getSharedChainConfig(config),
   }
-  const srdPaths = _.map(config.sworker.srdPaths, (p) => ({
-    required: true,
-    path: p,
-  }))
   return {
     config: sworkerConfig,
     paths: [{
       required: true,
       path: '/opt/crust/data/sworker',
-    }, ...srdPaths],
+    }, {
+      required: true,
+      path: '/opt/crust/data/files/srd',
+    }],
   }
 }
 
 async function genSworkerComposeConfig(config) {
-  const srdVolumes = _.get(config, 'sworker.srd_paths', [])
-        .map((p) => `${p}:${p}`)
-
   let tempVolumes = [
     '/opt/crust/data/sworker:/opt/crust/data/sworker',
-    ...srdVolumes,
+    '/opt/crust/data/files/srd:/opt/crust/data/files/srd',
     './sworker:/config'
   ]
 
