@@ -3,6 +3,7 @@
 basedir=$(cd `dirname $0`;pwd)
 scriptdir=$basedir/scripts
 installdir=/opt/crust/crust-node
+filesdir=/opt/crust/data/files
 source $scriptdir/utils.sh
 
 help()
@@ -132,6 +133,8 @@ install_crust_node()
 
         echo "Install new crust node"
         mkdir -p $installdir
+        mkdir -p $filesdir
+        chmod 777 -R $filesdir
         mkdir -p $installdir/logs
         cp -r $basedir/etc $installdir/
         cp $basedir/config.yaml $installdir/

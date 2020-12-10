@@ -2,7 +2,6 @@
 const Joi = require('joi')
 const { chainSchema } = require('./chain.schema')
 const { identitySchema } = require('./identity.schema')
-const { sworkerSchema } = require('./sworker.schema')
 const { nodeSchema } = require('./node.schema')
 
 function getConfigSchema(config) {
@@ -14,7 +13,7 @@ function getConfigSchema(config) {
   if (config.node.sworker == "enable") {
     sMap["api"] = Joi.object().default()
     sMap["identity"] = identitySchema.required()
-    sMap["sworker"] = sworkerSchema.required()
+    sMap["sworker"] = Joi.object().default()
   }
 
   if (config.node.smanager == "enable") {

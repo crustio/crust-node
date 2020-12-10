@@ -299,7 +299,7 @@ start_sworker()
 			return 1
 		fi
 
-		if [ ! -f "/dev/isgx" ]; then
+		if [ ! -e "/dev/isgx" ]; then
 			log_err "[ERROR] Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
 			return 1
 		fi

@@ -35,6 +35,7 @@ sudo vim /opt/crust/crust-node/config.yaml
   - 30888 19933 19944 (for crust chain)
   - 56666 (for crust API)
   - 12222 (for crust sWorker)
+  - 5001 4001 37773 (for IPFS)
 
 
 ```shell

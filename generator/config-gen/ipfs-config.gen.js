@@ -3,10 +3,14 @@ async function genIpfsConfig(config, outputCfg) {
     swarm_port: 4001,
     api_port: 5001,
     gateway_port: 37773,
+    path: '/opt/crust/data/files/ipfs'
   }
   return {
     config: ipfsConfig,
-    paths: [],
+    paths: [{
+      required: true,
+      path: '/opt/crust/data/files/ipfs',
+    }],
   }
 }
 
@@ -15,7 +19,7 @@ async function genIpfsComposeConfig(config) {
     image: 'ipfs/go-ipfs:latest',
     network_mode: 'host',
     volumes: [
-      '/opt/crust/data/ipfs:/data/ipfs'
+      '/opt/crust/data/files/ipfs:/data/ipfs'
     ],
     entrypoint: '/sbin/tini --',
     environment: {
