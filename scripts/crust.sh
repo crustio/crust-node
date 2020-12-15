@@ -762,10 +762,37 @@ tools_help()
 cat << EOF
 crust tools usage:
     help                                                       show help information
+    space-info                                                 show information about data folders
     rotate-keys                                                generate session key of chain node
     workload                                                   show workload information
     upgrade-reload {chain|api|smanager|ipfs|c-gen|sworker}     upgrade one docker image and reload the service
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+EOF
+}
+
+space_info()
+{
+	local data_folder_info=(`df -h /opt/crust/data | sed -n '2p'`)
+	local file_folder_info=(`df -h /opt/crust/data/files | sed -n '2p'`)
+cat << EOF
+-->Data folder (for chain and db)<--
+Path: /opt/crust/data
+File system: ${data_folder_info[0]}
+Total space: ${data_folder_info[1]}
+Used space: ${data_folder_info[2]}
+Avail space: ${data_folder_info[3]}
+
+-->Files folder (for ipfs and srd)<--
+Path: /opt/crust/data/files
+File system: ${file_folder_info[0]}
+Total space: ${file_folder_info[1]}
+Used space: ${file_folder_info[2]}
+Avail space: ${file_folder_info[3]}
+
+PS:
+1. Data folder is used to store chain and db, 500GB SSD is recommended
+2. Please mount the large capacity hard disk to files folder, you can use RAID or LVM to break through the size limit of a single hard drive
+3. SRD will not use all the space, it will reserve 50G of space
 EOF
 }
 
@@ -884,6 +911,9 @@ upgrade_reload()
 tools()
 {
 	case "$1" in
+		space-info)
+			space_info
+			;;
 		change-srd)
 			change_srd $2
 			;;
