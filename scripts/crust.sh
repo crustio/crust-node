@@ -753,7 +753,7 @@ EOF
 tools_help()
 {
 cat << EOF
-crust tools usage:
+Crust tools usage:
     help                                                       show help information
     space-info                                                 show information about data folders
     rotate-keys                                                generate session key of chain node
@@ -929,7 +929,7 @@ tools()
 config_help()
 {
 cat << EOF
-Usage:
+Crust config usage:
     help                                  show help information
     show                                  show configurations
     set                                   set configurations
@@ -1038,7 +1038,9 @@ Usage:
     status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
     reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
     logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
-    tools {...}                                  use 'crust tools help' for more details
+    
+	tools {...}                                  use 'crust tools help' for more details
+    config {...}                                 configuration operations, use 'crust config help' for more details         
 EOF
 }
 
