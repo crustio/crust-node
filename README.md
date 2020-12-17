@@ -22,11 +22,9 @@ Official crust node service for running crust protocol.
 sudo ./install.sh # Use 'sudo ./install.sh --registry cn' to accelerate installation in some areas
 ```
 
-### Generate application configuration
-
-#### Modify config.yaml
+### Modify config.yaml
 ```shell
-sudo vim /opt/crust/crust-node/config.yaml
+sudo crust config set
 ```
 
 ### Run service
