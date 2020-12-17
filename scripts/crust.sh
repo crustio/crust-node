@@ -931,17 +931,8 @@ config_help()
 cat << EOF
 Usage:
     help                                  show help information
-    show                                  show all configurations
-
-    mode {isolation|owner|member}         default: isolation; the mode of this crust node, more details in crust wiki
-    chain.name {name}                     default: crust-node; change name of chain
-    
-    identity.backup '{backup}'            change the backup of chain controller account, single quotes are needed before and after backup
-    identity.password {password}          change the password of chain controller account
-
-    node.sworker {enable|disable}         default: enable; enable or disable sworker service
-    node.smanager {enable|disable}        default: enable; enable or disable smanager service
-    node.ipfs {enable|disable}            default: enable; enable or disable ipfs service
+    show                                  show configurations
+    set                                   set configurations
 EOF
 }
 
@@ -950,71 +941,74 @@ config_show()
 	cat $basedir/config.yaml
 }
 
-config_change()
+config_set_all()
 {
-	case "$1" in
-		mode)
-			if [ x"$2" == x"isolation" ] || [ x"$2" == x"member" ]; then
-				sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
-				sed -i '8c \\  smanager: "enable"' $basedir/config.yaml &>/dev/null
-				sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
-			elif [ x"$2" == x"leader" ]; then
-				sed -i '6c \\  sworker: "disable"' $basedir/config.yaml &>/dev/null
-				sed -i '8c \\  smanager: "disable"' $basedir/config.yaml &>/dev/null
-				sed -i '10c \\  ipfs: "disable"' $basedir/config.yaml &>/dev/null
-			else
-				config_help
-				return 1
-			fi
-			;;
-		node.sworker)
-			if [ x"$2" != x"enable" ] && [ x"$2" != x"disable" ]; then
-				config_help
-				return 1
-			fi
-			sed -i '6c \\  sworker: "'$2'"' $basedir/config.yaml &>/dev/null
-			;;
-		node.smanager)
-			if [ x"$2" != x"enable" ] && [ x"$2" != x"disable" ]; then
-				config_help
-				return 1
-			fi
-			sed -i '8c \\  smanager: "'$2'"' $basedir/config.yaml &>/dev/null
-			;;
-		node.ipfs)
-			if [ x"$2" != x"enable" ] && [ x"$2" != x"disable" ]; then
-				config_help
-				return 1
-			fi
-			sed -i '10c \\  ipfs: "'$2'"' $basedir/config.yaml &>/dev/null
-			;;
-		chain.name)
-			if [ x"$2" == x"" ]; then
-				config_help
-				return 1
-			fi
-			shift
-			local name=`echo $@`
-			sed -i "22c \\  name: \"$name\"" $basedir/config.yaml &>/dev/null
-			;;
-		identity.backup)
-			if [ x"$2" == x"" ]; then
-				config_help
-				return 1
-			fi
-			sed -i "15c \\  backup: '$2'" $basedir/config.yaml &>/dev/null
-			;;
-		identity.password)
-			if [ x"$2" == x"" ]; then
-				config_help
-				return 1
-			fi
-			sed -i '17c \\  password: "'$2'"' $basedir/config.yaml &>/dev/null
-			;;
-		*)
-			log_err "config change error"
-			return 1
-	esac
+	local chain_name=""
+	read -p "Enter crust node name (default:crust-node): " chain_name
+	chain_name=`echo "$chain_name"`
+	if [ x"$chain_name" == x"" ]; then
+		chain_name="crust-node"
+	fi
+	sed -i "22c \\  name: \"$chain_name\"" $basedir/config.yaml &>/dev/null
+	log_success "Set crust node name: '$chain_name' successfully"
+
+	local mode=""
+	while true
+	do
+		read -p "Enter crust node mode from 'isolation/owner/member' (default:isolation): " mode
+		mode=`echo "$mode"`
+		if [ x"$mode" == x"" ]; then
+			mode="isolation"
+			break
+		elif [ x"$mode" == x"isolation" ] || [ x"$mode" == x"owner" ] || [ x"$mode" == x"member" ]; then
+			break
+		else
+			log_err "Input error, please input isolation/owner/member"
+		fi
+	done
+	if [ x"$mode" == x"owner" ]; then
+		sed -i '6c \\  sworker: "disable"' $basedir/config.yaml &>/dev/null
+		sed -i '8c \\  smanager: "disable"' $basedir/config.yaml &>/dev/null
+		sed -i '10c \\  ipfs: "disable"' $basedir/config.yaml &>/dev/null
+		log_success "Set crust node mode: '$mode' successfully"
+		log_success "Set configurations done"
+		return
+	else
+		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
+		sed -i '8c \\  smanager: "enable"' $basedir/config.yaml &>/dev/null
+		sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
+		log_success "Set crust node mode: '$mode' successfully"
+	fi
+
+	local identity_backup=""
+	while true
+	do
+		read -p "Enter the backup of controller account: " identity_backup
+		identity_backup=`echo "$identity_backup"`
+		if [ x"$identity_backup" != x"" ]; then
+			break
+		else
+			log_err "Input error, backup can't be empty"
+		fi
+	done
+	sed -i "15c \\  backup: '$identity_backup'" $basedir/config.yaml &>/dev/null
+	log_success "Set backup successfully"
+
+	local identity_password=""
+	while true
+	do
+		read -p "Enter the password of controller account: " identity_password
+		identity_password=`echo "$identity_password"`
+		if [ x"$identity_password" != x"" ]; then
+			break
+		else
+			log_err "Input error, password can't be empty"
+		fi
+	done
+	sed -i '17c \\  password: "'$identity_password'"' $basedir/config.yaml &>/dev/null
+
+	log_success "Set password successfully"
+	log_success "Set configurations done"
 }
 
 config()
@@ -1023,27 +1017,8 @@ config()
 		show)
 			config_show
 			;;
-		mode)
-			config_change mode $2
-			;;
-		node.sworker)
-			config_change node.sworker $2
-			;;
-		node.smanager)
-			config_change node.smanager $2
-			;;
-		node.ipfs)
-			config_change node.ipfs $2
-			;;
-		chain.name)
-			shift
-			config_change chain.name $@
-			;;
-		identity.backup)
-			config_change identity.backup $2
-			;;
-		identity.password)
-			config_change identity.password $2
+		set)
+			config_set_all
 			;;
 		*)
 			config_help
