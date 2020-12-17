@@ -6,7 +6,9 @@ builddir=$basedir/build
 
 source $scriptdir/utils.sh
 export EX_SWORKER_ARGS=''
- 
+
+########################################base################################################
+
 start()
 {
 	$scriptdir/gen_config.sh
@@ -141,105 +143,6 @@ stop()
 
 	help
 	return 1
-}
-
-logs_help()
-{
-cat << EOF
-Usage: crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
-
-Fetch the logs of a service
-
-Options:
-      --details        Show extra details provided to logs
-  -f, --follow         Follow log output
-      --since string   Show logs since timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
-      --tail string    Number of lines to show from the end of the logs (default "all")
-  -t, --timestamps     Show timestamps
-      --until string   Show logs before a timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
-EOF
-}
-
-logs()
-{
-	local name="${!#}"
-	local array=( "$@" )
-	local logs_help_flag=0
-	unset "array[${#array[@]}-1]"
-
-	if [ x"$name" == x"chain" ]; then
-		check_docker_status crust
-		if [ $? -eq 1 ]; then
-			log_info "Service crust chain is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f crust
-		logs_help_flag=$?
-	elif [ x"$name" == x"api" ]; then
-		check_docker_status crust-api
-		if [ $? -eq 1 ]; then
-			log_info "Service crust API is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f crust-api
-		logs_help_flag=$?
-	elif [ x"$name" == x"sworker" ]; then
-		local a_or_b=`cat $basedir/etc/sWorker.ab`
-		check_docker_status crust-sworker-$a_or_b
-		if [ $? -eq 1 ]; then
-			log_info "Service crust sworker is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f crust-sworker-$a_or_b
-		logs_help_flag=$?
-	elif [ x"$name" == x"ipfs" ]; then
-		check_docker_status ipfs
-		if [ $? -eq 1 ]; then
-			log_info "Service ipfs is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f ipfs
-		logs_help_flag=$?
-	elif [ x"$name" == x"smanager" ]; then
-		check_docker_status crust-smanager
-		if [ $? -eq 1 ]; then
-			log_info "Service crust smanager is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f crust-smanager
-		logs_help_flag=$?
-	elif [ x"$name" == x"sworker-a" ]; then
-		check_docker_status crust-sworker-a
-		if [ $? -eq 1 ]; then
-			log_info "Service crust sworker-a is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f crust-sworker-a
-		logs_help_flag=$?
-	elif [ x"$name" == x"sworker-b" ]; then
-		check_docker_status crust-sworker-b
-		if [ $? -eq 1 ]; then
-			log_info "Service crust sworker-b is not started now"
-			return 0
-		fi
-		docker logs ${array[@]} -f crust-sworker-b
-		logs_help_flag=$?
-	elif [ x"$name" == x"sworker-upshell" ]; then
-		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-		if [ x"$upgrade_pid" == x"" ]; then
-			log_info "Service crust sworker upgrade shell is not started now"
-			return 0
-		fi
-		tail -f $basedir/logs/upgrade.log
-	else
-		logs_help
-		return 1
-	fi
-
-	if [ $logs_help_flag -ne 0 ]; then
-		logs_help
-		return 1
-	fi
 }
 
 start_chain()
@@ -537,6 +440,109 @@ reload() {
 	return 1
 }
 
+########################################logs################################################
+
+logs_help()
+{
+cat << EOF
+Usage: crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
+
+Fetch the logs of a service
+
+Options:
+      --details        Show extra details provided to logs
+  -f, --follow         Follow log output
+      --since string   Show logs since timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
+      --tail string    Number of lines to show from the end of the logs (default "all")
+  -t, --timestamps     Show timestamps
+      --until string   Show logs before a timestamp (e.g. 2013-01-02T13:23:37) or relative (e.g. 42m for 42 minutes)
+EOF
+}
+
+logs()
+{
+	local name="${!#}"
+	local array=( "$@" )
+	local logs_help_flag=0
+	unset "array[${#array[@]}-1]"
+
+	if [ x"$name" == x"chain" ]; then
+		check_docker_status crust
+		if [ $? -eq 1 ]; then
+			log_info "Service crust chain is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f crust
+		logs_help_flag=$?
+	elif [ x"$name" == x"api" ]; then
+		check_docker_status crust-api
+		if [ $? -eq 1 ]; then
+			log_info "Service crust API is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f crust-api
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker" ]; then
+		local a_or_b=`cat $basedir/etc/sWorker.ab`
+		check_docker_status crust-sworker-$a_or_b
+		if [ $? -eq 1 ]; then
+			log_info "Service crust sworker is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f crust-sworker-$a_or_b
+		logs_help_flag=$?
+	elif [ x"$name" == x"ipfs" ]; then
+		check_docker_status ipfs
+		if [ $? -eq 1 ]; then
+			log_info "Service ipfs is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f ipfs
+		logs_help_flag=$?
+	elif [ x"$name" == x"smanager" ]; then
+		check_docker_status crust-smanager
+		if [ $? -eq 1 ]; then
+			log_info "Service crust smanager is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f crust-smanager
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker-a" ]; then
+		check_docker_status crust-sworker-a
+		if [ $? -eq 1 ]; then
+			log_info "Service crust sworker-a is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f crust-sworker-a
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker-b" ]; then
+		check_docker_status crust-sworker-b
+		if [ $? -eq 1 ]; then
+			log_info "Service crust sworker-b is not started now"
+			return 0
+		fi
+		docker logs ${array[@]} -f crust-sworker-b
+		logs_help_flag=$?
+	elif [ x"$name" == x"sworker-upshell" ]; then
+		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
+		if [ x"$upgrade_pid" == x"" ]; then
+			log_info "Service crust sworker upgrade shell is not started now"
+			return 0
+		fi
+		tail -f $basedir/logs/upgrade.log
+	else
+		logs_help
+		return 1
+	fi
+
+	if [ $logs_help_flag -ne 0 ]; then
+		logs_help
+		return 1
+	fi
+}
+
+#######################################status################################################
+
 status()
 {
 	if [ x"$1" == x"chain" ]; then
@@ -742,20 +748,7 @@ cat << EOF
 EOF
 }
 
-help()
-{
-cat << EOF
-Usage:
-    help                                         show help information
-    start {chain|api|sworker|smanager|ipfs}      start all crust service
-    stop {chain|api|sworker|smanager|ipfs}       stop all crust service or stop one service
-
-    status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
-    reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
-    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
-    tools {...}                                  use 'crust tools help' for more details
-EOF
-}
+#######################################tools################################################
 
 tools_help()
 {
@@ -930,7 +923,150 @@ tools()
 			tools_help
 	esac
 }
- 
+
+#########################################config################################################
+
+config_help()
+{
+cat << EOF
+Usage:
+    help                                  show help information
+    show                                  show all configurations
+
+    mode {isolation|owner|member}         default: isolation; the mode of this crust node, more details in crust wiki
+    chain.name {name}                     default: crust-node; change name of chain
+    
+    identity.backup '{backup}'            change the backup of chain controller account, single quotes are needed before and after backup
+    identity.password {password}          change the password of chain controller account
+
+    node.sworker {enable|disable}         default: enable; enable or disable sworker service
+    node.smanager {enable|disable}        default: enable; enable or disable smanager service
+    node.ipfs {enable|disable}            default: enable; enable or disable ipfs service
+EOF
+}
+
+config_show()
+{
+	cat $basedir/config.yaml
+}
+
+config_change()
+{
+	case "$1" in
+		mode)
+			if [ x"$2" == x"isolation" ] || [ x"$2" == x"member" ]; then
+				sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
+				sed -i '8c \\  smanager: "enable"' $basedir/config.yaml &>/dev/null
+				sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
+			elif [ x"$2" == x"leader" ]; then
+				sed -i '6c \\  sworker: "disable"' $basedir/config.yaml &>/dev/null
+				sed -i '8c \\  smanager: "disable"' $basedir/config.yaml &>/dev/null
+				sed -i '10c \\  ipfs: "disable"' $basedir/config.yaml &>/dev/null
+			else
+				config_help
+				return 1
+			fi
+			;;
+		node.sworker)
+			if [ x"$2" != x"enable" ] && [ x"$2" != x"disable" ]; then
+				config_help
+				return 1
+			fi
+			sed -i '6c \\  sworker: "'$2'"' $basedir/config.yaml &>/dev/null
+			;;
+		node.smanager)
+			if [ x"$2" != x"enable" ] && [ x"$2" != x"disable" ]; then
+				config_help
+				return 1
+			fi
+			sed -i '8c \\  smanager: "'$2'"' $basedir/config.yaml &>/dev/null
+			;;
+		node.ipfs)
+			if [ x"$2" != x"enable" ] && [ x"$2" != x"disable" ]; then
+				config_help
+				return 1
+			fi
+			sed -i '10c \\  ipfs: "'$2'"' $basedir/config.yaml &>/dev/null
+			;;
+		chain.name)
+			if [ x"$2" == x"" ]; then
+				config_help
+				return 1
+			fi
+			shift
+			local name=`echo $@`
+			sed -i "22c \\  name: \"$name\"" $basedir/config.yaml &>/dev/null
+			;;
+		identity.backup)
+			if [ x"$2" == x"" ]; then
+				config_help
+				return 1
+			fi
+			sed -i "15c \\  backup: '$2'" $basedir/config.yaml &>/dev/null
+			;;
+		identity.password)
+			if [ x"$2" == x"" ]; then
+				config_help
+				return 1
+			fi
+			sed -i '17c \\  password: "'$2'"' $basedir/config.yaml &>/dev/null
+			;;
+		*)
+			log_err "config change error"
+			return 1
+	esac
+}
+
+config()
+{
+	case "$1" in
+		show)
+			config_show
+			;;
+		mode)
+			config_change mode $2
+			;;
+		node.sworker)
+			config_change node.sworker $2
+			;;
+		node.smanager)
+			config_change node.smanager $2
+			;;
+		node.ipfs)
+			config_change node.ipfs $2
+			;;
+		chain.name)
+			shift
+			config_change chain.name $@
+			;;
+		identity.backup)
+			config_change identity.backup $2
+			;;
+		identity.password)
+			config_change identity.password $2
+			;;
+		*)
+			config_help
+	esac
+}
+
+######################################main entrance############################################
+
+help()
+{
+cat << EOF
+Usage:
+    help                                         show help information
+    start {chain|api|sworker|smanager|ipfs}      start all crust service
+    stop {chain|api|sworker|smanager|ipfs}       stop all crust service or stop one service
+
+    status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
+    reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
+    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
+    tools {...}                                  use 'crust tools help' for more details
+EOF
+}
+
 case "$1" in
 	start)
 		start $2
@@ -947,6 +1083,10 @@ case "$1" in
 	logs)
 		shift
 		logs $@
+		;;
+	config)
+		shift
+		config $@
 		;;
 	tools)
 		shift
