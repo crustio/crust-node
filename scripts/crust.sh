@@ -775,7 +775,7 @@ Total space: ${data_folder_info[1]}
 Used space: ${data_folder_info[2]}
 Avail space: ${data_folder_info[3]}
 
--->Files folder (for ipfs and srd)<--
+-->Files folder (for ipfs and data of sworker)<--
 Path: /opt/crust/data/files
 File system: ${file_folder_info[0]}
 Total space: ${file_folder_info[1]}
