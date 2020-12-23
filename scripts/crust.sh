@@ -814,11 +814,6 @@ change_srd()
 		return 1
 	fi
 
-	if [ x"$1" == x"0" ]; then 
-		log_err "Srd change number can't be zero"
-		return 1
-	fi
-
 	local a_or_b=`cat $basedir/etc/sWorker.ab`
 	check_docker_status crust-sworker-$a_or_b
 	if [ $? -ne 0 ]; then
@@ -830,11 +825,6 @@ change_srd()
 		log_err "No sworker configuration file"
 		return 1
 	fi
-
-	local backup=`cat $builddir/sworker/sworker_config.json | jq .chain.backup`
-	backup=${backup//\\/}
-	backup=${backup%?}
-	backup=${backup:1}
 
 	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
 	base_url=${base_url%?}
