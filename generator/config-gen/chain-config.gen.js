@@ -26,7 +26,9 @@ async function genChainComposeConfig(config) {
     '--ws-port',
     '19944',
     '--execution',
-    'WASM'
+    'WASM',
+    '--wasm-execution',
+    'compiled'
   ]
 
   if (config.node.chain == "authority") {
