@@ -989,7 +989,7 @@ config_set_all()
 		return
 	else
 		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
-		sed -i '8c \\  smanager: "enable"' $basedir/config.yaml &>/dev/null
+		sed -i '8c \\  smanager: "'$mode'"' $basedir/config.yaml &>/dev/null
 		sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
 		log_success "Set crust node mode: '$mode' successfully"
 	fi

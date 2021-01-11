@@ -1,12 +1,12 @@
 ## node configurations
 node:
-  ## the type of crust, for example: authority, full
+  ## the type of crust: authority/full
   chain: "authority"
-  ## enable or disable sworker
+  ## the type of sworker: disable/enable
   sworker: "enable"
-  ## enable or disable smanager
+  ## the type of smanager: disable/isolation/member
   smanager: "disable"
-  ## enable or disable ipfs
+  ## the type of ipfs: disable/enable
   ipfs: "disable"
 
 ## identity configurations
