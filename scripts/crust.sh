@@ -196,10 +196,12 @@ start_sworker()
 			return 1
 		fi
 
-		$scriptdir/install_sgx_driver.sh
-		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Install sgx dirver failed"
-			return 1
+		if [ -f "$scriptdir/install_sgx_driver.sh" ]; then
+			$scriptdir/install_sgx_driver.sh
+			if [ $? -ne 0 ]; then
+				log_err "[ERROR] Install sgx dirver failed"
+				return 1
+			fi
 		fi
 
 		if [ ! -e "/dev/isgx" ]; then
@@ -218,10 +220,12 @@ start_sworker()
 			kill -9 $upgrade_pid
 		fi
 
-		nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
-		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start crust-sworker upgrade failed"
-			return 1
+		if [ -f "$scriptdir/upgrade.sh" ]; then
+			nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
+			if [ $? -ne 0 ]; then
+				log_err "[ERROR] Start crust-sworker upgrade failed"
+				return 1
+			fi
 		fi
 	fi
 	return 0
