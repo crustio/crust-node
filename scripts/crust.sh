@@ -763,7 +763,7 @@ Crust tools usage:
     rotate-keys                                                generate session key of chain node
     workload                                                   show workload information
     file-info {cid}                                            show all files information or one file details
-    upgrade-reload {chain|api|smanager|ipfs|c-gen|sworker}     upgrade one docker image and reload the service
+    upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
 EOF
@@ -875,32 +875,28 @@ file_info()
 	fi
 }
 
-upgrade_reload()
+upgrade_image()
 {
 	if [ x"$1" == x"chain" ]; then
 		upgrade_docker_image crustio/crust
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
-		reload chain
 	elif [ x"$1" == x"api" ]; then
 		upgrade_docker_image crustio/crust-api
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
-		reload api
 	elif [ x"$1" == x"smanager" ]; then
 		upgrade_docker_image crustio/crust-smanager
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
-		reload smanager
 	elif [ x"$1" == x"ipfs" ]; then
 		upgrade_docker_image ipfs/go-ipfs crustio/go-ipfs
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
-		reload api
 	elif [ x"$1" == x"c-gen" ]; then
 		upgrade_docker_image crustio/config-generator
 		if [ $? -ne 0 ]; then
@@ -911,7 +907,6 @@ upgrade_reload()
 		if [ $? -ne 0 ]; then
 			return 1
 		fi
-		reload sworker
 	else
 		tools_help
 	fi
@@ -945,8 +940,8 @@ tools()
 		file-info)
 			file_info $2
 			;;
-		upgrade-reload)
-			upgrade_reload $2
+		upgrade-image)
+			upgrade_image $2
 			;;
 		ipfs)
 			shift
