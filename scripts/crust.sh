@@ -765,6 +765,7 @@ Crust tools usage:
     file-info {cid}                                            show all files information or one file details
     upgrade-reload {chain|api|smanager|ipfs|c-gen|sworker}     upgrade one docker image and reload the service
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'crust tools change-srd 100', 'crust tools change-srd -50'
+    ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
 EOF
 }
 
@@ -916,6 +917,16 @@ upgrade_reload()
 	fi
 }
 
+ipfs_cmd()
+{
+	check_docker_status ipfs
+	if [ $? -ne 0 ]; then
+		log_info "Service ipfs is not started or exited now"
+		return 0
+	fi
+	docker exec -i ipfs ipfs $@
+}
+
 tools()
 {
 	case "$1" in
@@ -936,6 +947,10 @@ tools()
 			;;
 		upgrade-reload)
 			upgrade_reload $2
+			;;
+		ipfs)
+			shift
+			ipfs_cmd $@
 			;;
 		*)
 			tools_help
@@ -1057,7 +1072,7 @@ Usage:
     reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
     logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
     
-	tools {...}                                  use 'crust tools help' for more details
+    tools {...}                                  use 'crust tools help' for more details
     config {...}                                 configuration operations, use 'crust config help' for more details         
 EOF
 }
