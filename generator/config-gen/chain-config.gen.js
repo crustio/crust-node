@@ -24,8 +24,6 @@ async function genChainComposeConfig(config) {
     '19933',
     '--ws-port',
     '19944',
-    '--execution',
-    'WASM',
     '--wasm-execution',
     'compiled'
   ]
@@ -35,7 +33,7 @@ async function genChainComposeConfig(config) {
   }
 
   if (config.node.chain == "full") {
-    args.push('--pruning', '5400')
+    args.push('--pruning', '8000')
   }
 
   return {
