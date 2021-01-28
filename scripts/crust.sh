@@ -1002,7 +1002,7 @@ config_set_all()
 		log_success "Set crust node mode: '$mode' successfully"
 		log_success "Set configurations done"
 		return
-	else if [ x"$mode" == x"isolation" ]; then
+	elif [ x"$mode" == x"isolation" ]; then
 		sed -i '4c \\  chain: "authority"' $basedir/config.yaml &>/dev/null
 		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
 		sed -i '8c \\  smanager: "'$mode'"' $basedir/config.yaml &>/dev/null
