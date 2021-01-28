@@ -995,13 +995,21 @@ config_set_all()
 		fi
 	done
 	if [ x"$mode" == x"owner" ]; then
+		sed -i '4c \\  chain: "authority"' $basedir/config.yaml &>/dev/null
 		sed -i '6c \\  sworker: "disable"' $basedir/config.yaml &>/dev/null
 		sed -i '8c \\  smanager: "disable"' $basedir/config.yaml &>/dev/null
 		sed -i '10c \\  ipfs: "disable"' $basedir/config.yaml &>/dev/null
 		log_success "Set crust node mode: '$mode' successfully"
 		log_success "Set configurations done"
 		return
+	else if [ x"$mode" == x"isolation" ]; then
+		sed -i '4c \\  chain: "authority"' $basedir/config.yaml &>/dev/null
+		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
+		sed -i '8c \\  smanager: "'$mode'"' $basedir/config.yaml &>/dev/null
+		sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
+		log_success "Set crust node mode: '$mode' successfully"
 	else
+		sed -i '4c \\  chain: "full"' $basedir/config.yaml &>/dev/null
 		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
 		sed -i '8c \\  smanager: "'$mode'"' $basedir/config.yaml &>/dev/null
 		sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
