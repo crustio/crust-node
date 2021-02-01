@@ -848,7 +848,7 @@ set_srd_ratio()
 		return 1
 	fi
 
-	if [ $1 -le 0 ] || [ $1 -ge 95 ]; then
+	if [ $1 -lt 0 ] || [ $1 -gt 95 ]; then
 		log_err "The range of set srd ratio is 0 ~ 95"
 		tools_help
 		return 1
