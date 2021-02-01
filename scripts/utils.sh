@@ -17,7 +17,7 @@ function log_success()
 
 function log_err()
 {
-    echo_c 35 "$1"
+    echo_c 35 "ERROR: $1"
 }
 
 function upgrade_docker_image()
