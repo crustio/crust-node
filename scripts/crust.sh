@@ -1056,7 +1056,12 @@ config_set_all()
 	local identity_backup=""
 	while true
 	do
-		read -p "Enter the backup of controller account: " identity_backup
+		if [ x"$mode" == x"member" ]; then
+			read -p "Enter the backup of account: " identity_backup
+		else
+			read -p "Enter the backup of controller account: " identity_backup
+		fi
+
 		identity_backup=`echo "$identity_backup"`
 		if [ x"$identity_backup" != x"" ]; then
 			break
@@ -1070,7 +1075,12 @@ config_set_all()
 	local identity_password=""
 	while true
 	do
-		read -p "Enter the password of controller account: " identity_password
+		if [ x"$mode" == x"member" ]; then
+			read -p "Enter the password of account: " identity_password
+		else
+			read -p "Enter the password of controller account: " identity_password
+		fi
+
 		identity_password=`echo "$identity_password"`
 		if [ x"$identity_password" != x"" ]; then
 			break
