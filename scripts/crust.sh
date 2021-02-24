@@ -764,7 +764,7 @@ Crust tools usage:
     workload                                                   show workload information
     file-info {cid}                                            show all files information or one file details
     upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
-    set-srd-ratio {ratio}                                      set SRD raito, default is 70%, range is 0% - 95%, for example 'set-srd-ratio 75'
+    set-srd-ratio {ratio}                                      set SRD raito, default is 99%, range is 0% - 99%, for example 'set-srd-ratio 75'
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
 EOF
@@ -848,8 +848,8 @@ set_srd_ratio()
 		return 1
 	fi
 
-	if [ $1 -lt 0 ] || [ $1 -gt 95 ]; then
-		log_err "The range of set srd ratio is 0 ~ 95"
+	if [ $1 -lt 0 ] || [ $1 -gt 99 ]; then
+		log_err "The range of set srd ratio is 0 ~ 99"
 		tools_help
 		return 1
 	fi
