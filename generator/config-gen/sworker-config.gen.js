@@ -6,6 +6,7 @@ async function genSworkerConfig(config, outputCfg) {
     data_path: "/opt/crust/data/files/sworker_data",
     base_path: "/opt/crust/data/sworker",
     base_url: "http://0.0.0.0:12222/api/v0",
+    ipfs_url :  "http://0.0.0.0:5001/api/v0",
     chain: getSharedChainConfig(config),
   }
   return {
@@ -16,6 +17,9 @@ async function genSworkerConfig(config, outputCfg) {
     }, {
       required: true,
       path: '/opt/crust/data/files/sworker_data',
+    }, {
+      required: true,
+      path: '/opt/crust/data/files/sworker_temp',
     }],
   }
 }
@@ -24,6 +28,7 @@ async function genSworkerComposeConfig(config) {
   let tempVolumes = [
     '/opt/crust/data/sworker:/opt/crust/data/sworker',
     '/opt/crust/data/files/sworker_data:/opt/crust/data/files/sworker_data',
+    '/opt/crust/data/files/sworker_temp:/opt/crust/data/files/sworker_temp',
     './sworker:/config'
   ]
 
