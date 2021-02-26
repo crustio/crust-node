@@ -24,8 +24,7 @@ async function genSworkerConfig(config, outputCfg) {
 async function genSworkerComposeConfig(config) {
   let tempVolumes = [
     '/opt/crust/data/sworker:/opt/crust/data/sworker',
-    '/opt/crust/data/files/sworker_data:/opt/crust/data/files/sworker_data',
-    '/opt/crust/data/files/sworker_temp:/opt/crust/data/files/sworker_temp',
+    '/opt/crust/data/files/sworker_data:/opt/crust/data/files',
     './sworker:/config'
   ]
 
