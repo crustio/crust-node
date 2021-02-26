@@ -16,10 +16,7 @@ async function genSworkerConfig(config, outputCfg) {
       path: '/opt/crust/data/sworker',
     }, {
       required: true,
-      path: '/opt/crust/data/files/sworker_data',
-    }, {
-      required: true,
-      path: '/opt/crust/data/files/sworker_temp',
+      path: '/opt/crust/data/files',
     }],
   }
 }
