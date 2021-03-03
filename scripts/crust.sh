@@ -976,6 +976,7 @@ sworker_ab_upgrade()
 				printf "Crust chain is syncing, please wait 60s, now is %s\r" "${i}s"
 				sleep 1
 			done
+			printf ""
 			continue
 		fi
 		break
@@ -1017,7 +1018,7 @@ sworker_ab_upgrade()
 	fi
 
 	# Upgrade sworker images
-	local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
+	local old_image=(`docker images | grep '^\b'crustio/crust-sworker'\b ' | grep 'latest'`)
 	old_image=${old_image[2]}
 
 	local region=`cat $basedir/etc/region.conf`
@@ -1037,7 +1038,7 @@ sworker_ab_upgrade()
 		return 1
 	fi
 
-	local new_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
+	local new_image=(`docker images | grep '^\b'crustio/crust-sworker'\b ' | grep 'latest'`)
 	new_image=${new_image[2]}
 	if [ x"$old_image" = x"$new_image" ]; then
 		log_info "The current sworker docker image is already the latest"
@@ -1080,6 +1081,7 @@ sworker_ab_upgrade()
 			printf "Sworker is upgrading. Wait 240s for next check...%s\r" "${i}s"
 			sleep 1
 		done
+		printf ""
 
 		# Get code from sworker
 		local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
