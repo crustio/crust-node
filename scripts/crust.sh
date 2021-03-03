@@ -430,7 +430,7 @@ reload() {
 logs_help()
 {
 cat << EOF
-Usage: crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
+Usage: crust logs [OPTIONS] {chain|api|sworker|sworker-a|sworker-b|smanager|ipfs}
 
 Fetch the logs of a service
 
@@ -999,13 +999,13 @@ sworker_ab_upgrade()
 	# Get code from sworker
 	local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
 	if [ x"$id_info" = x"" ]; then
-		log_err "Please check sworker logs"
+		log_err "Please check sworker logs to find more information"
 		return 1
 	fi
 
 	local mrenclave=`echo $id_info | jq .mrenclave`
-	if [ x"$mrenclave" = x"" ]; then
-		log_err "Please check sworker logs"
+	if [ x"$mrenclave" = x"" ] || [ ! ${#mrenclave} -eq 66 ]; then
+		log_err "Please check sworker logs to find more information"
 		return 1
 	fi
 	mrenclave=`echo ${mrenclave: 1: 64}`
@@ -1271,16 +1271,16 @@ help()
 {
 cat << EOF
 Usage:
-    help                                         show help information
-    start {chain|api|sworker|smanager|ipfs}      start all crust service
-    stop {chain|api|sworker|smanager|ipfs}       stop all crust service or stop one service
+    help                                                             show help information
+    start {chain|api|sworker|smanager|ipfs}                          start all crust service
+    stop {chain|api|sworker|smanager|ipfs}                           stop all crust service or stop one service
 
-    status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
-    reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
-    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
+    status {chain|api|sworker|smanager|ipfs}                         check status or reload one service status
+    reload {chain|api|sworker|smanager|ipfs}                         reload all service or reload one service
+    logs {chain|api|sworker|sworker-a|sworker-b|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
     
-    tools {...}                                  use 'crust tools help' for more details
-    config {...}                                 configuration operations, use 'crust config help' for more details         
+    tools {...}                                                      use 'crust tools help' for more details
+    config {...}                                                     configuration operations, use 'crust config help' for more details         
 EOF
 }
 
