@@ -1,6 +1,7 @@
 #!/bin/bash
 scriptdir=$(cd `dirname $0`;pwd)
 basedir=$(cd $scriptdir/..;pwd)
+. $scriptdir/utils.sh
 
 is_16=`cat /etc/issue | grep 16.04`
 is_18=`cat /etc/issue | grep 18.04`
@@ -21,8 +22,6 @@ else
     log_err "Crust sworker can't support this system!"
     exit 1
 fi
-
-. $scriptdir/utils.sh
 
 log_info "Download sgx driver"
 if [ -f "$driverbin" ]; then
