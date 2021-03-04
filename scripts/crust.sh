@@ -214,31 +214,12 @@ start_sworker()
 			log_err "[ERROR] Start crust-sworker-$a_or_b failed"
 			return 1
 		fi
-
-		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-		if [ x"$upgrade_pid" != x"" ]; then
-			kill -9 $upgrade_pid
-		fi
-
-		if [ -f "$scriptdir/upgrade.sh" ]; then
-			nohup $scriptdir/upgrade.sh &>$basedir/logs/upgrade.log &
-			if [ $? -ne 0 ]; then
-				log_err "[ERROR] Start crust-sworker upgrade failed"
-				return 1
-			fi
-		fi
 	fi
 	return 0
 }
 
 stop_sworker()
 {
-	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-	if [ x"$upgrade_pid" != x"" ]; then
-		log_info "Stopping crust sworker upgrade shell"
-		kill -9 $upgrade_pid &>/dev/null
-	fi
-
 	check_docker_status crust-sworker-a
 	if [ $? -ne 1 ]; then
 		log_info "Stopping crust sworker A service"
@@ -449,7 +430,7 @@ reload() {
 logs_help()
 {
 cat << EOF
-Usage: crust logs [OPTIONS] {chain|api|sworker|smanager|ipfs}
+Usage: crust logs [OPTIONS] {chain|api|sworker|sworker-a|sworker-b|smanager|ipfs}
 
 Fetch the logs of a service
 
@@ -527,13 +508,6 @@ logs()
 		fi
 		docker logs ${array[@]} -f crust-sworker-b
 		logs_help_flag=$?
-	elif [ x"$name" == x"sworker-upshell" ]; then
-		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-		if [ x"$upgrade_pid" == x"" ]; then
-			log_info "Service crust sworker upgrade shell is not started now"
-			return 0
-		fi
-		tail -f $basedir/logs/upgrade.log
 	else
 		logs_help
 		return 1
@@ -674,7 +648,6 @@ sworker_status()
 {
 	local sworker_a_status="stop"
 	local sworker_b_status="stop"
-	local upgrade_shell_status="stop"
 	local a_or_b=`cat $basedir/etc/sWorker.ab`
 
 	check_docker_status crust-sworker-a
@@ -693,18 +666,12 @@ sworker_status()
 		sworker_b_status="exited"
 	fi
 
-	local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-	if [ x"$upgrade_pid" != x"" ]; then
-		upgrade_shell_status="running->${upgrade_pid}"
-	fi
-
 cat << EOF
 -----------------------------------------
     Service                    Status
 -----------------------------------------
     sworker-a                  ${sworker_a_status}
     sworker-b                  ${sworker_b_status}
-    upgrade-shell              ${upgrade_shell_status}
     main-progress              ${a_or_b}
 -----------------------------------------
 EOF
@@ -767,6 +734,7 @@ Crust tools usage:
     set-srd-ratio {ratio}                                      set SRD raito, default is 99%, range is 0% - 99%, for example 'set-srd-ratio 75'
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
+    sworker-ab-upgrade                                         sworker AB upgrade
 EOF
 }
 
@@ -956,6 +924,194 @@ ipfs_cmd()
 	docker exec -i ipfs ipfs $@
 }
 
+sworker_ab_upgrade()
+{
+	# Check sworker
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	if [ $? -ne 0 ]; then
+		log_err "Service crust sWorker is not started or exited now"
+		return 1
+	fi
+
+	log_info "Start sworker A/B upgragde...."
+
+	# Get configurations
+	local config_file=$builddir/sworker/sworker_config.json
+	if [ x"$config_file" = x"" ]; then
+		log_err "please give right config file"
+		return 1
+	fi
+
+	api_base_url=`cat $config_file | jq .chain.base_url`
+	sworker_base_url=`cat $config_file | jq .base_url`
+
+	if [ x"$api_base_url" = x"" ] || [ x"$sworker_base_url" = x"" ]; then
+		log_err "please give right config file"
+		return 1
+	fi
+
+	api_base_url=`echo "$api_base_url" | sed -e 's/^"//' -e 's/"$//'`
+	sworker_base_url=`echo "$sworker_base_url" | sed -e 's/^"//' -e 's/"$//'`
+
+	log_info "Read configurations success."
+
+	# Check chain
+	while :
+	do
+		system_health=`curl --max-time 30 $api_base_url/system/health 2>/dev/null`
+		if [ x"$system_health" = x"" ]; then
+			log_err "Service crust chain or api is not started or exited now"
+			return 1
+		fi
+
+		is_syncing=`echo $system_health | jq .isSyncing`
+		if [ x"$is_syncing" = x"" ]; then
+			log_err "Service crust api dose not connet to crust chain"
+			return 1
+		fi
+
+		if [ x"$is_syncing" = x"true" ]; then
+			for i in $(seq 1 60); do
+				printf "Crust chain is syncing, please wait 60s, now is %s\r" "${i}s"
+				sleep 1
+			done
+			printf ""
+			continue
+		fi
+		break
+	done
+
+	# Get code from chain
+	local code=`curl --max-time 30 $api_base_url/swork/code 2>/dev/null`
+	if [ x"$code" = x"" ]; then
+		log_err "Service crust chain or api is not started or exited now"
+		return 1
+	fi
+
+	if [[ ! "$code" =~ ^\"0x.* ]]; then
+		log_err "Service crust chain or api is not started or exited now"
+		return 1
+	fi
+
+	code=`echo ${code: 3: 64}`
+	log_info "sWorker code on chain: $code"
+
+	# Get code from sworker
+	local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
+	if [ x"$id_info" = x"" ]; then
+		log_err "Please check sworker logs to find more information"
+		return 1
+	fi
+
+	local mrenclave=`echo $id_info | jq .mrenclave`
+	if [ x"$mrenclave" = x"" ] || [ ! ${#mrenclave} -eq 66 ]; then
+		log_err "Please check sworker logs to find more information"
+		return 1
+	fi
+	mrenclave=`echo ${mrenclave: 1: 64}`
+	log_info "sWorker self code: $mrenclave"
+
+	if [ x"$mrenclave" == x"$code" ]; then
+		log_success "sWorker is already latest"
+		return 0
+	fi
+
+	# Upgrade sworker images
+	local old_image=(`docker images | grep '^\b'crustio/crust-sworker'\b ' | grep 'latest'`)
+	old_image=${old_image[2]}
+
+	local region=`cat $basedir/etc/region.conf`
+	local res=0
+	if [ x"$region" == x"cn" ]; then
+		local aliyun_address=registry.cn-hangzhou.aliyuncs.com
+		docker pull $aliyun_address/crustio/crust-sworker:latest
+		res=$(($?|$res))
+		docker tag $aliyun_address/crustio/crust-sworker:latest crustio/crust-sworker:latest
+	else
+		docker pull crustio/crust-sworker:latest
+		res=$(($?|$res))
+	fi
+
+	if [ $res -ne 0 ]; then
+		log_err "Download sworker docker image failed"
+		return 1
+	fi
+
+	local new_image=(`docker images | grep '^\b'crustio/crust-sworker'\b ' | grep 'latest'`)
+	new_image=${new_image[2]}
+	if [ x"$old_image" = x"$new_image" ]; then
+		log_info "The current sworker docker image is already the latest"
+		return 1
+	fi
+
+	# Start A/B
+	if [ x"$a_or_b" = x"a" ]; then
+		a_or_b='b'
+	else
+		a_or_b='a'
+	fi
+
+	check_docker_status crust-sworker-a
+	local resa=$?
+	check_docker_status crust-sworker-b
+	local resb=$?
+	if [ $resa -eq 0 ] && [ $resb -eq 0 ] ; then
+		log_info "sWorker A/B upgrade is already in progress"
+	else
+		docker stop crust-sworker-$a_or_b &>/dev/null
+		docker rm crust-sworker-$a_or_b &>/dev/null
+		EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		if [ $? -ne 0 ]; then
+			log_err "Setup new sWorker failed"
+			docker tag $old_image crustio/crust-sworker:latest
+			return 1
+		fi
+	fi
+
+	# Change back to older image
+	docker tag $old_image crustio/crust-sworker:latest
+	log_info "Please do not close the program and wait patiently."
+	log_info "If you need more information, please use other terminal to execute 'sudo crust logs sworker-a' and 'sudo crust logs sworker-b'"
+
+	# Check A/B status
+	while :
+	do
+		for i in $(seq 1 240); do
+			printf "Sworker is upgrading. Wait 240s for next check...%s\r" "${i}s"
+			sleep 1
+		done
+		printf ""
+
+		# Get code from sworker
+		local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
+		if [ x"$id_info" = x"" ]; then
+			continue
+		fi
+
+		local mrenclave=`echo $id_info | jq .mrenclave`
+		if [ x"$mrenclave" = x"" ]; then
+			continue
+		fi
+		mrenclave=`echo ${mrenclave: 1: 64}`
+
+		if [ x"$mrenclave" == x"$code" ]; then
+			break
+		fi
+	done
+	
+	# Set new information
+	docker tag $new_image crustio/crust-sworker:latest
+
+	if [ x"$a_or_b" = x"a" ]; then
+		sed -i 's/b/a/g' $basedir/etc/sWorker.ab
+	else
+		sed -i 's/a/b/g' $basedir/etc/sWorker.ab
+	fi
+
+	log_success "Sworker update success, setup new sworker 'crust-sworker-$a_or_b'"
+}
+
 tools()
 {
 	case "$1" in
@@ -979,6 +1135,9 @@ tools()
 			;;
 		upgrade-image)
 			upgrade_image $2
+			;;
+		sworker-ab-upgrade)
+			sworker_ab_upgrade
 			;;
 		ipfs)
 			shift
@@ -1114,16 +1273,16 @@ help()
 {
 cat << EOF
 Usage:
-    help                                         show help information
-    start {chain|api|sworker|smanager|ipfs}      start all crust service
-    stop {chain|api|sworker|smanager|ipfs}       stop all crust service or stop one service
+    help                                                             show help information
+    start {chain|api|sworker|smanager|ipfs}                          start all crust service
+    stop {chain|api|sworker|smanager|ipfs}                           stop all crust service or stop one service
 
-    status {chain|api|sworker|smanager|ipfs}     check status or reload one service status
-    reload {chain|api|sworker|smanager|ipfs}     reload all service or reload one service
-    logs {chain|api|sworker|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
+    status {chain|api|sworker|smanager|ipfs}                         check status or reload one service status
+    reload {chain|api|sworker|smanager|ipfs}                         reload all service or reload one service
+    logs {chain|api|sworker|sworker-a|sworker-b|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
     
-    tools {...}                                  use 'crust tools help' for more details
-    config {...}                                 configuration operations, use 'crust config help' for more details         
+    tools {...}                                                      use 'crust tools help' for more details
+    config {...}                                                     configuration operations, use 'crust config help' for more details         
 EOF
 }
 
