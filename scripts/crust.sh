@@ -1030,6 +1030,36 @@ sworker_ab_upgrade()
 
 	if [ x"$mrenclave" == x"$code" ]; then
 		log_success "sWorker is already latest"
+		while :
+		do
+			check_docker_status crust-sworker-a
+			local resa=$?
+			check_docker_status crust-sworker-b
+			local resb=$?
+			if [ $resa -eq 0 ] && [ $resb -eq 0 ] ; then
+				sleep 10
+				continue
+			fi
+			break
+		done
+
+		check_docker_status crust-sworker-a
+		if [ $? -eq 0 ]; then
+			local aimage=(`docker ps -a | grep '^\b'crust-sworker-a'\b '`)
+			aimage=${aimage[1]}
+			if [ x"$aimage" != x"crustio/crust-sworker:latest" ]; then
+				docker tag $aimage crustio/crust-sworker:latest
+			fi
+		fi
+
+		check_docker_status crust-sworker-b
+		if [ $? -eq 0 ]; then
+			local bimage=(`docker ps -a | grep '^\b'crust-sworker-b'\b '`)
+			bimage=${bimage[1]}
+			if [ x"$bimage" != x"crustio/crust-sworker:latest" ]; then
+				docker tag $bimage crustio/crust-sworker:latest
+			fi
+		fi		
 		return 0
 	fi
 
