@@ -988,11 +988,11 @@ sworker_ab_upgrade()
 		fi
 
 		if [ x"$is_syncing" = x"true" ]; then
+			printf "\n"
 			for i in $(seq 1 60); do
 				printf "Crust chain is syncing, please wait 60s, now is %s\r" "${i}s"
 				sleep 1
 			done
-			printf ""
 			continue
 		fi
 		break
@@ -1087,32 +1087,27 @@ sworker_ab_upgrade()
 
 	# Change back to older image
 	docker tag $old_image crustio/crust-sworker:latest
-	log_info "Please do not close the program and wait patiently."
+	log_info "Please do not close this program and wait patiently, ."
 	log_info "If you need more information, please use other terminal to execute 'sudo crust logs sworker-a' and 'sudo crust logs sworker-b'"
 
 	# Check A/B status
+	local acc=0
 	while :
 	do
-		for i in $(seq 1 240); do
-			printf "Sworker is upgrading. Wait 240s for next check...%s\r" "${i}s"
-			sleep 1
-		done
-		printf ""
+		printf "Sworker is upgrading, please do not close this program. Wait %s\r" "${acc}s"
+		((acc++))
+		sleep 1
 
 		# Get code from sworker
 		local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
-		if [ x"$id_info" = x"" ]; then
-			continue
-		fi
-
-		local mrenclave=`echo $id_info | jq .mrenclave`
-		if [ x"$mrenclave" = x"" ]; then
-			continue
-		fi
-		mrenclave=`echo ${mrenclave: 1: 64}`
-
-		if [ x"$mrenclave" == x"$code" ]; then
-			break
+		if [ x"$id_info" != x"" ]; then
+			local mrenclave=`echo $id_info | jq .mrenclave`
+			if [ x"$mrenclave" != x"" ]; then
+				mrenclave=`echo ${mrenclave: 1: 64}`
+				if [ x"$mrenclave" == x"$code" ]; then
+					break
+				fi
+			fi
 		fi
 	done
 	
