@@ -728,13 +728,14 @@ Crust tools usage:
     help                                                       show help information
     space-info                                                 show information about data folders
     rotate-keys                                                generate session key of chain node
+    upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
+    sworker-ab-upgrade                                         sworker AB upgrade
     workload                                                   show workload information
     file-info {cid}                                            show all files information or one file details
-    upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
+    delete-file {cid}                                          delete one file
     set-srd-ratio {ratio}                                      set SRD raito, default is 99%, range is 0% - 99%, for example 'set-srd-ratio 75'
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
-    sworker-ab-upgrade                                         sworker AB upgrade
 EOF
 }
 
@@ -875,6 +876,21 @@ file_info()
 	else
 		curl --request POST ''$base_url'/file/info' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}'
 	fi
+}
+
+delete_file()
+{
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	if [ $? -ne 0 ]; then
+		log_info "Service crust sworker is not started or exited now"
+		return 0
+	fi
+
+	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+	base_url=${base_url%?}
+	base_url=${base_url:1}
+	curl --request POST ''$base_url'/storage/delete' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}'
 }
 
 upgrade_image()
@@ -1132,6 +1148,9 @@ tools()
 			;;
 		file-info)
 			file_info $2
+			;;
+		delete-file)
+			delete_file $2
 			;;
 		upgrade-image)
 			upgrade_image $2
