@@ -1139,6 +1139,14 @@ sworker_ab_upgrade()
 				fi
 			fi
 		fi
+
+		# Check upgrade sworker status
+		check_docker_status crust-sworker-$a_or_b
+		if [ $? -ne 0 ]; then
+			printf "\n"
+			log_err "Sworker update failed, please use 'sudo crust logs sworker-a' and 'sudo crust logs sworker-b' to find more details"
+			return 1
+		fi
 	done
 	
 	# Set new information
@@ -1150,6 +1158,7 @@ sworker_ab_upgrade()
 		sed -i 's/a/b/g' $basedir/etc/sWorker.ab
 	fi
 
+	printf "\n"
 	log_success "Sworker update success, setup new sworker 'crust-sworker-$a_or_b'"
 }
 
