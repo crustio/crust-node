@@ -1045,7 +1045,7 @@ sworker_ab_upgrade()
 
 		check_docker_status crust-sworker-a
 		if [ $? -eq 0 ]; then
-			local aimage=(`docker ps -a | grep '^\b'crust-sworker-a'\b '`)
+			local aimage=(`docker ps -a | grep 'crust-sworker-a'`)
 			aimage=${aimage[1]}
 			if [ x"$aimage" != x"crustio/crust-sworker:latest" ]; then
 				docker tag $aimage crustio/crust-sworker:latest
@@ -1054,7 +1054,7 @@ sworker_ab_upgrade()
 
 		check_docker_status crust-sworker-b
 		if [ $? -eq 0 ]; then
-			local bimage=(`docker ps -a | grep '^\b'crust-sworker-b'\b '`)
+			local bimage=(`docker ps -a | grep 'crust-sworker-b'`)
 			bimage=${bimage[1]}
 			if [ x"$bimage" != x"crustio/crust-sworker:latest" ]; then
 				docker tag $bimage crustio/crust-sworker:latest
