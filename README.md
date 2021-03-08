@@ -8,12 +8,11 @@ Official crust node service for running crust protocol.
 
 - Operating system requirements:
 
-  Ubuntu 16.04/18.04
+  Ubuntu 16.04/18.04/20.04
   
 - Other configurations
 
   - **Secure Boot** in BIOS needs to be turned off
-  - Need use ordinary account, **cannot support root account**
 
 ## Install dependencies
 
@@ -34,7 +33,6 @@ sudo crust config set
   - 56666 (for crust API)
   - 12222 (for crust sWorker)
   - 5001 4001 37773 (for IPFS)
-
 
 ```shell
 sudo crust help
