@@ -728,13 +728,14 @@ Crust tools usage:
     help                                                       show help information
     space-info                                                 show information about data folders
     rotate-keys                                                generate session key of chain node
+    upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
+    sworker-ab-upgrade                                         sworker AB upgrade
     workload                                                   show workload information
     file-info {cid}                                            show all files information or one file details
-    upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
+    delete-file {cid}                                          delete one file
     set-srd-ratio {ratio}                                      set SRD raito, default is 99%, range is 0% - 99%, for example 'set-srd-ratio 75'
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
-    sworker-ab-upgrade                                         sworker AB upgrade
 EOF
 }
 
@@ -877,6 +878,21 @@ file_info()
 	fi
 }
 
+delete_file()
+{
+	local a_or_b=`cat $basedir/etc/sWorker.ab`
+	check_docker_status crust-sworker-$a_or_b
+	if [ $? -ne 0 ]; then
+		log_info "Service crust sworker is not started or exited now"
+		return 0
+	fi
+
+	local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+	base_url=${base_url%?}
+	base_url=${base_url:1}
+	curl --request POST ''$base_url'/storage/delete' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}'
+}
+
 upgrade_image()
 {
 	if [ x"$1" == x"chain" ]; then
@@ -972,11 +988,11 @@ sworker_ab_upgrade()
 		fi
 
 		if [ x"$is_syncing" = x"true" ]; then
+			printf "\n"
 			for i in $(seq 1 60); do
 				printf "Crust chain is syncing, please wait 60s, now is %s\r" "${i}s"
 				sleep 1
 			done
-			printf ""
 			continue
 		fi
 		break
@@ -1014,6 +1030,36 @@ sworker_ab_upgrade()
 
 	if [ x"$mrenclave" == x"$code" ]; then
 		log_success "sWorker is already latest"
+		while :
+		do
+			check_docker_status crust-sworker-a
+			local resa=$?
+			check_docker_status crust-sworker-b
+			local resb=$?
+			if [ $resa -eq 0 ] && [ $resb -eq 0 ] ; then
+				sleep 10
+				continue
+			fi
+			break
+		done
+
+		check_docker_status crust-sworker-a
+		if [ $? -eq 0 ]; then
+			local aimage=(`docker ps -a | grep 'crust-sworker-a'`)
+			aimage=${aimage[1]}
+			if [ x"$aimage" != x"crustio/crust-sworker:latest" ]; then
+				docker tag $aimage crustio/crust-sworker:latest
+			fi
+		fi
+
+		check_docker_status crust-sworker-b
+		if [ $? -eq 0 ]; then
+			local bimage=(`docker ps -a | grep 'crust-sworker-b'`)
+			bimage=${bimage[1]}
+			if [ x"$bimage" != x"crustio/crust-sworker:latest" ]; then
+				docker tag $bimage crustio/crust-sworker:latest
+			fi
+		fi		
 		return 0
 	fi
 
@@ -1071,32 +1117,35 @@ sworker_ab_upgrade()
 
 	# Change back to older image
 	docker tag $old_image crustio/crust-sworker:latest
-	log_info "Please do not close the program and wait patiently."
+	log_info "Please do not close this program and wait patiently, ."
 	log_info "If you need more information, please use other terminal to execute 'sudo crust logs sworker-a' and 'sudo crust logs sworker-b'"
 
 	# Check A/B status
+	local acc=0
 	while :
 	do
-		for i in $(seq 1 240); do
-			printf "Sworker is upgrading. Wait 240s for next check...%s\r" "${i}s"
-			sleep 1
-		done
-		printf ""
+		printf "Sworker is upgrading, please do not close this program. Wait %s\r" "${acc}s"
+		((acc++))
+		sleep 1
 
 		# Get code from sworker
 		local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
-		if [ x"$id_info" = x"" ]; then
-			continue
+		if [ x"$id_info" != x"" ]; then
+			local mrenclave=`echo $id_info | jq .mrenclave`
+			if [ x"$mrenclave" != x"" ]; then
+				mrenclave=`echo ${mrenclave: 1: 64}`
+				if [ x"$mrenclave" == x"$code" ]; then
+					break
+				fi
+			fi
 		fi
 
-		local mrenclave=`echo $id_info | jq .mrenclave`
-		if [ x"$mrenclave" = x"" ]; then
-			continue
-		fi
-		mrenclave=`echo ${mrenclave: 1: 64}`
-
-		if [ x"$mrenclave" == x"$code" ]; then
-			break
+		# Check upgrade sworker status
+		check_docker_status crust-sworker-$a_or_b
+		if [ $? -ne 0 ]; then
+			printf "\n"
+			log_err "Sworker update failed, please use 'sudo crust logs sworker-a' and 'sudo crust logs sworker-b' to find more details"
+			return 1
 		fi
 	done
 	
@@ -1109,6 +1158,7 @@ sworker_ab_upgrade()
 		sed -i 's/a/b/g' $basedir/etc/sWorker.ab
 	fi
 
+	printf "\n"
 	log_success "Sworker update success, setup new sworker 'crust-sworker-$a_or_b'"
 }
 
@@ -1132,6 +1182,9 @@ tools()
 			;;
 		file-info)
 			file_info $2
+			;;
+		delete-file)
+			delete_file $2
 			;;
 		upgrade-image)
 			upgrade_image $2
