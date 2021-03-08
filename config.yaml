@@ -11,9 +11,9 @@ node:
 
 ## identity configurations
 identity:
-  ## the backup of chain controller account
+  ## the backup of chain account
   backup: ''
-  ## the password of chain controller account
+  ## the password of chain account
   password: ""
 
 ## chain configurations
