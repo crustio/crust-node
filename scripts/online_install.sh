@@ -1,6 +1,7 @@
 #!/bin/bash
 
 version=$1
+shift
 
 if [ $(id -u) -ne 0 ]; then
     echo "Please run with sudo!"
@@ -20,7 +21,7 @@ if [ $res -ne 0 ]; then
     exit 1
 fi
 
-./crust-node-$version/install.sh
+./crust-node-$version/install.sh $@
 if [ $res -ne 0 ]; then
     echo "Install crust node $version failed"
     rm v$version.tar.gz
