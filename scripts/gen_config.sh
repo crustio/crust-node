@@ -64,5 +64,7 @@ COMMENT
 rm -f $BUILD_DIR/config.yaml
 cp -r $BUILD_DIR/.tmp/* $BUILD_DIR/
 rm -rf $BUILD_DIR/.tmp
+chown -R root:root $BUILD_DIR
+chmod -R 0600 $BUILD_DIR
 
 log_success "Configurations generated at: $BUILD_DIR"
