@@ -5,8 +5,8 @@ async function genSworkerConfig(config, outputCfg) {
   const sworkerConfig = {
     data_path: "/opt/crust/data/files/sworker_data",
     base_path: "/opt/crust/data/sworker",
-    base_url: "http://0.0.0.0:12222/api/v0",
-    ipfs_url :  "http://0.0.0.0:5001/api/v0",
+    base_url: "http://127.0.0.1:12222/api/v0",
+    ipfs_url :  "http://127.0.0.1:5001/api/v0",
     chain: getSharedChainConfig(config),
   }
   return {

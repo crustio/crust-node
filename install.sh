@@ -133,6 +133,8 @@ install_crust_node()
         mkdir -p $installdir/logs
         cp -r $basedir/etc $installdir/
         cp $basedir/config.yaml $installdir/
+        chown root:root $installdir/config.yaml
+        chmod 0600 $installdir/config.yaml
         cp -r $basedir/scripts $installdir/
     fi
     
