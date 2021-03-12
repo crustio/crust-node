@@ -66,5 +66,6 @@ cp -r $BUILD_DIR/.tmp/* $BUILD_DIR/
 rm -rf $BUILD_DIR/.tmp
 chown -R root:root $BUILD_DIR
 chmod -R 0600 $BUILD_DIR
+chmod 0600 $basedir/config.yaml
 
 log_success "Configurations generated at: $BUILD_DIR"
