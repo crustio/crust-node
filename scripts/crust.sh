@@ -152,8 +152,26 @@ start_chain()
 		return 0
 	fi
 
+	local config_file=$builddir/chain/chain_config.json
+	if [ x"$config_file" = x"" ]; then
+		log_err "please give right chain config file"
+		return 1
+	fi
+
+	local chain_port=`cat $config_file | jq .port`
+
+	if [ x"$chain_port" = x"" ]; then
+		log_err "please give right chain config file"
+		return 1
+	fi
+
+	if [ $chain_port -lt 0 ] || [ $1 -gt 65535 ]; then
+		log_err "The range of chain port is 0 ~ 65535"
+		return 1
+	fi
+
 	local res=0
-	check_port 30888
+	check_port $chain_port
 	res=$(($?|$res))
 	check_port 19933
 	res=$(($?|$res))
@@ -1210,12 +1228,26 @@ Crust config usage:
     help                                  show help information
     show                                  show configurations
     set                                   set configurations
+    set-port                              set configurations
 EOF
 }
 
 config_show()
 {
 	cat $basedir/config.yaml
+}
+
+config_set_port()
+{
+	local chain_port=""
+	read -p "Enter crust chain port (default:30888): " chain_port
+	chain_port=`echo "$chain_port"`
+	if [ x"$chain_port" == x"" ]; then
+		chain_port="30888"
+	fi
+	sed -i "24c \\  port: $chain_port" $basedir/config.yaml &>/dev/null
+	log_success "Set crust chain port: $chain_port successfully"
+	log_success "If you want the configuration to take effect, please execute 'sudo crust reload chain'"
 }
 
 config_set_all()
@@ -1314,6 +1346,9 @@ config()
 			;;
 		set)
 			config_set_all
+			;;
+		set-port)
+			config_set_port
 			;;
 		*)
 			config_help
