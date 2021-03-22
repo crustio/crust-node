@@ -1227,26 +1227,12 @@ Crust config usage:
     help                                  show help information
     show                                  show configurations
     set                                   set configurations
-    set-port                              set configurations
 EOF
 }
 
 config_show()
 {
 	cat $basedir/config.yaml
-}
-
-config_set_port()
-{
-	local chain_port=""
-	read -p "Enter crust chain port (default:30888): " chain_port
-	chain_port=`echo "$chain_port"`
-	if [ x"$chain_port" == x"" ]; then
-		chain_port="30888"
-	fi
-	sed -i "24c \\  port: $chain_port" $basedir/config.yaml &>/dev/null
-	log_success "Set crust chain port: $chain_port successfully"
-	log_success "If you want the configuration to take effect, please execute 'sudo crust reload chain'"
 }
 
 config_set_all()
@@ -1345,9 +1331,6 @@ config()
 			;;
 		set)
 			config_set_all
-			;;
-		set-port)
-			config_set_port
 			;;
 		*)
 			config_help
