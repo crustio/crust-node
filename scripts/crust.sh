@@ -164,7 +164,7 @@ start_chain()
 		chain_port=30888
 	fi
 
-	if [ $chain_port -lt 0 ] || [ $1 -gt 65535 ]; then
+	if [ $chain_port -lt 0 ] || [ $chain_port -gt 65535 ]; then
 		log_err "The range of chain port is 0 ~ 65535"
 		return 1
 	fi
