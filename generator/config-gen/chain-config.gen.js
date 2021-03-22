@@ -17,7 +17,7 @@ async function genChainComposeConfig(config) {
     '--chain',
     'maxwell',
     '--port',
-    '30888',
+    `${config.chain.port}`,
     '--name',
     `${config.chain.name}`,
     '--rpc-port',
