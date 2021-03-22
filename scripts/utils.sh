@@ -17,7 +17,7 @@ function log_success()
 
 function log_err()
 {
-    echo_c 35 "ERROR: $1"
+    echo_c 35 "[ERROR] $1"
 }
 
 function upgrade_docker_image()
@@ -64,7 +64,7 @@ check_port() {
 	local port=$1
 	local grep_port=`netstat -tlpn | grep "\b$port\b"`
 	if [ -n "$grep_port" ]; then
-		echo "[ERROR] please make sure port $port is not occupied"
+		log_err "please make sure port $port is not occupied"
 		return 1
 	fi
 }

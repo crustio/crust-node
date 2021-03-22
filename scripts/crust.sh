@@ -13,7 +13,7 @@ start()
 {
 	$scriptdir/gen_config.sh
 	if [ $? -ne 0 ]; then
-		log_err "[ERROR] Generate configuration files failed"
+		log_err "Generate configuration files failed"
 		exit 1
 	fi
 	
@@ -57,6 +57,9 @@ start()
 	if [ x"$1" = x"chain" ]; then
 		log_info "Start chain service"
 		start_chain
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
 		log_success "Start chain service success"
 		return 0
 	fi
@@ -64,6 +67,9 @@ start()
 	if [ x"$1" = x"api" ]; then
 		log_info "Start api service"
 		start_api
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
 		log_success "Start api service success"
 		return 0
 	fi
@@ -71,6 +77,9 @@ start()
 	if [ x"$1" = x"sworker" ]; then
 		log_info "Start sworker service"
 		start_sworker
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
 		log_success "Start sworker service success"
 		return 0
 	fi
@@ -78,6 +87,9 @@ start()
 	if [ x"$1" = x"smanager" ]; then
 		log_info "Start smanager service"
 		start_smanager
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
 		log_success "Start smanager service success"
 		return 0
 	fi
@@ -85,6 +97,9 @@ start()
 	if [ x"$1" = x"ipfs" ]; then
 		log_info "Start ipfs service"
 		start_ipfs
+		if [ $? -ne 0 ]; then
+			exit 1
+		fi
 		log_success "Start ipfs service success"
 		return 0
 	fi
@@ -154,13 +169,13 @@ start_chain()
 
 	local config_file=$builddir/chain/chain_config.json
 	if [ x"$config_file" = x"" ]; then
-		log_err "please give right chain config file"
+		log_err "Please give right chain config file"
 		return 1
 	fi
 
 	local chain_port=`cat $config_file | jq .port`
 
-	if [ x"$chain_port" = x"" ]; then
+	if [ x"$chain_port" = x"" ] || [ x"$chain_port" = x"null" ]; then
 		chain_port=30888
 	fi
 
@@ -182,7 +197,7 @@ start_chain()
 
 	docker-compose -f $builddir/docker-compose.yaml up -d crust
 	if [ $? -ne 0 ]; then
-		log_err "[ERROR] Start crust-api failed"
+		log_err "Start crust-api failed"
 		return 1
 	fi
 	return 0
@@ -216,19 +231,19 @@ start_sworker()
 		if [ -f "$scriptdir/install_sgx_driver.sh" ]; then
 			$scriptdir/install_sgx_driver.sh
 			if [ $? -ne 0 ]; then
-				log_err "[ERROR] Install sgx dirver failed"
+				log_err "Install sgx dirver failed"
 				return 1
 			fi
 		fi
 
 		if [ ! -e "/dev/isgx" ]; then
-			log_err "[ERROR] Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
+			log_err "Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
 			return 1
 		fi
 
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start crust-sworker-$a_or_b failed"
+			log_err "Start crust-sworker-$a_or_b failed"
 			return 1
 		fi
 	fi
@@ -269,7 +284,7 @@ start_api()
 
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start crust-api failed"
+			log_err "Start crust-api failed"
 			return 1
 		fi
 	fi
@@ -297,7 +312,7 @@ start_smanager()
 
 		docker-compose -f $builddir/docker-compose.yaml up -d crust-smanager
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start crust-smanager failed"
+			log_err "Start crust-smanager failed"
 			return 1
 		fi
 	fi
@@ -336,7 +351,7 @@ start_ipfs()
 
 		docker-compose -f $builddir/docker-compose.yaml up -d ipfs
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Start ipfs failed"
+			log_err "Start ipfs failed"
 			return 1
 		fi
 	fi
@@ -369,7 +384,7 @@ reload() {
 		stop_chain
 		$scriptdir/gen_config.sh
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Generate configuration files failed"
+			log_err "Generate configuration files failed"
 			exit 1
 		fi
 		start_chain
@@ -384,7 +399,7 @@ reload() {
 		stop_api
 		$scriptdir/gen_config.sh
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Generate configuration files failed"
+			log_err "Generate configuration files failed"
 			exit 1
 		fi
 		start_api
@@ -399,7 +414,7 @@ reload() {
 		stop_sworker
 		$scriptdir/gen_config.sh
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Generate configuration files failed"
+			log_err "Generate configuration files failed"
 			exit 1
 		fi
 		start_sworker
@@ -414,7 +429,7 @@ reload() {
 		stop_smanager
 		$scriptdir/gen_config.sh
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Generate configuration files failed"
+			log_err "Generate configuration files failed"
 			exit 1
 		fi
 		start_smanager
@@ -429,7 +444,7 @@ reload() {
 		stop_ipfs
 		$scriptdir/gen_config.sh
 		if [ $? -ne 0 ]; then
-			log_err "[ERROR] Generate configuration files failed"
+			log_err "Generate configuration files failed"
 			exit 1
 		fi
 		start_ipfs
