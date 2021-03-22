@@ -17,7 +17,7 @@ async function genChainComposeConfig(config) {
     '--chain',
     'maxwell',
     '--port',
-    '30888',
+    `${config.chain.port}`,
     '--name',
     `${config.chain.name}`,
     '--rpc-port',
@@ -25,7 +25,9 @@ async function genChainComposeConfig(config) {
     '--ws-port',
     '19944',
     '--wasm-execution',
-    'compiled'
+    'compiled',
+    '--in-peers',
+    '100'
   ]
 
   if (config.node.chain == "authority") {
