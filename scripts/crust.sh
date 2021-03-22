@@ -161,8 +161,7 @@ start_chain()
 	local chain_port=`cat $config_file | jq .port`
 
 	if [ x"$chain_port" = x"" ]; then
-		log_err "please give right chain config file"
-		return 1
+		chain_port=30888
 	fi
 
 	if [ $chain_port -lt 0 ] || [ $1 -gt 65535 ]; then
