@@ -1359,6 +1359,8 @@ help()
 cat << EOF
 Usage:
     help                                                             show help information
+    version                                                          show version
+
     start {chain|api|sworker|smanager|ipfs}                          start all crust service
     stop {chain|api|sworker|smanager|ipfs}                           stop all crust service or stop one service
 
@@ -1367,11 +1369,21 @@ Usage:
     logs {chain|api|sworker|sworker-a|sworker-b|smanager|ipfs}       track service logs, ctrl-c to exit. use 'crust logs help' for more details
     
     tools {...}                                                      use 'crust tools help' for more details
-    config {...}                                                     configuration operations, use 'crust config help' for more details         
+    config {...}                                                     configuration operations, use 'crust config help' for more details
 EOF
 }
 
+version()
+{
+cat << EOF
+v0.10.0
+EOF	
+}
+
 case "$1" in
+	version)
+		version
+		;;
 	start)
 		start $2
 		;;
