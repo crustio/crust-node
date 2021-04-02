@@ -1377,7 +1377,7 @@ version()
 {
 cat << EOF
 v0.10.0
-EOF	
+EOF
 }
 
 case "$1" in
