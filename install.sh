@@ -3,7 +3,7 @@
 basedir=$(cd `dirname $0`;pwd)
 scriptdir=$basedir/scripts
 installdir=/opt/crust/crust-node
-filesdir=/opt/crust/data/files
+disksdir=/opt/crust/data/disks
 source $scriptdir/utils.sh
 
 help()
@@ -108,12 +108,12 @@ download_docker_images()
 create_node_paths()
 {
     mkdir -p $installdir
-    mkdir -p $filesdir
-    chmod 777 $filesdir
+    mkdir -p $disksdir
+    chmod 777 $disksdir
     for((i=1;i<=128;i++));
     do
-        mkdir -p $filesdir/$i
-        chmod 777 $filesdir/$i
+        mkdir -p $disksdir/$i
+        chmod 777 $disksdir/$i
     done
 }
 
