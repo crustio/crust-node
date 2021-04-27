@@ -3,13 +3,13 @@ async function genIpfsConfig(config, outputCfg) {
     swarm_port: 4001,
     api_port: 5001,
     gateway_port: 37773,
-    path: '/opt/crust/data/files/ipfs'
+    path: '/opt/crust/data/ipfs'
   }
   return {
     config: ipfsConfig,
     paths: [{
       required: true,
-      path: '/opt/crust/data/files/ipfs',
+      path: '/opt/crust/data/ipfs',
     }],
   }
 }
@@ -20,7 +20,7 @@ async function genIpfsComposeConfig(config) {
     network_mode: 'host',
     restart: 'always',
     volumes: [
-      '/opt/crust/data/files/ipfs:/data/ipfs'
+      '/opt/crust/data/ipfs:/data/ipfs'
     ],
     entrypoint: '/sbin/tini --',
     environment: {

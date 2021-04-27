@@ -105,6 +105,18 @@ download_docker_images()
     fi
 }
 
+create_node_paths()
+{
+    mkdir -p $installdir
+    mkdir -p $filesdir
+    chmod 777 $filesdir
+    for((i=1;i<=128;i++));
+    do
+        mkdir -p $filesdir/$i
+        chmod 777 $filesdir/$i
+    done
+}
+
 install_crust_node()
 {
     log_info "--------------Install crust node-------------"
@@ -115,11 +127,6 @@ install_crust_node()
         rm $bin_file
         rm -rf $installdir/scripts
         cp -r $basedir/scripts $installdir/
-        mkdir -p $installdir/logs
-        local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-        if [ x"$upgrade_pid" != x"" ]; then
-            kill -9 $upgrade_pid
-        fi
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
             echo "Uninstall old crust node"
@@ -127,10 +134,7 @@ install_crust_node()
         fi
 
         echo "Install new crust node"
-        mkdir -p $installdir
-        mkdir -p $filesdir
-        chmod 777 -R $filesdir
-        mkdir -p $installdir/logs
+        create_node_paths()
         cp -r $basedir/etc $installdir/
         cp $basedir/config.yaml $installdir/
         chown root:root $installdir/config.yaml
