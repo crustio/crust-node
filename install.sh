@@ -134,7 +134,7 @@ install_crust_node()
         fi
 
         echo "Install new crust node"
-        create_node_paths()
+        create_node_paths
         cp -r $basedir/etc $installdir/
         cp $basedir/config.yaml $installdir/
         chown root:root $installdir/config.yaml
