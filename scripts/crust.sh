@@ -5,6 +5,7 @@ scriptdir=$basedir/scripts
 builddir=$basedir/build
 
 source $scriptdir/utils.sh
+source $scriptdir/version.sh
 export EX_SWORKER_ARGS=''
 
 ########################################base################################################
@@ -774,27 +775,27 @@ EOF
 space_info()
 {
 	local data_folder_info=(`df -h /opt/crust/data | sed -n '2p'`)
-	local file_folder_info=(`df -h /opt/crust/data/files | sed -n '2p'`)
 cat << EOF
--->Data folder (for chain and db)<--
+------ Base data folder ------
 Path: /opt/crust/data
 File system: ${data_folder_info[0]}
 Total space: ${data_folder_info[1]}
 Used space: ${data_folder_info[2]}
 Avail space: ${data_folder_info[3]}
 
--->Files folder (for ipfs and data of sworker)<--
-Path: /opt/crust/data/files
-File system: ${file_folder_info[0]}
-Total space: ${file_folder_info[1]}
-Used space: ${file_folder_info[2]}
-Avail space: ${file_folder_info[3]}
-
-PS:
-1. Data folder is used to store chain and db, 500GB SSD is recommended
-2. Please mount the large capacity hard disk to files folder, you can use RAID or LVM to break through the size limit of a single hard drive
-3. SRD will not use all the space, it will reserve 50G of space
 EOF
+
+	for i in $(seq 1 128); do
+		local disk_folder_info=(`df -h /opt/crust/data/disks/${i} | sed -n '2p'`)
+		if [ x"${disk_folder_info[0]}" != x"${data_folder_info[0]}" ]; then
+			printf "------ Storage folder ${i} ------\n"
+			printf "Path: /opt/crust/data/disks/${i}\n"
+			printf "File system: ${disk_folder_info[0]}\n"
+			printf "Total space: ${disk_folder_info[1]}\n"
+			printf "Used space: ${disk_folder_info[2]}\n"
+			printf "Avail space: ${disk_folder_info[3]}\n"
+		fi
+	done
 }
 
 rotate_keys()
@@ -1370,13 +1371,6 @@ Usage:
     
     tools {...}                                                      use 'crust tools help' for more details
     config {...}                                                     configuration operations, use 'crust config help' for more details
-EOF
-}
-
-version()
-{
-cat << EOF
-v0.10.0
 EOF
 }
 
