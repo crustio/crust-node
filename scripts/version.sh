@@ -57,10 +57,10 @@ inner_docker_version()
     smanager_image=${smanager_image[2]}
 
     printf "Docker images:\n"
-    printf "\tChain: ${chain_image}\n"
-    printf "\SWorker: ${sworker_image}\n"
-    printf "\tC-gen: ${cgen_image}\n"
-    printf "\tIPFS: ${ipfs_image}\n"
-    printf "\tAPI: ${api_image}\n"
-    printf "\tSmanager: ${smanager_image}\n"
+    printf "  Chain: ${chain_image}\n"
+    printf "  SWorker: ${sworker_image}\n"
+    printf "  C-gen: ${cgen_image}\n"
+    printf "  IPFS: ${ipfs_image}\n"
+    printf "  API: ${api_image}\n"
+    printf "  Smanager: ${smanager_image}\n"
 }

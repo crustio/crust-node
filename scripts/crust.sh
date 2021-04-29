@@ -776,19 +776,18 @@ space_info()
 {
 	local data_folder_info=(`df -h /opt/crust/data | sed -n '2p'`)
 cat << EOF
------- Base data folder ------
+>>>>>> Base data folder <<<<<<
 Path: /opt/crust/data
 File system: ${data_folder_info[0]}
 Total space: ${data_folder_info[1]}
 Used space: ${data_folder_info[2]}
 Avail space: ${data_folder_info[3]}
-
 EOF
 
 	for i in $(seq 1 128); do
 		local disk_folder_info=(`df -h /opt/crust/data/disks/${i} | sed -n '2p'`)
 		if [ x"${disk_folder_info[0]}" != x"${data_folder_info[0]}" ]; then
-			printf "------ Storage folder ${i} ------\n"
+			printf "\n>>>>>> Storage folder ${i} <<<<<<\n"
 			printf "Path: /opt/crust/data/disks/${i}\n"
 			printf "File system: ${disk_folder_info[0]}\n"
 			printf "Total space: ${disk_folder_info[1]}\n"
