@@ -2,12 +2,18 @@ const _ = require('lodash')
 const { getSharedChainConfig } = require('./chain-config.gen')
 
 async function genSworkerConfig(config, outputCfg) {
+  var dataPaths = []
+
+  for (i = 1; i <= 128; i++) {
+    dataPaths.push("/opt/crust/data/disks/" + i)
+  }
+
   const sworkerConfig = {
-    data_path: "/opt/crust/data/files/sworker_data",
-    base_path: "/opt/crust/data/sworker",
+    base_path: "/opt/crust/data/files/sworker_data",
     base_url: "http://127.0.0.1:12222/api/v0",
-    ipfs_url :  "http://127.0.0.1:5001/api/v0",
     chain: getSharedChainConfig(config),
+    data_path: dataPaths,
+    ipfs_url: "http://127.0.0.1:5001/api/v0",
   }
   return {
     config: sworkerConfig,
@@ -24,7 +30,7 @@ async function genSworkerConfig(config, outputCfg) {
 async function genSworkerComposeConfig(config) {
   let tempVolumes = [
     '/opt/crust/data/sworker:/opt/crust/data/sworker',
-    '/opt/crust/data/files:/opt/crust/data/files',
+    '/opt/crust/data/disks:/opt/crust/data/disks',
     './sworker:/config'
   ]
 

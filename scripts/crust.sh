@@ -77,7 +77,8 @@ start()
 
 	if [ x"$1" = x"sworker" ]; then
 		log_info "Start sworker service"
-		start_sworker
+		shift
+		start_sworker $@
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi
@@ -241,8 +242,7 @@ start_sworker()
 			log_err "Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
 			return 1
 		fi
-
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		EX_SWORKER_ARGS=$@ docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-sworker-$a_or_b failed"
 			return 1
@@ -418,7 +418,8 @@ reload() {
 			log_err "Generate configuration files failed"
 			exit 1
 		fi
-		start_sworker
+		shift
+		start_sworker $@
 
 		log_success "Reload sworker service success"
 		return 0
@@ -1378,13 +1379,15 @@ case "$1" in
 		version
 		;;
 	start)
-		start $2
+		shift
+		start $@
 		;;
 	stop)
 		stop $2
 		;;
 	reload)
-		reload $2
+		shift
+		reload $@
 		;;
 	status)
 		status $2
