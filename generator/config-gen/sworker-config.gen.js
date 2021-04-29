@@ -9,7 +9,7 @@ async function genSworkerConfig(config, outputCfg) {
   }
 
   const sworkerConfig = {
-    base_path: "/opt/crust/data/files/sworker_data",
+    base_path: "/opt/crust/data/sworker",
     base_url: "http://127.0.0.1:12222/api/v0",
     chain: getSharedChainConfig(config),
     data_path: dataPaths,
@@ -22,7 +22,7 @@ async function genSworkerConfig(config, outputCfg) {
       path: '/opt/crust/data/sworker',
     }, {
       required: true,
-      path: '/opt/crust/data/files',
+      path: '/opt/crust/data/disks',
     }],
   }
 }
