@@ -796,6 +796,14 @@ EOF
 			printf "Avail space: ${disk_folder_info[3]}\n"
 		fi
 	done
+
+cat << EOF
+
+PS:
+1. Base data folder is used to store chain and db, 1TB SSD is recommended
+2. Please mount the hard disk to storage folders, paths is from: /opt/crust/data/disks/1 ~ /opt/crust/data/disks/128
+3. SRD will not use all the space, it will reserve 50G of space
+EOF
 }
 
 rotate_keys()

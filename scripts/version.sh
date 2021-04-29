@@ -53,7 +53,7 @@ inner_docker_version()
     local api_image=(`docker images | grep '^\b'crustio/crust-api'\b ' | grep 'latest'`)
     api_image=${api_image[2]}
 
-    local smanager_image=(`docker images | grep '^\b'crustio/smanager_image'\b ' | grep 'latest'`)
+    local smanager_image=(`docker images | grep '^\b'crustio/crust-smanager'\b ' | grep 'latest'`)
     smanager_image=${smanager_image[2]}
 
     printf "Docker images:\n"
