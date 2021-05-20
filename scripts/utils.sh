@@ -1,5 +1,8 @@
 #!/bin/bash
 
+node_type="maxwell"
+node_version="v0.10.0"
+
 function echo_c()
 {
     printf "\033[0;$1m$2\033[0m\n"

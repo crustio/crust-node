@@ -19,6 +19,10 @@ exit 0
 
 install_depenencies()
 {
+    if [ x"$update" == x"true" ]; then
+        return 0
+    fi
+
     log_info "------------Apt update--------------"
     apt-get update
     if [ $? -ne 0 ]; then
@@ -55,6 +59,10 @@ install_depenencies()
 
 download_docker_images()
 {
+    if [ x"$update" == x"true" ]; then
+        return 0
+    fi
+
     log_info "-------Download crust docker images----------"
     res=0
 
@@ -127,6 +135,7 @@ install_crust_node()
         rm $bin_file
         rm -rf $installdir/scripts
         cp -r $basedir/scripts $installdir/
+        region=`cat $basedir/etc/region.conf`
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
             echo "Uninstall old crust node"
@@ -140,10 +149,10 @@ install_crust_node()
         chown root:root $installdir/config.yaml
         chmod 0600 $installdir/config.yaml
         cp -r $basedir/scripts $installdir/
+
+        echo "Change crust node configurations"
+        sed -i 's/en/'$region'/g' $installdir/etc/region.conf
     fi
-    
-    echo "Change crust node configurations"
-    sed -i 's/en/'$region'/g' $installdir/etc/region.conf
 
     echo "Install crust command line tool"
     cp $scriptdir/crust.sh /usr/bin/crust

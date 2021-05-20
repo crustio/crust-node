@@ -12,9 +12,8 @@ export EX_SWORKER_ARGS=''
 
 start()
 {
-	$scriptdir/gen_config.sh
-	if [ $? -ne 0 ]; then
-		log_err "Generate configuration files failed"
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		log_err "No configuration file, please set config"
 		exit 1
 	fi
 	
@@ -164,6 +163,11 @@ stop()
 
 start_chain()
 {
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		log_err "No configuration file, please set config"
+		return 1
+	fi
+
 	check_docker_status crust
 	if [ $? -eq 0 ]; then
 		return 0
@@ -218,6 +222,11 @@ stop_chain()
 
 start_sworker()
 {
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		log_err "No configuration file, please set config"
+		return 1
+	fi
+
 	if [ -d "$builddir/sworker" ]; then
 		local a_or_b=`cat $basedir/etc/sWorker.ab`
 		check_docker_status crust-sworker-$a_or_b
@@ -272,6 +281,11 @@ stop_sworker()
 
 start_api()
 {
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		log_err "No configuration file, please set config"
+		return 1
+	fi
+
 	if [ -d "$builddir/sworker" ]; then
 		check_docker_status crust-api
 		if [ $? -eq 0 ]; then
@@ -305,6 +319,11 @@ stop_api()
 
 start_smanager()
 {
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		log_err "No configuration file, please set config"
+		return 1
+	fi
+
 	if [ -d "$builddir/smanager" ]; then
 		check_docker_status crust-smanager
 		if [ $? -eq 0 ]; then
@@ -333,6 +352,11 @@ stop_smanager()
 
 start_ipfs()
 {
+	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+		log_err "No configuration file, please set config"
+		return 1
+	fi
+
 	if [ -d "$builddir/ipfs" ]; then
 		check_docker_status ipfs
 		if [ $? -eq 0 ]; then
@@ -383,11 +407,6 @@ reload() {
 		log_info "Reload chain service"
 
 		stop_chain
-		$scriptdir/gen_config.sh
-		if [ $? -ne 0 ]; then
-			log_err "Generate configuration files failed"
-			exit 1
-		fi
 		start_chain
 
 		log_success "Reload chain service success"
@@ -398,11 +417,6 @@ reload() {
 		log_info "Reload api service"
 		
 		stop_api
-		$scriptdir/gen_config.sh
-		if [ $? -ne 0 ]; then
-			log_err "Generate configuration files failed"
-			exit 1
-		fi
 		start_api
 
 		log_success "Reload api service success"
@@ -413,11 +427,6 @@ reload() {
 		log_info "Reload sworker service"
 		
 		stop_sworker
-		$scriptdir/gen_config.sh
-		if [ $? -ne 0 ]; then
-			log_err "Generate configuration files failed"
-			exit 1
-		fi
 		shift
 		start_sworker $@
 
@@ -429,11 +438,6 @@ reload() {
 		log_info "Reload smanager service"
 		
 		stop_smanager
-		$scriptdir/gen_config.sh
-		if [ $? -ne 0 ]; then
-			log_err "Generate configuration files failed"
-			exit 1
-		fi
 		start_smanager
 
 		log_success "Reload smanager service success"
@@ -444,11 +448,6 @@ reload() {
 		log_info "Reload ipfs service"
 		
 		stop_ipfs
-		$scriptdir/gen_config.sh
-		if [ $? -ne 0 ]; then
-			log_err "Generate configuration files failed"
-			exit 1
-		fi
 		start_ipfs
 
 		log_success "Reload ipfs service success"
@@ -1250,7 +1249,8 @@ cat << EOF
 Crust config usage:
     help                                  show help information
     show                                  show configurations
-    set                                   set configurations
+    set                                   set and generate new configurations
+    generate                              generate new configurations                              
 EOF
 }
 
@@ -1344,7 +1344,20 @@ config_set_all()
 	sed -i '17c \\  password: "'$identity_password'"' $basedir/config.yaml &>/dev/null
 
 	log_success "Set password successfully"
-	log_success "Set configurations done"
+	log_success "Set configurations successfully"
+	
+	# Generate configurations
+	config_generate
+}
+
+config_generate()
+{
+	$scriptdir/gen_config.sh
+	if [ $? -ne 0 ]; then
+		log_err "Generate configuration files failed"
+		exit 1
+	fi
+	log_success "Generate configurations successfully"
 }
 
 config()
@@ -1355,6 +1368,9 @@ config()
 			;;
 		set)
 			config_set_all
+			;;
+		generate)
+			config_generate
 			;;
 		*)
 			config_help
