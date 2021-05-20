@@ -19,6 +19,10 @@ exit 0
 
 install_depenencies()
 {
+    if [ x"$update" == x"true" ]; then
+        return 0
+    fi
+
     log_info "------------Apt update--------------"
     apt-get update
     if [ $? -ne 0 ]; then
@@ -55,6 +59,10 @@ install_depenencies()
 
 download_docker_images()
 {
+    if [ x"$update" == x"true" ]; then
+        return 0
+    fi
+
     log_info "-------Download crust docker images----------"
     res=0
 
