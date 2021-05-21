@@ -1,17 +1,13 @@
 #!/bin/bash
 
-basedir=/opt/crust/crust-node
-scriptdir=$basedir/scripts
-builddir=$basedir/build
-
 source $scriptdir/utils.sh
 
 version()
 {
-printf "Node type: ${node_type}\n"
-printf "Node version: ${node_version}\n"
-inner_sworker_version
-inner_docker_version
+    printf "Node type: ${node_type}\n"
+    printf "Node version: ${node_version}\n"
+    inner_sworker_version
+    inner_docker_version
 }
 
 inner_sworker_version()
