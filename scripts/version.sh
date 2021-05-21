@@ -12,12 +12,12 @@ version()
 
 inner_sworker_version()
 {
-	local config_file=$builddir/sworker/sworker_config.json
-	if [ x"$config_file" = x"" ]; then
+	local sworker_config_file=$builddir/sworker/sworker_config.json
+	if [ ! -f "$sworker_config_file" ]; then
 		return
 	fi
 
-	sworker_base_url=`cat $config_file | jq .base_url`
+	sworker_base_url=`cat $sworker_config_file | jq .base_url`
 
 	if [ x"$sworker_base_url" = x"" ]; then
 		return

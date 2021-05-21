@@ -9,7 +9,7 @@ export EX_SWORKER_ARGS=''
 
 start()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		exit 1
 	fi
@@ -19,31 +19,31 @@ start()
 
 		start_chain
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_sworker
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_api
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_smanager
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_ipfs
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
@@ -160,7 +160,7 @@ stop()
 
 start_chain()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -198,7 +198,7 @@ start_chain()
 		return 1
 	fi
 
-	docker-compose -f $builddir/docker-compose.yaml up -d crust
+	docker-compose -f $composeyaml up -d crust
 	if [ $? -ne 0 ]; then
 		log_err "Start crust-api failed"
 		return 1
@@ -219,7 +219,7 @@ stop_chain()
 
 start_sworker()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -248,7 +248,7 @@ start_sworker()
 			log_err "Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
 			return 1
 		fi
-		EX_SWORKER_ARGS=$@ docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		EX_SWORKER_ARGS=$@ docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-sworker-$a_or_b failed"
 			return 1
@@ -278,7 +278,7 @@ stop_sworker()
 
 start_api()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -294,7 +294,7 @@ start_api()
 			return 1
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
+		docker-compose -f $composeyaml up -d crust-api
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-api failed"
 			return 1
@@ -316,7 +316,7 @@ stop_api()
 
 start_smanager()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -327,7 +327,7 @@ start_smanager()
 			return 0
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-smanager
+		docker-compose -f $composeyaml up -d crust-smanager
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-smanager failed"
 			return 1
@@ -349,7 +349,7 @@ stop_smanager()
 
 start_ipfs()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -371,7 +371,7 @@ start_ipfs()
 			return 1
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d ipfs
+		docker-compose -f $composeyaml up -d ipfs
 		if [ $? -ne 0 ]; then
 			log_err "Start ipfs failed"
 			return 1
@@ -1144,7 +1144,7 @@ sworker_ab_upgrade()
 	else
 		docker stop crust-sworker-$a_or_b &>/dev/null
 		docker rm crust-sworker-$a_or_b &>/dev/null
-		EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		EX_SWORKER_ARGS=--upgrade docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "Setup new sWorker failed"
 			docker tag $old_image crustio/crust-sworker:latest

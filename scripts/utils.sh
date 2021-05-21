@@ -7,6 +7,7 @@ basedir=/opt/crust/crust-node
 scriptdir=$basedir/scripts
 builddir=$basedir/build
 configfile=$basedir/config.yaml
+composeyaml=$builddir/docker-compose.yaml
 
 function echo_c()
 {
