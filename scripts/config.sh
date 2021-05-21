@@ -111,12 +111,60 @@ config_set_all()
 
 config_generate()
 {
-	$scriptdir/gen_config.sh
-	if [ $? -ne 0 ]; then
-		log_err "Generate configuration files failed"
-		exit 1
-	fi
-	log_success "Generate configurations successfully"
+    log_info "Start generate configurations and docker compose file"
+    local cg_image="crustio/config-generator:latest"
+
+    if [ ! -f "$configfile" ]; then
+        log_err "config.yaml doesn't exists!"
+        exit 1
+    fi
+
+    rm -rf $builddir
+    mkdir -p $builddir
+
+    cp -f $configfile $builddir/
+    local cidfile=`mktemp`
+    rm $cidfile
+    docker run --cidfile $cidfile -i --workdir /opt/output -v $builddir:/opt/output $cg_image node /opt/app/index.js
+    local res="$?"
+    local cid=`cat $cidfile`
+    docker rm $cid
+
+    if [ "$res" -ne "0" ]; then
+        log_err "Failed to generate application configs, please check your config.yaml"
+        exit 1
+    fi
+
+<<'COMMENT'
+invalid_paths=0
+while IFS= read -r line || [ -n "$line" ]; do
+    mark=${line:0:1}
+    path=${line:2}
+    if [ ! -e "$path" ]; then
+        if [ "$mark" == "|" ]; then
+            log_warn "$path doesn't exist!"
+        elif [ "$mark" == "+" ]; then
+            log_err "$path doesn't exist!"
+            invalid_paths=1
+        fi
+    fi
+done <$builddir/.tmp/.paths
+
+if [ $invalid_paths -ne "0" ]; then
+    log_err "some paths is not valid, please check your config!"
+    exit 1
+fi
+
+COMMENT
+
+    rm -f $configfile
+    cp -r $builddir/.tmp/* $builddir/
+    rm -rf $builddir/.tmp
+    chown -R root:root $builddir
+    chmod -R 0600 $builddir
+    chmod 0600 $configfile
+
+    log_success "Configurations generated at: $builddir"
 }
 
 config()

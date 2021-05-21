@@ -1,9 +1,6 @@
 #!/bin/bash
-scriptdir=$(cd `dirname $0`;pwd)
-basedir=$(cd $scriptdir/..;pwd)
 
 . $scriptdir/utils.sh
-
 
 install_sgx_driver()
 {

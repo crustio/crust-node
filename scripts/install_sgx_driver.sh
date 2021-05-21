@@ -1,6 +1,5 @@
 #!/bin/bash
-scriptdir=$(cd `dirname $0`;pwd)
-basedir=$(cd $scriptdir/..;pwd)
+
 . $scriptdir/utils.sh
 
 is_16=`cat /etc/issue | grep 16.04`
