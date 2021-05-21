@@ -1,10 +1,10 @@
 #!/bin/bash
 
-basedir=$(cd `dirname $0`;pwd)
-scriptdir=$basedir/scripts
+localbasedir=$(cd `dirname $0`;pwd)
+localscriptdir=$localbasedir/scripts
 installdir=/opt/crust/crust-node
 disksdir=/opt/crust/data/disks
-source $scriptdir/utils.sh
+source $localscriptdir/utils.sh
 
 help()
 {
@@ -134,8 +134,8 @@ install_crust_node()
         echo "Update crust node"
         rm $bin_file
         rm -rf $installdir/scripts
-        cp -r $basedir/scripts $installdir/
-        region=`cat $basedir/etc/region.conf`
+        cp -r $localbasedir/scripts $installdir/
+        region=`cat $localbasedir/etc/region.conf`
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
             echo "Uninstall old crust node"
@@ -144,18 +144,18 @@ install_crust_node()
 
         echo "Install new crust node"
         create_node_paths
-        cp -r $basedir/etc $installdir/
-        cp $basedir/config.yaml $installdir/
+        cp -r $localbasedir/etc $installdir/
+        cp $localbasedir/config.yaml $installdir/
         chown root:root $installdir/config.yaml
         chmod 0600 $installdir/config.yaml
-        cp -r $basedir/scripts $installdir/
+        cp -r $localbasedir/scripts $installdir/
 
         echo "Change crust node configurations"
         sed -i 's/en/'$region'/g' $installdir/etc/region.conf
     fi
 
     echo "Install crust command line tool"
-    cp $scriptdir/crust.sh /usr/bin/crust
+    cp $localscriptdir/crust.sh /usr/bin/crust
 
     log_success "------------Install success-------------"
 }
