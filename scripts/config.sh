@@ -10,8 +10,8 @@ Crust config usage:
     show                                  show configurations
     set                                   set and generate new configurations
     generate                              generate new configurations
-    set-chain-port {port}                 set chain port and generate new configuration, default is 30888
-    set-conn-chain {ws}                   set conneted chain ws and generate new configuration, default is ws://127.0.0.1:19944
+    chain-port {port}                     set chain port and generate new configuration, default is 30888
+    conn-chain {ws}                       set conneted chain ws and generate new configuration, default is ws://127.0.0.1:19944
 EOF
 }
 
@@ -111,14 +111,14 @@ config_set_all()
 	config_generate
 }
 
-config_set_conn_chain()
+config_conn_chain()
 {
 	sed -i '28c \\  ws: "'$1'"' $configfile &>/dev/null
 	log_success "Set connected chain ws successfully"
 	config_generate
 }
 
-config_set_chain_port()
+config_chain_port()
 {
 	sed -i "24c \\  port: '$1'" $configfile &>/dev/null
 	log_success "Set chain port successfully"
@@ -192,13 +192,13 @@ config()
 		set)
 			config_set_all
 			;;
-		set-conn-chain)
+		conn-chain)
 			shift
-			config_set_conn_chain $@
+			config_conn_chain $@
 			;;
-		set-chain-port)
+		chain-port)
 			shift
-			config_set_chain_port $@
+			config_chain_port $@
 			;;
 		generate)
 			config_generate
