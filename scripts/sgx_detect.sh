@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $scriptdir/utils.sh
+source /opt/crust/crust-node/scripts/utils.sh
 
 install_sgx_driver()
 {

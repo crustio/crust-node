@@ -1,8 +1,8 @@
 #!/bin/bash
 
-source $scriptdir/utils.sh
-source $scriptdir/version.sh
-source $scriptdir/config.sh
+source /opt/crust/crust-node/scripts/utils.sh
+source /opt/crust/crust-node/scripts/version.sh
+source /opt/crust/crust-node/scripts/config.sh
 export EX_SWORKER_ARGS=''
 
 ########################################base################################################

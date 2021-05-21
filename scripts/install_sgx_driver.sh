@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $scriptdir/utils.sh
+source /opt/crust/crust-node/scripts/utils.sh
 
 is_16=`cat /etc/issue | grep 16.04`
 is_18=`cat /etc/issue | grep 18.04`

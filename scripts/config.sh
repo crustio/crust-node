@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $scriptdir/utils.sh
+source /opt/crust/crust-node/scripts/utils.sh
 
 config_help()
 {
