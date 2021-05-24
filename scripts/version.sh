@@ -1,27 +1,23 @@
 #!/bin/bash
 
-basedir=/opt/crust/crust-node
-scriptdir=$basedir/scripts
-builddir=$basedir/build
-
-source $scriptdir/utils.sh
+source /opt/crust/crust-node/scripts/utils.sh
 
 version()
 {
-printf "Node type: ${node_type}\n"
-printf "Node version: ${node_version}\n"
-inner_sworker_version
-inner_docker_version
+    printf "Node type: ${node_type}\n"
+    printf "Node version: ${node_version}\n"
+    inner_sworker_version
+    inner_docker_version
 }
 
 inner_sworker_version()
 {
-	local config_file=$builddir/sworker/sworker_config.json
-	if [ x"$config_file" = x"" ]; then
+	local sworker_config_file=$builddir/sworker/sworker_config.json
+	if [ ! -f "$sworker_config_file" ]; then
 		return
 	fi
 
-	sworker_base_url=`cat $config_file | jq .base_url`
+	sworker_base_url=`cat $sworker_config_file | jq .base_url`
 
 	if [ x"$sworker_base_url" = x"" ]; then
 		return

@@ -1,18 +1,15 @@
 #!/bin/bash
 
-basedir=/opt/crust/crust-node
-scriptdir=$basedir/scripts
-builddir=$basedir/build
-
-source $scriptdir/utils.sh
-source $scriptdir/version.sh
+source /opt/crust/crust-node/scripts/utils.sh
+source /opt/crust/crust-node/scripts/version.sh
+source /opt/crust/crust-node/scripts/config.sh
 export EX_SWORKER_ARGS=''
 
 ########################################base################################################
 
 start()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		exit 1
 	fi
@@ -22,31 +19,31 @@ start()
 
 		start_chain
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_sworker
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_api
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_smanager
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
 		start_ipfs
 		if [ $? -ne 0 ]; then
-			docker-compose -f $builddir/docker-compose.yaml down
+			docker-compose -f $composeyaml down
 			exit 1
 		fi
 
@@ -163,7 +160,7 @@ stop()
 
 start_chain()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -201,7 +198,7 @@ start_chain()
 		return 1
 	fi
 
-	docker-compose -f $builddir/docker-compose.yaml up -d crust
+	docker-compose -f $composeyaml up -d crust
 	if [ $? -ne 0 ]; then
 		log_err "Start crust-api failed"
 		return 1
@@ -222,7 +219,7 @@ stop_chain()
 
 start_sworker()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -251,7 +248,7 @@ start_sworker()
 			log_err "Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
 			return 1
 		fi
-		EX_SWORKER_ARGS=$@ docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		EX_SWORKER_ARGS=$@ docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-sworker-$a_or_b failed"
 			return 1
@@ -281,7 +278,7 @@ stop_sworker()
 
 start_api()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -297,7 +294,7 @@ start_api()
 			return 1
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-api
+		docker-compose -f $composeyaml up -d crust-api
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-api failed"
 			return 1
@@ -319,7 +316,7 @@ stop_api()
 
 start_smanager()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -330,7 +327,7 @@ start_smanager()
 			return 0
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d crust-smanager
+		docker-compose -f $composeyaml up -d crust-smanager
 		if [ $? -ne 0 ]; then
 			log_err "Start crust-smanager failed"
 			return 1
@@ -352,7 +349,7 @@ stop_smanager()
 
 start_ipfs()
 {
-	if [ ! -f "$builddir/docker-compose.yaml" ]; then
+	if [ ! -f "$composeyaml" ]; then
 		log_err "No configuration file, please set config"
 		return 1
 	fi
@@ -374,7 +371,7 @@ start_ipfs()
 			return 1
 		fi
 
-		docker-compose -f $builddir/docker-compose.yaml up -d ipfs
+		docker-compose -f $composeyaml up -d ipfs
 		if [ $? -ne 0 ]; then
 			log_err "Start ipfs failed"
 			return 1
@@ -1147,7 +1144,7 @@ sworker_ab_upgrade()
 	else
 		docker stop crust-sworker-$a_or_b &>/dev/null
 		docker rm crust-sworker-$a_or_b &>/dev/null
-		EX_SWORKER_ARGS=--upgrade docker-compose -f $builddir/docker-compose.yaml up -d crust-sworker-$a_or_b
+		EX_SWORKER_ARGS=--upgrade docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
 		if [ $? -ne 0 ]; then
 			log_err "Setup new sWorker failed"
 			docker tag $old_image crustio/crust-sworker:latest
@@ -1238,142 +1235,6 @@ tools()
 			;;
 		*)
 			tools_help
-	esac
-}
-
-#########################################config################################################
-
-config_help()
-{
-cat << EOF
-Crust config usage:
-    help                                  show help information
-    show                                  show configurations
-    set                                   set and generate new configurations
-    generate                              generate new configurations                              
-EOF
-}
-
-config_show()
-{
-	cat $basedir/config.yaml
-}
-
-config_set_all()
-{
-	local chain_name=""
-	read -p "Enter crust node name (default:crust-node): " chain_name
-	chain_name=`echo "$chain_name"`
-	if [ x"$chain_name" == x"" ]; then
-		chain_name="crust-node"
-	fi
-	sed -i "22c \\  name: \"$chain_name\"" $basedir/config.yaml &>/dev/null
-	log_success "Set crust node name: '$chain_name' successfully"
-
-	local mode=""
-	while true
-	do
-		read -p "Enter crust node mode from 'isolation/owner/member' (default:isolation): " mode
-		mode=`echo "$mode"`
-		if [ x"$mode" == x"" ]; then
-			mode="isolation"
-			break
-		elif [ x"$mode" == x"isolation" ] || [ x"$mode" == x"owner" ] || [ x"$mode" == x"member" ]; then
-			break
-		else
-			log_err "Input error, please input isolation/owner/member"
-		fi
-	done
-	if [ x"$mode" == x"owner" ]; then
-		sed -i '4c \\  chain: "authority"' $basedir/config.yaml &>/dev/null
-		sed -i '6c \\  sworker: "disable"' $basedir/config.yaml &>/dev/null
-		sed -i '8c \\  smanager: "disable"' $basedir/config.yaml &>/dev/null
-		sed -i '10c \\  ipfs: "disable"' $basedir/config.yaml &>/dev/null
-		log_success "Set crust node mode: '$mode' successfully"
-		log_success "Set configurations done"
-		return
-	elif [ x"$mode" == x"isolation" ]; then
-		sed -i '4c \\  chain: "authority"' $basedir/config.yaml &>/dev/null
-		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
-		sed -i '8c \\  smanager: "'$mode'"' $basedir/config.yaml &>/dev/null
-		sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
-		log_success "Set crust node mode: '$mode' successfully"
-	else
-		sed -i '4c \\  chain: "full"' $basedir/config.yaml &>/dev/null
-		sed -i '6c \\  sworker: "enable"' $basedir/config.yaml &>/dev/null
-		sed -i '8c \\  smanager: "'$mode'"' $basedir/config.yaml &>/dev/null
-		sed -i '10c \\  ipfs: "enable"' $basedir/config.yaml &>/dev/null
-		log_success "Set crust node mode: '$mode' successfully"
-	fi
-
-	local identity_backup=""
-	while true
-	do
-		if [ x"$mode" == x"member" ]; then
-			read -p "Enter the backup of account: " identity_backup
-		else
-			read -p "Enter the backup of controller account: " identity_backup
-		fi
-
-		identity_backup=`echo "$identity_backup"`
-		if [ x"$identity_backup" != x"" ]; then
-			break
-		else
-			log_err "Input error, backup can't be empty"
-		fi
-	done
-	sed -i "15c \\  backup: '$identity_backup'" $basedir/config.yaml &>/dev/null
-	log_success "Set backup successfully"
-
-	local identity_password=""
-	while true
-	do
-		if [ x"$mode" == x"member" ]; then
-			read -p "Enter the password of account: " identity_password
-		else
-			read -p "Enter the password of controller account: " identity_password
-		fi
-
-		identity_password=`echo "$identity_password"`
-		if [ x"$identity_password" != x"" ]; then
-			break
-		else
-			log_err "Input error, password can't be empty"
-		fi
-	done
-	sed -i '17c \\  password: "'$identity_password'"' $basedir/config.yaml &>/dev/null
-
-	log_success "Set password successfully"
-	log_success "Set configurations successfully"
-	
-	# Generate configurations
-	config_generate
-}
-
-config_generate()
-{
-	$scriptdir/gen_config.sh
-	if [ $? -ne 0 ]; then
-		log_err "Generate configuration files failed"
-		exit 1
-	fi
-	log_success "Generate configurations successfully"
-}
-
-config()
-{
-	case "$1" in
-		show)
-			config_show
-			;;
-		set)
-			config_set_all
-			;;
-		generate)
-			config_generate
-			;;
-		*)
-			config_help
 	esac
 }
 

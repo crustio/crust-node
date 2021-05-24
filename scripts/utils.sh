@@ -3,6 +3,12 @@
 node_type="maxwell"
 node_version="v0.10.0"
 
+basedir=/opt/crust/crust-node
+scriptdir=$basedir/scripts
+builddir=$basedir/build
+configfile=$basedir/config.yaml
+composeyaml=$builddir/docker-compose.yaml
+
 function echo_c()
 {
     printf "\033[0;$1m$2\033[0m\n"

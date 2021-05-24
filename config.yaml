@@ -22,3 +22,8 @@ chain:
   name: "crust-node"
   ## the port of chain node
   port: 30888
+
+api:
+  ## the url for chain
+  ws: "ws://127.0.0.1:19944"
+  
