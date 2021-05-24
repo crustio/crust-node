@@ -64,48 +64,36 @@ download_docker_images()
     fi
 
     log_info "-------Download crust docker images----------"
-    res=0
-
+    
+    local docker_org="crustio"
     if [ x"$region" == x"cn" ]; then
-        local aliyun_address=registry.cn-hangzhou.aliyuncs.com
-
-        docker pull $aliyun_address/crustio/config-generator
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/config-generator crustio/config-generator
-
-        docker pull $aliyun_address/crustio/crust
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust crustio/crust
-
-        docker pull $aliyun_address/crustio/crust-api
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-api crustio/crust-api
-
-        docker pull $aliyun_address/crustio/crust-sworker
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
-
-        docker pull $aliyun_address/crustio/crust-smanager
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-smanager crustio/crust-smanager
-        
-        docker pull $aliyun_address/crustio/go-ipfs
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/go-ipfs ipfs/go-ipfs
-    else
-        docker pull crustio/config-generator
-        res=$(($?|$res))
-        docker pull crustio/crust
-        res=$(($?|$res))
-        docker pull crustio/crust-api
-        res=$(($?|$res))
-        docker pull crustio/crust-sworker
-        res=$(($?|$res))
-        docker pull crustio/crust-smanager
-        res=$(($?|$res))
-        docker pull ipfs/go-ipfs
-        res=$(($?|$res))
+       docker_org=$aliyun_address/$docker_org
     fi
+
+    local res=0
+    docker pull $docker_org/config-generator:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/config-generator:$node_type crustio/config-generator
+        
+    docker pull $docker_org/crust:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust:$node_type crustio/crust
+
+    docker pull $docker_org/crust-api:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust-api:$node_type crustio/crust-api
+
+    docker pull $docker_org/crust-sworker:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust-sworker:$node_type crustio/crust-sworker
+
+    docker pull $docker_org/crust-smanager:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust-smanager:$node_type crustio/crust-smanager
+        
+    docker pull $docker_org/go-ipfs:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/go-ipfs:$node_type ipfs/go-ipfs
 
     if [ $res -ne 0 ]; then
         log_err "Install docker failed"

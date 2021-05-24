@@ -2,6 +2,7 @@
 
 node_type="maxwell"
 node_version="v0.10.0"
+aliyun_address="registry.cn-hangzhou.aliyuncs.com"
 
 basedir=/opt/crust/crust-node
 scriptdir=$basedir/scripts
@@ -43,7 +44,6 @@ function upgrade_docker_image()
     local region=`cat $basedir/etc/region.conf`
     local res=0
     if [ x"$region" == x"cn" ]; then
-        local aliyun_address=registry.cn-hangzhou.aliyuncs.com
         docker pull $aliyun_address/$crustio_name
         res=$(($?|$res))
         docker tag $aliyun_address/$crustio_name $1
