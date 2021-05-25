@@ -26,7 +26,13 @@ async function genIpfsComposeConfig(config) {
     environment: {
       IPFS_PROFILE: 'badgerds',
     },
-    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs config Datastore.StorageMax 50000GB && /usr/local/bin/start_ipfs bootstrap add /ip4/101.33.32.103/tcp/4001/p2p/12D3KooWEVFe1uGbgsDCgt9GV5sAC864RNPPDJLTnX9phoWHuV2d && /usr/local/bin/start_ipfs daemon --migrate=true"',
+    logging: {
+      driver: "json-file",
+      options: {
+        "max-size": "500m"
+      }
+    },
+    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs config Datastore.StorageMax 250GB && /usr/local/bin/start_ipfs bootstrap add /ip4/101.33.32.103/tcp/4001/p2p/12D3KooWEVFe1uGbgsDCgt9GV5sAC864RNPPDJLTnX9phoWHuV2d && /usr/local/bin/start_ipfs daemon --migrate=true"',
   }
 }
 

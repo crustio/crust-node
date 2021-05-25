@@ -44,6 +44,12 @@ async function genSworkerComposeConfig(config) {
     environment: {
       ARGS: '-c /config/sworker_config.json --debug $EX_SWORKER_ARGS',
     },
+    logging: {
+      driver: "json-file",
+      options: {
+        "max-size": "500m"
+      }
+    },
   }
 }
 

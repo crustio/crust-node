@@ -47,6 +47,12 @@ async function genChainComposeConfig(config) {
       '/opt/crust/data/chain:/opt/crust/data/chain'
     ],
     command: args,
+    logging: {
+      driver: "json-file",
+      options: {
+        "max-size": "500m"
+      }
+    },
   }
 }
 

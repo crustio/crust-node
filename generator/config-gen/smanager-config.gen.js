@@ -26,7 +26,13 @@ async function genSmanagerConfig(config, outputCfg) {
       restart: 'always',
       environment: {
         ARGS: args,
-      }
+      },
+      logging: {
+        driver: "json-file",
+        options: {
+          "max-size": "500m"
+        }
+      },
     }
   }
   
