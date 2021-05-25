@@ -236,7 +236,7 @@ sworker_ab_upgrade()
         return 1
     fi
 
-    if [ ${#1} -eq 64 ];then
+    if [ ${#1} -ne 64 ];then
         log_err "Please give right sWorker code."
         return 1
     fi
