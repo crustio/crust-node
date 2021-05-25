@@ -232,8 +232,12 @@ sworker_ab_upgrade()
 {
     # Check input 
     if [ x"$1" == x"" ]; then
-        log_err "Please give new sWorker code."
-        tools_help
+        log_err "Please give sWorker code."
+        return 1
+    fi
+
+    if [ ${#1} -eq 64 ];then
+        log_err "Please give right sWorker code."
         return 1
     fi
     local code=$1
@@ -268,7 +272,7 @@ sworker_ab_upgrade()
 
     log_info "Read configurations success."
 
-    if [ x"$2" != x"no-chain" ]; then
+    if [ x"$2" != x"--offline" ]; then
         # Check chain
         while :
         do
@@ -389,7 +393,13 @@ sworker_ab_upgrade()
     else
         docker stop crust-sworker-$a_or_b &>/dev/null
         docker rm crust-sworker-$a_or_b &>/dev/null
-        EX_SWORKER_ARGS=--upgrade docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
+
+        if [ x"$2" != x"--offline" ]; then
+            EX_SWORKER_ARGS=--upgrade docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
+        else
+            EX_SWORKER_ARGS='--upgrade --offline' docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
+        fi
+        
         if [ $? -ne 0 ]; then
             log_err "Setup new sWorker failed"
             docker tag $old_image crustio/crust-sworker:latest
