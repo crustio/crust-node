@@ -17,112 +17,112 @@ EOF
 
 config_show()
 {
-	cat $configfile
+    cat $configfile
 }
 
 config_set_all()
 {
-	local chain_name=""
-	read -p "Enter crust node name (default:crust-node): " chain_name
-	chain_name=`echo "$chain_name"`
-	if [ x"$chain_name" == x"" ]; then
-		chain_name="crust-node"
-	fi
-	sed -i "22c \\  name: \"$chain_name\"" $configfile &>/dev/null
-	log_success "Set crust node name: '$chain_name' successfully"
+    local chain_name=""
+    read -p "Enter crust node name (default:crust-node): " chain_name
+    chain_name=`echo "$chain_name"`
+    if [ x"$chain_name" == x"" ]; then
+        chain_name="crust-node"
+    fi
+    sed -i "22c \\  name: \"$chain_name\"" $configfile &>/dev/null
+    log_success "Set crust node name: '$chain_name' successfully"
 
-	local mode=""
-	while true
-	do
-		read -p "Enter crust node mode from 'isolation/owner/member' (default:isolation): " mode
-		mode=`echo "$mode"`
-		if [ x"$mode" == x"" ]; then
-			mode="isolation"
-			break
-		elif [ x"$mode" == x"isolation" ] || [ x"$mode" == x"owner" ] || [ x"$mode" == x"member" ]; then
-			break
-		else
-			log_err "Input error, please input isolation/owner/member"
-		fi
-	done
-	if [ x"$mode" == x"owner" ]; then
-		sed -i '4c \\  chain: "authority"' $configfile &>/dev/null
-		sed -i '6c \\  sworker: "disable"' $configfile &>/dev/null
-		sed -i '8c \\  smanager: "disable"' $configfile &>/dev/null
-		sed -i '10c \\  ipfs: "disable"' $configfile &>/dev/null
-		log_success "Set crust node mode: '$mode' successfully"
-		log_success "Set configurations done"
-		return
-	elif [ x"$mode" == x"isolation" ]; then
-		sed -i '4c \\  chain: "authority"' $configfile &>/dev/null
-		sed -i '6c \\  sworker: "enable"' $configfile &>/dev/null
-		sed -i '8c \\  smanager: "'$mode'"' $configfile &>/dev/null
-		sed -i '10c \\  ipfs: "enable"' $configfile &>/dev/null
-		log_success "Set crust node mode: '$mode' successfully"
-	else
-		sed -i '4c \\  chain: "full"' $configfile &>/dev/null
-		sed -i '6c \\  sworker: "enable"' $configfile &>/dev/null
-		sed -i '8c \\  smanager: "'$mode'"' $configfile &>/dev/null
-		sed -i '10c \\  ipfs: "enable"' $configfile &>/dev/null
-		log_success "Set crust node mode: '$mode' successfully"
-	fi
+    local mode=""
+    while true
+    do
+        read -p "Enter crust node mode from 'isolation/owner/member' (default:isolation): " mode
+        mode=`echo "$mode"`
+        if [ x"$mode" == x"" ]; then
+            mode="isolation"
+            break
+        elif [ x"$mode" == x"isolation" ] || [ x"$mode" == x"owner" ] || [ x"$mode" == x"member" ]; then
+            break
+        else
+            log_err "Input error, please input isolation/owner/member"
+        fi
+    done
+    if [ x"$mode" == x"owner" ]; then
+        sed -i '4c \\  chain: "authority"' $configfile &>/dev/null
+        sed -i '6c \\  sworker: "disable"' $configfile &>/dev/null
+        sed -i '8c \\  smanager: "disable"' $configfile &>/dev/null
+        sed -i '10c \\  ipfs: "disable"' $configfile &>/dev/null
+        log_success "Set crust node mode: '$mode' successfully"
+        log_success "Set configurations done"
+        return
+    elif [ x"$mode" == x"isolation" ]; then
+        sed -i '4c \\  chain: "authority"' $configfile &>/dev/null
+        sed -i '6c \\  sworker: "enable"' $configfile &>/dev/null
+        sed -i '8c \\  smanager: "'$mode'"' $configfile &>/dev/null
+        sed -i '10c \\  ipfs: "enable"' $configfile &>/dev/null
+        log_success "Set crust node mode: '$mode' successfully"
+    else
+        sed -i '4c \\  chain: "full"' $configfile &>/dev/null
+        sed -i '6c \\  sworker: "enable"' $configfile &>/dev/null
+        sed -i '8c \\  smanager: "'$mode'"' $configfile &>/dev/null
+        sed -i '10c \\  ipfs: "enable"' $configfile &>/dev/null
+        log_success "Set crust node mode: '$mode' successfully"
+    fi
 
-	local identity_backup=""
-	while true
-	do
-		if [ x"$mode" == x"member" ]; then
-			read -p "Enter the backup of account: " identity_backup
-		else
-			read -p "Enter the backup of controller account: " identity_backup
-		fi
+    local identity_backup=""
+    while true
+    do
+        if [ x"$mode" == x"member" ]; then
+            read -p "Enter the backup of account: " identity_backup
+        else
+            read -p "Enter the backup of controller account: " identity_backup
+        fi
 
-		identity_backup=`echo "$identity_backup"`
-		if [ x"$identity_backup" != x"" ]; then
-			break
-		else
-			log_err "Input error, backup can't be empty"
-		fi
-	done
-	sed -i "15c \\  backup: '$identity_backup'" $configfile &>/dev/null
-	log_success "Set backup successfully"
+        identity_backup=`echo "$identity_backup"`
+        if [ x"$identity_backup" != x"" ]; then
+            break
+        else
+            log_err "Input error, backup can't be empty"
+        fi
+    done
+    sed -i "15c \\  backup: '$identity_backup'" $configfile &>/dev/null
+    log_success "Set backup successfully"
 
-	local identity_password=""
-	while true
-	do
-		if [ x"$mode" == x"member" ]; then
-			read -p "Enter the password of account: " identity_password
-		else
-			read -p "Enter the password of controller account: " identity_password
-		fi
+    local identity_password=""
+    while true
+    do
+        if [ x"$mode" == x"member" ]; then
+            read -p "Enter the password of account: " identity_password
+        else
+            read -p "Enter the password of controller account: " identity_password
+        fi
 
-		identity_password=`echo "$identity_password"`
-		if [ x"$identity_password" != x"" ]; then
-			break
-		else
-			log_err "Input error, password can't be empty"
-		fi
-	done
-	sed -i '17c \\  password: "'$identity_password'"' $configfile &>/dev/null
+        identity_password=`echo "$identity_password"`
+        if [ x"$identity_password" != x"" ]; then
+            break
+        else
+            log_err "Input error, password can't be empty"
+        fi
+    done
+    sed -i '17c \\  password: "'$identity_password'"' $configfile &>/dev/null
 
-	log_success "Set password successfully"
-	log_success "Set configurations successfully"
-	
-	# Generate configurations
-	config_generate
+    log_success "Set password successfully"
+    log_success "Set configurations successfully"
+    
+    # Generate configurations
+    config_generate
 }
 
 config_conn_chain()
 {
-	sed -i '28c \\  ws: "'$1'"' $configfile &>/dev/null
-	log_success "Set connected chain ws successfully"
-	config_generate
+    sed -i '28c \\  ws: "'$1'"' $configfile &>/dev/null
+    log_success "Set connected chain ws successfully"
+    config_generate
 }
 
 config_chain_port()
 {
-	sed -i "24c \\  port: '$1'" $configfile &>/dev/null
-	log_success "Set chain port successfully"
-	config_generate
+    sed -i "24c \\  port: '$1'" $configfile &>/dev/null
+    log_success "Set chain port successfully"
+    config_generate
 }
 
 config_generate()
@@ -185,25 +185,25 @@ COMMENT
 
 config()
 {
-	case "$1" in
-		show)
-			config_show
-			;;
-		set)
-			config_set_all
-			;;
-		conn-chain)
-			shift
-			config_conn_chain $@
-			;;
-		chain-port)
-			shift
-			config_chain_port $@
-			;;
-		generate)
-			config_generate
-			;;
-		*)
-			config_help
-	esac
+    case "$1" in
+        show)
+            config_show
+            ;;
+        set)
+            config_set_all
+            ;;
+        conn-chain)
+            shift
+            config_conn_chain $@
+            ;;
+        chain-port)
+            shift
+            config_chain_port $@
+            ;;
+        generate)
+            config_generate
+            ;;
+        *)
+            config_help
+    esac
 }

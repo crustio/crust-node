@@ -16,7 +16,7 @@ async function genIpfsConfig(config, outputCfg) {
 
 async function genIpfsComposeConfig(config) {
   return {
-    image: 'ipfs/go-ipfs:latest',
+    image: 'crustio/go-ipfs:latest',
     network_mode: 'host',
     restart: 'always',
     volumes: [
