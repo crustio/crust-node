@@ -93,7 +93,7 @@ download_docker_images()
         
     docker pull $docker_org/go-ipfs:$node_type
     res=$(($?|$res))
-    docker tag $docker_org/go-ipfs:$node_type ipfs/go-ipfs
+    docker tag $docker_org/go-ipfs:$node_type crustio/go-ipfs
 
     if [ $res -ne 0 ]; then
         log_err "Install docker failed"

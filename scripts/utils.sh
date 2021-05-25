@@ -32,39 +32,39 @@ function log_err()
 
 function upgrade_docker_image()
 {
-    local basedir=/opt/crust/crust-node
-    local crustio_name=$2
-    if [ x"$crustio_name" == x"" ]; then
-        crustio_name=$1
+    local image_name=$1
+    local image_tag=$node_type
+    if [ x"$2" != x"" ]; then
+        image_tag=$2
     fi
 
-    local old_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
+    local old_image=(`docker images | grep '^\b'$image_name'\b ' | grep 'latest'`)
     old_image=${old_image[2]}
 
     local region=`cat $basedir/etc/region.conf`
-    local res=0
+    local docker_org="crustio"
     if [ x"$region" == x"cn" ]; then
-        docker pull $aliyun_address/$crustio_name
-        res=$(($?|$res))
-        docker tag $aliyun_address/$crustio_name $1
-    else
-        docker pull $1
-        res=$(($?|$res))
+       docker_org=$aliyun_address/$docker_org
     fi
 
+    local res=0
+    docker pull $docker_org/$image_name:$image_tag
+    res=$(($?|$res))
+    docker tag $docker_org/$image_name:$image_tag crustio/$image_name
+
     if [ $res -ne 0 ]; then
-        log_err "Download docker image $1 failed"
+        log_err "Download docker image $image_name:$image_tag failed"
         return 1
     fi
 
-    local new_image=(`docker images | grep '^\b'$1'\b ' | grep 'latest'`)
+    local new_image=(`docker images | grep '^\b'$image_name'\b ' | grep 'latest'`)
     new_image=${new_image[2]}
     if [ x"$old_image" = x"$new_image" ]; then
-        log_info "The current docker image $1 ($old_image) is already the latest"
+        log_info "The current docker image $image_name ($old_image) is already the latest"
         return 1
     fi
     
-    log_info "The docker image of $1 is changed from $old_image to $new_image"
+    log_info "The docker image of $image_name is changed from $old_image to $new_image"
 
     return 0
 }
