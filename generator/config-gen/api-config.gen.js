@@ -20,7 +20,13 @@ async function genApiComposeConfig(config) {
     restart: 'always',
     environment: {
       ARGS: args,
-    }
+    },
+    logging: {
+      driver: "json-file",
+      options: {
+        "max-size": "500m"
+      }
+    },
   }
 }
 

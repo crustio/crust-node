@@ -14,7 +14,6 @@ Crust tools usage:
     workload                                                   show workload information
     file-info {cid}                                            show all files information or one file details
     delete-file {cid}                                          delete one file
-    set-srd-ratio {ratio}                                      set SRD raito, default is 99%, range is 0% - 99%, for example 'set-srd-ratio 75'
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
 EOF
@@ -95,39 +94,6 @@ change_srd()
     base_url=${base_url:1}
 
     curl -XPOST ''$base_url'/srd/change' -H 'backup: '$backup'' --data-raw '{"change" : '$1'}'
-}
-
-set_srd_ratio()
-{
-    if [ x"$1" == x"" ] || [[ ! $1 =~ ^[1-9][0-9]*$|^[-][1-9][0-9]*$|^0$ ]]; then 
-        log_err "The input of set srd ratio must be integer number"
-        tools_help
-        return 1
-    fi
-
-    if [ $1 -lt 0 ] || [ $1 -gt 99 ]; then
-        log_err "The range of set srd ratio is 0 ~ 99"
-        tools_help
-        return 1
-    fi
-
-    local a_or_b=`cat $basedir/etc/sWorker.ab`
-    check_docker_status crust-sworker-$a_or_b
-    if [ $? -ne 0 ]; then
-        log_info "Service crust sworker is not started or exited now"
-        return 0
-    fi
-
-    if [ ! -f "$builddir/sworker/sworker_config.json" ]; then
-        log_err "No sworker configuration file"
-        return 1
-    fi
-
-    local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
-    base_url=${base_url%?}
-    base_url=${base_url:1}
-
-    curl -XPOST ''$base_url'/srd/ratio' -H 'backup: '$backup'' --data-raw '{"ratio" : '$1'}'
 }
 
 workload()
@@ -459,9 +425,6 @@ tools()
             ;;
         change-srd)
             change_srd $2
-            ;;
-        set-srd-ratio)
-            set_srd_ratio $2
             ;;
         rotate-keys)
             rotate_keys
