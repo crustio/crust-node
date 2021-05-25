@@ -12,23 +12,23 @@ version()
 
 inner_sworker_version()
 {
-	local sworker_config_file=$builddir/sworker/sworker_config.json
-	if [ ! -f "$sworker_config_file" ]; then
-		return
-	fi
+    local sworker_config_file=$builddir/sworker/sworker_config.json
+    if [ ! -f "$sworker_config_file" ]; then
+        return
+    fi
 
-	sworker_base_url=`cat $sworker_config_file | jq .base_url`
+    sworker_base_url=`cat $sworker_config_file | jq .base_url`
 
-	if [ x"$sworker_base_url" = x"" ]; then
-		return
-	fi
+    if [ x"$sworker_base_url" = x"" ]; then
+        return
+    fi
 
-	sworker_base_url=`echo "$sworker_base_url" | sed -e 's/^"//' -e 's/"$//'`
+    sworker_base_url=`echo "$sworker_base_url" | sed -e 's/^"//' -e 's/"$//'`
 
     local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
-	if [ x"$id_info" = x"" ]; then
-		return
-	fi
+    if [ x"$id_info" = x"" ]; then
+        return
+    fi
     printf "SWorker version:\n${id_info}\n"
 }
 
