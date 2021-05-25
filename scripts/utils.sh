@@ -38,7 +38,7 @@ function upgrade_docker_image()
         image_tag=$2
     fi
 
-    local old_image=(`docker images | grep '^\b'$image_name'\b ' | grep 'latest'`)
+    local old_image=(`docker images | grep '^\b'crustio/$image_name'\b ' | grep 'latest'`)
     old_image=${old_image[2]}
 
     local region=`cat $basedir/etc/region.conf`
@@ -57,7 +57,7 @@ function upgrade_docker_image()
         return 1
     fi
 
-    local new_image=(`docker images | grep '^\b'$image_name'\b ' | grep 'latest'`)
+    local new_image=(`docker images | grep '^\b'crustio/$image_name'\b ' | grep 'latest'`)
     new_image=${new_image[2]}
     if [ x"$old_image" = x"$new_image" ]; then
         log_info "The current docker image $image_name ($old_image) is already the latest"
