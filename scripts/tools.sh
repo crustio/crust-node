@@ -394,11 +394,8 @@ sworker_ab_upgrade()
         docker stop crust-sworker-$a_or_b &>/dev/null
         docker rm crust-sworker-$a_or_b &>/dev/null
 
-        if [ x"$2" != x"--offline" ]; then
-            EX_SWORKER_ARGS=--upgrade docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
-        else
-            EX_SWORKER_ARGS='--upgrade --offline' docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
-        fi
+        shift
+        EX_SWORKER_ARGS="--upgrade $@" docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
         
         if [ $? -ne 0 ]; then
             log_err "Setup new sWorker failed"
@@ -482,7 +479,8 @@ tools()
             upgrade_image $2 $3
             ;;
         sworker-ab-upgrade)
-            sworker_ab_upgrade $2 $3
+            shift
+            sworker_ab_upgrade $@
             ;;
         ipfs)
             shift
