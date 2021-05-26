@@ -140,8 +140,8 @@ file_info()
     if [ x"$2" != x"" ]; then
         output="--output $2"
     fi
-    
-    curl -X GET ''$base_url'/file/info_by_type' --header 'Content-Type: application/json' --data-raw '{"type":"'$1'"}'
+
+    curl -X GET ''$base_url'/file/info_by_type' --header 'Content-Type: application/json' --data-raw '{"type":"'$1'"}' $output
 }
 
 delete_file()
