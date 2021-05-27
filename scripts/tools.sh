@@ -12,7 +12,7 @@ Crust tools usage:
     upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
     sworker-ab-upgrade {code}                                  sworker AB upgrade
     workload                                                   show workload information
-    file-info {cid}                                            show all files information or one file details
+    file-info {all/valid/lost/pending} {output-file}           show files information
     delete-file {cid}                                          delete one file
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
@@ -126,10 +126,22 @@ file_info()
     base_url=${base_url:1}
 
     if [ x"$1" == x"" ]; then
-        curl $base_url/file/info_all --output sworker_file_info_all.json
-    else
-        curl --request POST ''$base_url'/file/info' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}'
+        tools_help
+        return 1
     fi
+
+    if [ x"$1" != x"all" ] && [ x"$1" != x"valid" ] && [ x"$1" != x"lost" ] && [ x"$1" != x"pending" ]; then
+        tools_help
+        return 1
+    fi
+
+    local output=""
+
+    if [ x"$2" != x"" ]; then
+        output="--output $2"
+    fi
+
+    curl -X GET ''$base_url'/file/info_by_type' --header 'Content-Type: application/json' --data-raw '{"type":"'$1'"}' $output
 }
 
 delete_file()
