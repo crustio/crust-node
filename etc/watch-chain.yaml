@@ -28,6 +28,8 @@ services:
       - '--no-telemetry'
       - '--pruning'
       - '8000'
+      - '--ws-max-connections'
+      - '100'
       - '--ws-external'
       - '--rpc-external'
     logging:
