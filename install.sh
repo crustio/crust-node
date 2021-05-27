@@ -123,7 +123,8 @@ install_crust_node()
         rm $bin_file
         rm -rf $installdir/scripts
         cp -r $localbasedir/scripts $installdir/
-        region=`cat $localbasedir/etc/region.conf`
+        rm $installdir/etc/watch-chain.yaml
+        cp $localbasedir/etc/watch-chain.yaml $installdir/etc/watch-chain.yaml
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
             echo "Uninstall old crust node"

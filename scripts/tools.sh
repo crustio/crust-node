@@ -16,6 +16,7 @@ Crust tools usage:
     delete-file {cid}                                          delete one file
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
+    watch-chain                                                generate watch chain node docker-compose file and show help
 EOF
 }
 
@@ -30,7 +31,7 @@ Total space: ${data_folder_info[1]}
 Used space: ${data_folder_info[2]}
 Avail space: ${data_folder_info[3]}
 EOF
-
+    local has_disks=false
     for i in $(seq 1 128); do
         local disk_folder_info=(`df -h /opt/crust/data/disks/${i} | sed -n '2p'`)
         if [ x"${disk_folder_info[0]}" != x"${data_folder_info[0]}" ]; then
@@ -40,8 +41,14 @@ EOF
             printf "Total space: ${disk_folder_info[1]}\n"
             printf "Used space: ${disk_folder_info[2]}\n"
             printf "Avail space: ${disk_folder_info[3]}\n"
+            has_disks=true
         fi
     done
+
+    if [ "$has_disks" == false ]; then
+        log_err "Please mount the hard disk to storage folders, paths is from: /opt/crust/data/disks/1 ~ /opt/crust/data/disks/128"
+        return 1
+    fi
 
 cat << EOF
 
@@ -429,6 +436,21 @@ sworker_ab_upgrade()
     log_success "Sworker update success, setup new sworker 'crust-sworker-$a_or_b'"
 }
 
+watch_chain()
+{
+    cp $basedir/etc/watch-chain.yaml watch-chain.yaml
+
+cat << EOF
+The 'watch-chain.yaml' file has been generated your current path, use docker-compose to start the watch chain node
+
+PS:
+1. Watch chain node can provide ws and rpc services, please open 30888, 19933 and 19944 ports
+2. You can edit 'watch-chain.yaml' to customize your watch chain
+3. The simplest startup example: 'sudo docker-compose -f watch-chain.yaml up -d'
+4. With external connect chain configuration, a topology structure where one chain node serves multiple members can be realized
+EOF
+}
+
 tools()
 {
     case "$1" in
@@ -456,6 +478,9 @@ tools()
         sworker-ab-upgrade)
             shift
             sworker_ab_upgrade $@
+            ;;
+        watch-chain)
+            watch_chain
             ;;
         ipfs)
             shift
