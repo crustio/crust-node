@@ -1,10 +1,10 @@
 #!/bin/bash
 
-basedir=$(cd `dirname $0`;pwd)
-scriptdir=$basedir/scripts
+localbasedir=$(cd `dirname $0`;pwd)
+localscriptdir=$localbasedir/scripts
 installdir=/opt/crust/crust-node
-filesdir=/opt/crust/data/files
-source $scriptdir/utils.sh
+disksdir=/opt/crust/data/disks
+source $localscriptdir/utils.sh
 
 help()
 {
@@ -19,6 +19,10 @@ exit 0
 
 install_depenencies()
 {
+    if [ x"$update" == x"true" ]; then
+        return 0
+    fi
+
     log_info "------------Apt update--------------"
     apt-get update
     if [ $? -ne 0 ]; then
@@ -55,54 +59,58 @@ install_depenencies()
 
 download_docker_images()
 {
-    log_info "-------Download crust docker images----------"
-    res=0
-
-    if [ x"$region" == x"cn" ]; then
-        local aliyun_address=registry.cn-hangzhou.aliyuncs.com
-
-        docker pull $aliyun_address/crustio/config-generator
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/config-generator crustio/config-generator
-
-        docker pull $aliyun_address/crustio/crust
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust crustio/crust
-
-        docker pull $aliyun_address/crustio/crust-api
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-api crustio/crust-api
-
-        docker pull $aliyun_address/crustio/crust-sworker
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-sworker crustio/crust-sworker
-
-        docker pull $aliyun_address/crustio/crust-smanager
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/crust-smanager crustio/crust-smanager
-        
-        docker pull $aliyun_address/crustio/go-ipfs
-        res=$(($?|$res))
-        docker tag $aliyun_address/crustio/go-ipfs ipfs/go-ipfs
-    else
-        docker pull crustio/config-generator
-        res=$(($?|$res))
-        docker pull crustio/crust
-        res=$(($?|$res))
-        docker pull crustio/crust-api
-        res=$(($?|$res))
-        docker pull crustio/crust-sworker
-        res=$(($?|$res))
-        docker pull crustio/crust-smanager
-        res=$(($?|$res))
-        docker pull ipfs/go-ipfs
-        res=$(($?|$res))
+    if [ x"$update" == x"true" ]; then
+        return 0
     fi
+
+    log_info "-------Download crust docker images----------"
+    
+    local docker_org="crustio"
+    if [ x"$region" == x"cn" ]; then
+       docker_org=$aliyun_address/$docker_org
+    fi
+
+    local res=0
+    docker pull $docker_org/config-generator:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/config-generator:$node_type crustio/config-generator
+        
+    docker pull $docker_org/crust:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust:$node_type crustio/crust
+
+    docker pull $docker_org/crust-api:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust-api:$node_type crustio/crust-api
+
+    docker pull $docker_org/crust-sworker:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust-sworker:$node_type crustio/crust-sworker
+
+    docker pull $docker_org/crust-smanager:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/crust-smanager:$node_type crustio/crust-smanager
+        
+    docker pull $docker_org/go-ipfs:$node_type
+    res=$(($?|$res))
+    docker tag $docker_org/go-ipfs:$node_type crustio/go-ipfs
 
     if [ $res -ne 0 ]; then
         log_err "Install docker failed"
         exit 1
     fi
+}
+
+create_node_paths()
+{
+    mkdir -p $installdir
+    mkdir -p $disksdir
+    chmod 777 $disksdir
+    for((i=1;i<=128;i++));
+    do
+        mkdir -p $disksdir/$i
+        chmod 777 $disksdir/$i
+    done
 }
 
 install_crust_node()
@@ -114,12 +122,9 @@ install_crust_node()
         echo "Update crust node"
         rm $bin_file
         rm -rf $installdir/scripts
-        cp -r $basedir/scripts $installdir/
-        mkdir -p $installdir/logs
-        local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/upgrade.sh" | grep -v grep | awk '{print $2}')
-        if [ x"$upgrade_pid" != x"" ]; then
-            kill -9 $upgrade_pid
-        fi
+        cp -r $localbasedir/scripts $installdir/
+        rm $installdir/etc/watch-chain.yaml
+        cp $localbasedir/etc/watch-chain.yaml $installdir/etc/watch-chain.yaml
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
             echo "Uninstall old crust node"
@@ -127,22 +132,19 @@ install_crust_node()
         fi
 
         echo "Install new crust node"
-        mkdir -p $installdir
-        mkdir -p $filesdir
-        chmod 777 -R $filesdir
-        mkdir -p $installdir/logs
-        cp -r $basedir/etc $installdir/
-        cp $basedir/config.yaml $installdir/
+        create_node_paths
+        cp -r $localbasedir/etc $installdir/
+        cp $localbasedir/config.yaml $installdir/
         chown root:root $installdir/config.yaml
         chmod 0600 $installdir/config.yaml
-        cp -r $basedir/scripts $installdir/
+        cp -r $localbasedir/scripts $installdir/
+
+        echo "Change crust node configurations"
+        sed -i 's/en/'$region'/g' $installdir/etc/region.conf
     fi
-    
-    echo "Change crust node configurations"
-    sed -i 's/en/'$region'/g' $installdir/etc/region.conf
 
     echo "Install crust command line tool"
-    cp $scriptdir/crust.sh /usr/bin/crust
+    cp $localscriptdir/crust.sh /usr/bin/crust
 
     log_success "------------Install success-------------"
 }

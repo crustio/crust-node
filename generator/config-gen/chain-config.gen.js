@@ -27,7 +27,9 @@ async function genChainComposeConfig(config) {
     '--wasm-execution',
     'compiled',
     '--in-peers',
-    '100'
+    '75',
+    '--out-peers',
+    '75'
   ]
 
   if (config.node.chain == "authority") {
@@ -35,7 +37,7 @@ async function genChainComposeConfig(config) {
   }
 
   if (config.node.chain == "full") {
-    args.push('--pruning', '8000')
+    args.push('--no-telemetry', '--pruning', '8000')
   }
 
   return {
@@ -45,6 +47,12 @@ async function genChainComposeConfig(config) {
       '/opt/crust/data/chain:/opt/crust/data/chain'
     ],
     command: args,
+    logging: {
+      driver: "json-file",
+      options: {
+        "max-size": "500m"
+      }
+    },
   }
 }
 

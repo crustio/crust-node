@@ -1,7 +1,7 @@
 async function genApiConfig(config, outputCfg) {
   const apiConfig = {
     port: 56666,
-    chain_ws_url: `ws://127.0.0.1:19944`,
+    chain_ws_url: config.api.ws,
   }
   return {
     config: apiConfig,
@@ -12,7 +12,7 @@ async function genApiConfig(config, outputCfg) {
 async function genApiComposeConfig(config) {
   const args = [
     '56666',
-    `ws://127.0.0.1:19944`,
+    `${config.api.ws}`,
   ].join(' ')
   return {
     image: 'crustio/crust-api:latest',
@@ -20,7 +20,13 @@ async function genApiComposeConfig(config) {
     restart: 'always',
     environment: {
       ARGS: args,
-    }
+    },
+    logging: {
+      driver: "json-file",
+      options: {
+        "max-size": "500m"
+      }
+    },
   }
 }
 
