@@ -24,7 +24,7 @@ async function genIpfsComposeConfig(config) {
     ],
     entrypoint: '/sbin/tini --',
     environment: {
-      IPFS_PROFILE: 'badgerds',
+      IPFS_PROFILE: 'leveldb',
     },
     logging: {
       driver: "json-file",
