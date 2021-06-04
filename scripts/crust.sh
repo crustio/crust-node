@@ -20,12 +20,14 @@ start()
 
         if [ -f "$builddir/api/api_config.json" ]; then
             local chain_ws_url=`cat $builddir/api/api_config.json | jq .chain_ws_url`
-            if [ x"$chain_ws_url" == x"ws://127.0.0.1:19944" ]; then
+            if [ x"$chain_ws_url" == x"\"ws://127.0.0.1:19944\"" ]; then
                 start_chain
                 if [ $? -ne 0 ]; then
                     docker-compose -f $composeyaml down
                     exit 1
                 fi
+            else
+                log_info "API will connect to other chain: ${chain_ws_url}"
             fi
         else
             start_chain

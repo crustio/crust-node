@@ -113,15 +113,26 @@ config_set_all()
 
 config_conn_chain()
 {
+    if [ x"$1" = x"" ]; then
+        log_err "Please give conneted chain ws."
+        config_help
+        return 1
+    fi
+
     sed -i '28c \\  ws: "'$1'"' $configfile &>/dev/null
-    log_success "Set connected chain ws successfully"
+    log_success "Set connected chain ws '$1' successfully"
     config_generate
 }
 
 config_chain_port()
 {
+    if [ x"$1" = x"" ]; then
+        log_err "Please give right chain port."
+        config_help
+        return 1
+    fi
     sed -i "24c \\  port: '$1'" $configfile &>/dev/null
-    log_success "Set chain port successfully"
+    log_success "Set chain port '$1' successfully"
     config_generate
 }
 
