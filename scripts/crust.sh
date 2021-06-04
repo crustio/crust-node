@@ -36,7 +36,7 @@ start()
                 exit 1
             fi
         fi
-        
+
         start_sworker
         if [ $? -ne 0 ]; then
             docker-compose -f $composeyaml down
