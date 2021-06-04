@@ -18,12 +18,23 @@ start()
     if [ x"$1" = x"" ]; then
         log_info "Start crust"
 
-        start_chain
-        if [ $? -ne 0 ]; then
-            docker-compose -f $composeyaml down
-            exit 1
+        if [ -f "$builddir/api/api_config.json" ]; then
+            local chain_ws_url=`cat $builddir/api/api_config.json | jq .chain_ws_url`
+            if [ x"$chain_ws_url" == x"ws://127.0.0.1:19944" ]; then
+                start_chain
+                if [ $? -ne 0 ]; then
+                    docker-compose -f $composeyaml down
+                    exit 1
+                fi
+            fi
+        else
+            start_chain
+            if [ $? -ne 0 ]; then
+                docker-compose -f $composeyaml down
+                exit 1
+            fi
         fi
-
+        
         start_sworker
         if [ $? -ne 0 ]; then
             docker-compose -f $composeyaml down
