@@ -14,7 +14,7 @@ start()
         log_err "No configuration file, please set config"
         exit 1
     fi
-    
+
     if [ x"$1" = x"" ]; then
         log_info "Start crust"
 
