@@ -43,7 +43,7 @@ inner_docker_version()
     local cgen_image=(`docker images | grep '^\b'crustio/config-generator'\b ' | grep 'latest'`)
     cgen_image=${cgen_image[2]}
 
-    local ipfs_image=(`docker images | grep '^\b'ipfs/go-ipfs'\b ' | grep 'latest'`)
+    local ipfs_image=(`docker images | grep '^\b'crustio/go-ipfs'\b ' | grep 'latest'`)
     ipfs_image=${ipfs_image[2]}
 
     local api_image=(`docker images | grep '^\b'crustio/crust-api'\b ' | grep 'latest'`)
