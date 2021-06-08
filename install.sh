@@ -55,6 +55,8 @@ install_depenencies()
             exit 1
         fi
     fi
+
+    sysctl -w net.core.rmem_max=2500000
 }
 
 download_docker_images()
