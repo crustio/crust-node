@@ -6,6 +6,8 @@ version()
 {
     printf "Node type: ${node_type}\n"
     printf "Node version: ${node_version}\n"
+    local mode=`cat $basedir/etc/mode.conf`
+    printf "Node mode: ${mode}"
     inner_sworker_version
     inner_docker_version
 }
