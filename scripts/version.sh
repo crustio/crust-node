@@ -4,8 +4,8 @@ source /opt/crust/crust-node/scripts/utils.sh
 
 version()
 {
-    printf "Node type: ${node_type}\n"
     printf "Node version: ${node_version}\n"
+    printf "Node network: ${node_type}\n"
     local mode=`cat $basedir/etc/mode.conf`
     printf "Node mode: ${mode}\n"
     inner_sworker_version
