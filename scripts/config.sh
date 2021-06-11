@@ -45,6 +45,7 @@ config_set_all()
             log_err "Input error, please input isolation/owner/member"
         fi
     done
+
     if [ x"$mode" == x"owner" ]; then
         sed -i '4c \\  chain: "authority"' $configfile &>/dev/null
         sed -i '6c \\  sworker: "disable"' $configfile &>/dev/null
@@ -66,6 +67,9 @@ config_set_all()
         sed -i '10c \\  ipfs: "enable"' $configfile &>/dev/null
         log_success "Set crust node mode: '$mode' successfully"
     fi
+
+    local old_mode=`cat $basedir/etc/mode.conf`
+    sed -i 's/'$old_mode'/'$mode'/g' $basedir/etc/mode.conf
 
     local identity_backup=""
     while true
