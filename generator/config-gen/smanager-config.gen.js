@@ -1,6 +1,6 @@
 async function genSmanagerConfig(config, outputCfg) {
     const smanagerConfig = {
-      chain_addr: 'ws://127.0.0.1:19944',
+      chain_addr: config.api.ws,
       ipfs_addr: 'http://127.0.0.1:5001',
       sworker_addr: 'http://127.0.0.1:12222',
       mode: config.node.smanager,
@@ -14,7 +14,7 @@ async function genSmanagerConfig(config, outputCfg) {
   
   async function genSmanagerComposeConfig(config) {
     const args = [
-      'ws://127.0.0.1:19944',
+      config.api.ws,
       'http://127.0.0.1:5001',
       'http://127.0.0.1:12222',
       config.node.smanager,
