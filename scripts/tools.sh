@@ -12,11 +12,12 @@ Crust tools usage:
     upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
     sworker-ab-upgrade {code}                                  sworker AB upgrade
     workload                                                   show workload information
-    file-info {all/valid/lost/pending} {output-file}           show files information
+    file-info {all|valid|lost|pending|{cid}} {output-file}     show file information
     delete-file {cid}                                          delete one file
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
     watch-chain                                                generate watch chain node docker-compose file and show help
+    set-sworker-debug {true/false}                             set sworker debug
 EOF
 }
 
@@ -33,10 +34,10 @@ Avail space: ${data_folder_info[3]}
 EOF
     local has_disks=false
     for i in $(seq 1 128); do
-        local disk_folder_info=(`df -h /opt/crust/data/disks/${i} | sed -n '2p'`)
+        local disk_folder_info=(`df -h /opt/crust/disks/${i} | sed -n '2p'`)
         if [ x"${disk_folder_info[0]}" != x"${data_folder_info[0]}" ]; then
             printf "\n>>>>>> Storage folder ${i} <<<<<<\n"
-            printf "Path: /opt/crust/data/disks/${i}\n"
+            printf "Path: /opt/crust/disks/${i}\n"
             printf "File system: ${disk_folder_info[0]}\n"
             printf "Total space: ${disk_folder_info[1]}\n"
             printf "Used space: ${disk_folder_info[2]}\n"
@@ -46,15 +47,15 @@ EOF
     done
 
     if [ "$has_disks" == false ]; then
-        log_err "Please mount the hard disk to storage folders, paths is from: /opt/crust/data/disks/1 ~ /opt/crust/data/disks/128"
+        log_err "Please mount the hard disk to storage folders, paths is from: /opt/crust/disks/1 ~ /opt/crust/data/disks/128"
         return 1
     fi
 
 cat << EOF
 
 PS:
-1. Base data folder is used to store chain and db, 2TB SSD is recommended
-2. Please mount the hard disk to storage folders, paths is from: /opt/crust/data/disks/1 ~ /opt/crust/data/disks/128
+1. Base data folder is used to store chain and db, 2TB SSD is recommended, you can mount SSD on /opt/crust/data
+2. Please mount the hard disk to storage folders, paths is from: /opt/crust/disks/1 ~ /opt/crust/disks/128
 3. SRD will not use all the space, it will reserve 50G of space
 EOF
 }
@@ -137,15 +138,19 @@ file_info()
         return 1
     fi
 
-    if [ x"$1" != x"all" ] && [ x"$1" != x"valid" ] && [ x"$1" != x"lost" ] && [ x"$1" != x"pending" ]; then
-        tools_help
-        return 1
-    fi
-
     local output=""
 
     if [ x"$2" != x"" ]; then
         output="--output $2"
+    fi
+
+    if [ ${#1} -eq 46 ];then
+        curl -X GET ''$base_url'/file/info' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}' $output
+    fi
+
+    if [ x"$1" != x"all" ] && [ x"$1" != x"valid" ] && [ x"$1" != x"lost" ] && [ x"$1" != x"pending" ]; then
+        tools_help
+        return 1
     fi
 
     curl -X GET ''$base_url'/file/info_by_type' --header 'Content-Type: application/json' --data-raw '{"type":"'$1'"}' $output
@@ -164,6 +169,26 @@ delete_file()
     base_url=${base_url%?}
     base_url=${base_url:1}
     curl --request POST ''$base_url'/storage/delete' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}'
+}
+
+set_sworker_debug()
+{
+    local a_or_b=`cat $basedir/etc/sWorker.ab`
+    check_docker_status crust-sworker-$a_or_b
+    if [ $? -ne 0 ]; then
+        log_info "Service crust sworker is not started or exited now"
+        return 0
+    fi
+
+    if [ x"$1" != x"true" ] && [ x"$1" != x"false" ]; then
+        tools_help
+        return 1
+    fi
+
+    local base_url=`cat $builddir/sworker/sworker_config.json | jq .base_url`
+    base_url=${base_url%?}
+    base_url=${base_url:1}
+    curl --request POST ''$base_url'/debug' --header 'Content-Type: application/json' --data-raw '{"debug":'$1'}'
 }
 
 upgrade_image()
@@ -471,6 +496,9 @@ tools()
             ;;
         delete-file)
             delete_file $2
+            ;;
+        set-sworker-debug)
+            set_sworker_debug $2
             ;;
         upgrade-image)
             upgrade_image $2 $3

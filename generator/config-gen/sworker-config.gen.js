@@ -5,7 +5,7 @@ async function genSworkerConfig(config, outputCfg) {
   var dataPaths = []
 
   for (i = 1; i <= 128; i++) {
-    dataPaths.push("/opt/crust/data/disks/" + i)
+    dataPaths.push("/opt/crust/disks/" + i)
   }
 
   const sworkerConfig = {
@@ -22,7 +22,7 @@ async function genSworkerConfig(config, outputCfg) {
       path: '/opt/crust/data/sworker',
     }, {
       required: true,
-      path: '/opt/crust/data/disks',
+      path: '/opt/crust/disks',
     }],
   }
 }
@@ -30,7 +30,7 @@ async function genSworkerConfig(config, outputCfg) {
 async function genSworkerComposeConfig(config) {
   let tempVolumes = [
     '/opt/crust/data/sworker:/opt/crust/data/sworker',
-    '/opt/crust/data/disks:/opt/crust/data/disks',
+    '/opt/crust/disks:/opt/crust/disks',
     './sworker:/config'
   ]
 

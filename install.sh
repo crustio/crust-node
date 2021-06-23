@@ -3,7 +3,7 @@
 localbasedir=$(cd `dirname $0`;pwd)
 localscriptdir=$localbasedir/scripts
 installdir=/opt/crust/crust-node
-disksdir=/opt/crust/data/disks
+disksdir=/opt/crust/disks
 source $localscriptdir/utils.sh
 
 help()
