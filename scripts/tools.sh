@@ -17,7 +17,7 @@ Crust tools usage:
     change-srd {number}                                        change sworker's srd capacity(GB), for example: 'change-srd 100', 'change-srd -50'
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
     watch-chain                                                generate watch chain node docker-compose file and show help
-    set-sworker-debug {true/false}                             set sworker debug
+    set-sworker-debug {true|false}                             set sworker debug
 EOF
 }
 
@@ -146,6 +146,7 @@ file_info()
 
     if [ ${#1} -eq 46 ];then
         curl -X GET ''$base_url'/file/info' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}' $output
+        return $?
     fi
 
     if [ x"$1" != x"all" ] && [ x"$1" != x"valid" ] && [ x"$1" != x"lost" ] && [ x"$1" != x"pending" ]; then
@@ -154,6 +155,7 @@ file_info()
     fi
 
     curl -X GET ''$base_url'/file/info_by_type' --header 'Content-Type: application/json' --data-raw '{"type":"'$1'"}' $output
+    return $?
 }
 
 delete_file()
