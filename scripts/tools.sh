@@ -145,7 +145,7 @@ file_info()
     fi
 
     if [ ${#1} -eq 46 ];then
-        curl -X GET ''$base_url'/file/info' --header 'Content-Type: application/json' --data-raw '{"cid":"'$1'"}' $output
+        curl -X GET ''$base_url'/file/info?cid='$1'' $output
         return $?
     fi
 
@@ -154,7 +154,7 @@ file_info()
         return 1
     fi
 
-    curl -X GET ''$base_url'/file/info_by_type' --header 'Content-Type: application/json' --data-raw '{"type":"'$1'"}' $output
+    curl -X GET ''$base_url'/file/info_by_type?type='$1'' $output
     return $?
 }
 
