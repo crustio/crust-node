@@ -1,7 +1,7 @@
 #!/bin/bash
 
-node_type="maxwell"
-node_version="v0.10.0"
+node_type="mainnet"
+node_version="v1.0.0"
 aliyun_address="registry.cn-hangzhou.aliyuncs.com"
 
 basedir=/opt/crust/crust-node
