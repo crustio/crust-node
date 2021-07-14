@@ -7,7 +7,7 @@ async function inspectKey(address) {
   if (!keyTool) {
     throw 'key tool path not specified'
   }
-  const {stdout} = await execa(keyTool, ['inspect-key', '--uri', address]);
+  const {stdout} = await execa(keyTool, ['inspect', address]);
 
   const rows = _.chain(stdout).split('\n').map(_.trim)
   const accountId = extractAccountId(rows)
