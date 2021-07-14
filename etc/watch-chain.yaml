@@ -10,7 +10,7 @@ services:
       - '--base-path'
       - /opt/crust/data/watchchain
       - '--chain'
-      - maxwell
+      - mainnet
       - '--port'
       - '30888'
       - '--name'

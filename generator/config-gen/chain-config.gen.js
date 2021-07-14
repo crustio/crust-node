@@ -15,7 +15,7 @@ async function genChainComposeConfig(config) {
     '--base-path',
     '/opt/crust/data/chain',
     '--chain',
-    'maxwell',
+    'mainnet',
     '--port',
     `${config.chain.port}`,
     '--name',
