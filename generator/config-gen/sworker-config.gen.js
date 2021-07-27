@@ -42,7 +42,7 @@ async function genSworkerComposeConfig(config) {
     ],
     volumes: tempVolumes,
     environment: {
-      ARGS: '-c /config/sworker_config.json --debug $EX_SWORKER_ARGS',
+      ARGS: '-c /config/sworker_config.json $EX_SWORKER_ARGS',
     },
     logging: {
       driver: "json-file",

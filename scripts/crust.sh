@@ -154,10 +154,8 @@ stop()
         return 0
     fi
 
-    if [ x"$1" = x"smanager" ]; then
-        log_info "Stop smanager service"
-        stop_smanager
-        log_success "Stop smanager service success"
+    if [ x"$1" = x"smanager" ]; then    
+        log_info "Cannot stop the smanager service alone, this will affect your benefits"
         return 0
     fi
 
