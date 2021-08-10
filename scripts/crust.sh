@@ -344,12 +344,30 @@ start_smanager()
             log_err "Start crust-smanager failed"
             return 1
         fi
+
+        local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/auto_smanager.sh" | grep -v grep | awk '{print $2}')
+        if [ x"$upgrade_pid" != x"" ]; then
+            kill -9 $upgrade_pid
+        fi
+
+        if [ -f "$scriptdir/auto_smanager.sh" ]; then
+            nohup $scriptdir/auto_smanager.sh &>$basedir/auto_smanager.log &
+            if [ $? -ne 0 ]; then
+                log_err "Start crust-smanager upgrade failed"
+                return 1
+            fi
+        fi
     fi
     return 0
 }
 
 stop_smanager()
 {
+    local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/auto_smanager.sh" | grep -v grep | awk '{print $2}')
+	if [ x"$upgrade_pid" != x"" ]; then
+		kill -9 $upgrade_pid
+	fi
+    
     check_docker_status crust-smanager
     if [ $? -ne 1 ]; then
         log_info "Stopping crust smanager service"
@@ -550,6 +568,14 @@ logs()
         fi
         docker logs ${array[@]} -f crust-sworker-b
         logs_help_flag=$?
+    elif [ x"$name" == x"smanager-upshell" ]; then
+		local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/auto_smanager.sh" | grep -v grep | awk '{print $2}')
+		if [ x"$upgrade_pid" == x"" ]; then
+			log_info "Service crust smanager upgrade shell is not started now"
+			return 0
+		fi
+		tail -f $basedir/auto_smanager.log
+	else
     else
         logs_help
         return 1
@@ -722,6 +748,7 @@ EOF
 smanager_status()
 {
     local smanager_status="stop"
+    local upgrade_shell_status="stop"
 
     check_docker_status crust-smanager
     res=$?
@@ -731,11 +758,17 @@ smanager_status()
         smanager_status="exited"
     fi
 
+    local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/auto_smanager.sh" | grep -v grep | awk '{print $2}')
+	if [ x"$upgrade_pid" != x"" ]; then
+		upgrade_shell_status="running->${upgrade_pid}"
+	fi
+
 cat << EOF
 -----------------------------------------
     Service                    Status
 -----------------------------------------
     smanager                   ${smanager_status}
+    upgrade-shell              ${upgrade_shell_status}
 -----------------------------------------
 EOF
 }
