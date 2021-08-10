@@ -41,7 +41,7 @@ async function genSmanagerConfig(config, outputCfg) {
       network_mode: 'host',
       restart: 'unless-stopped',
       environment: {
-        SMANAGER_CONFIG: "/config",
+        SMANAGER_CONFIG: "/config/smanager_config.json",
       },
       volumes: [
         './smanager:/config',
