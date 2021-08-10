@@ -575,7 +575,6 @@ logs()
 			return 0
 		fi
 		tail -f $basedir/auto_smanager.log
-	else
     else
         logs_help
         return 1
