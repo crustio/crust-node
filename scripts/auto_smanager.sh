@@ -6,12 +6,13 @@ auto_smanager_main()
 {
     log_info "Start smanager auto upgrade task."
     local rnd=$(rand 1 200)
+    log_info "Random sleep $rnd s"
     sleep $rnd
     while :
     do
         sleep 900
         log_info "New check Round"
-        
+
         upgrade_docker_image crust-smanager $node_type
         if [ $? -ne 0 ]; then
             continue
