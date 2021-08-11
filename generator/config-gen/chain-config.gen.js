@@ -24,6 +24,8 @@ async function genChainComposeConfig(config) {
     '19933',
     '--ws-port',
     '19944',
+    '--execution',
+    'WASM',
     '--wasm-execution',
     'compiled',
     '--in-peers',
