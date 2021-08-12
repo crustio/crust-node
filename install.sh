@@ -109,6 +109,8 @@ create_node_paths()
     mkdir -p $installdir
     mkdir -p $disksdir
     chmod 777 $disksdir
+    mkdir -p $datadir
+    chmod 777 $datadir
     for((i=1;i<=128;i++));
     do
         mkdir -p $disksdir/$i
