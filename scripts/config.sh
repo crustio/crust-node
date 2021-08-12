@@ -51,8 +51,11 @@ config_set_all()
         sed -i '6c \\  sworker: "disable"' $configfile &>/dev/null
         sed -i '8c \\  smanager: "disable"' $configfile &>/dev/null
         sed -i '10c \\  ipfs: "disable"' $configfile &>/dev/null
+        local old_mode=`cat $basedir/etc/mode.conf`
+        sed -i 's/'$old_mode'/'$mode'/g' $basedir/etc/mode.conf
         log_success "Set crust node mode: '$mode' successfully"
-        log_success "Set configurations done"
+        log_success "Set configurations successfully"
+        config_generate
         return
     elif [ x"$mode" == x"isolation" ]; then
         sed -i '4c \\  chain: "authority"' $configfile &>/dev/null
