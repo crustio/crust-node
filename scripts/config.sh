@@ -99,7 +99,7 @@ config_set_all()
         if [ x"$mode" == x"member" ]; then
             read -p "Enter the password of account: " identity_password
         else
-            read -p "Enter the password of controller account: " identity_password
+            read -p "Enter the password of member account: " identity_password
         fi
 
         identity_password=`echo "$identity_password"`
