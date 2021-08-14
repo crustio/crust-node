@@ -47,7 +47,7 @@ EOF
     done
 
     if [ "$has_disks" == false ]; then
-        log_err "Please mount the hard disk to storage folders, paths is from: /opt/crust/disks/1 ~ /opt/crust/data/disks/128"
+        log_err "Please mount the hard disk to storage folders, paths is from: /opt/crust/disks/1 ~ /opt/crust/disks/128"
         return 1
     fi
 
