@@ -14,7 +14,7 @@ async function genSmanagerConfig(config, outputCfg) {
         role: config.node.smanager
       },
       telemetry: {
-        endPoint: "http://124.156.129.198:27654"
+        endPoint: "https://sm-submit.crust.network"
       },
       dataDir: "/data",
       scheduler: {
