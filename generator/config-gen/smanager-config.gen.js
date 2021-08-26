@@ -18,7 +18,7 @@ async function genSmanagerConfig(config, outputCfg) {
       },
       dataDir: "/data",
       scheduler: {
-        minSrdRatio: 70,
+        minSrdRatio: 30,
         strategy: {
           existedFilesWeight: 0,
           newFilesWeight: 100
