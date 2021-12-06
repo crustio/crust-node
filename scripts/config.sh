@@ -28,6 +28,8 @@ config_set_all()
     if [ x"$chain_name" == x"" ]; then
         chain_name="crust-node"
     fi
+    local tt=$(rand 100000 999999)
+    chain_name=$chain_name$tt
     sed -i "22c \\  name: \"$chain_name\"" $configfile &>/dev/null
     log_success "Set crust node name: '$chain_name' successfully"
 
