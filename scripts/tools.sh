@@ -9,7 +9,7 @@ Crust tools usage:
     help                                                       show help information
     space-info                                                 show information about data folders
     rotate-keys                                                generate session key of chain node
-    upgrade-image {chain|api|smanager|ipfs|c-gen|sworker}      upgrade one docker image
+    upgrade-image {chain|api|smanager|ipfs|c-gen|sw}           upgrade one docker image
     sworker-ab-upgrade {code}                                  sworker AB upgrade
     workload                                                   show workload information
     file-info {all|valid|lost|pending|{cid}} {output-file}     show file information
@@ -220,7 +220,7 @@ upgrade_image()
         if [ $? -ne 0 ]; then
             return 1
         fi
-    elif [ x"$1" == x"sworker" ]; then
+    elif [ x"$1" == x"sw" ]; then
         upgrade_docker_image crust-sworker $2
         if [ $? -ne 0 ]; then
             return 1
