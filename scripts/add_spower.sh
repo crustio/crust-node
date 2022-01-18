@@ -230,7 +230,8 @@ trap 'rm $TMPFILE $TMPFILE2' EXIT
 echo "INFO: get files from subsquid..."
 member_acc=0
 file_num=0
-fetched_latest_blk=0
+fetched_lest_order_blk=0
+fetched_lest_report_blk=0
 # Get previous meta
 if [ -s $prev_meta_file ]; then
     for el in $(cat $prev_meta_file 2>/dev/null); do
@@ -252,7 +253,7 @@ for id in ${member_ids[@]}; do
 done
 for id in ${member_ids[@]}; do
     ((member_acc++))
-    printf "%s" "INFO: id:'$id' files from subscan...$member_acc/${#member_ids[@]}"
+    printf "%s" "INFO: id:'$id' files from subsquid...$member_acc/${#member_ids[@]}"
     lest_report_blk=0
     lest_order_blk=0
 
@@ -263,7 +264,7 @@ for id in ${member_ids[@]}; do
         cond="(where:{blockNum_gt:$blk_num})"
     fi
     curl -s -XPOST -H "content-type: application/json; charset=utf-8" 'https://app.gc.subsquid.io/beta/crust/001/graphql' --data-raw '{"query": "query MyQuery {\n  accountById(id: \"'$id'\") {\n    workReports'$cond' {\n      addedFiles\n      deletedFiles\n    blockNum\n    }\n  }\n}"}'  > $TMPFILE
-    if [ x"$(cat $TMPFILE | jq -r ".data.accountById.workReports|length")" = x"0" ]; then
+    if [ x"$(cat $TMPFILE | jq -r '.data.accountById.workReports|length')" = x"0" ]; then
         echo " No more files can be got from block:${id_2_lblk[$id]}"
         continue
     elif ! cat $TMPFILE | jq . &>/dev/null; then
@@ -314,11 +315,14 @@ for id in ${member_ids[@]}; do
     if [ $lest_report_blk -gt 0 ]; then
         id_2_lblk[$id]=$lest_report_blk
     fi
-    fetched_latest_blk=$(max $fetched_latest_blk $lest_order_blk)
+    fetched_lest_order_blk=$(max $fetched_lest_order_blk $lest_order_blk)
+    fetched_lest_report_blk=$(max $fetched_lest_report_blk $lest_report_blk)
 done
 cat $TMPFILE2 | sort | uniq > $owned_cids_file
+# In case of chain unstability
+fetched_lest_order_blk=$(min $fetched_lest_order_blk $fetched_lest_report_blk)
 if [ x"$fetch_start_blk_n" = x"" ]; then
-    fetch_start_blk_n=$fetched_latest_blk
+    fetch_start_blk_n=$fetched_lest_order_blk
 fi
 if [ x"$fetch_start_blk_o" = x"" ]; then
     fetch_start_blk_o=$fetch_start_blk_n
