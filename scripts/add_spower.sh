@@ -97,7 +97,6 @@ function usage()
 basedir=$(cd `dirname $0`; pwd)
 spower_dir=$basedir/spower
 TMPFILE=$spower_dir/tmp
-TMPFILE2=$spower_dir/tmp2
 owned_cids_file=$spower_dir/owned_cids
 add_files_script=$spower_dir/add_files.sh
 prev_meta_file=$spower_dir/prev_meta
@@ -211,7 +210,13 @@ if [ x"$owner_id" = x"" ] || [ ${#owner_id} -ne ${#account} ]; then
     exit 1
 fi
 echo "INFO: current account's owner:'$owner_id'"
-member_ids=($(curl -s -XPOST https://crust.webapi.subscan.io/api/scan/swork/group/members --data-raw '{"row": 1000, "page": 0, "group_owner": "'$owner_id'"}' | jq -r '.data.list|.[]|.account_id' | sort))
+# If subscan api key indicated, replace this line with it. %SUBSCANAPIKEY%
+if [ x"$SUBSCANAPIKEY" != x"" ]; then
+    subscan_header="--header 'X-API-Key: $SUBSCANAPIKEY'"
+else
+    echo "WARN: no subscan api key indicated which may result in querying owner member failed. You can set value for SUBSCANAPIKEY env."
+fi
+member_ids=($(curl -s -XPOST 'https://crust.webapi.subscan.io/api/scan/swork/group/members' $subscan_header --data-raw '{"row": 1000, "page": 0, "group_owner": "'$owner_id'"}' | jq -r '.data.list|.[]|.account_id' | sort))
 if [ ${#member_ids[@]} -le 0 ]; then
     echo "INFO: no member has been found"
     exit 0
@@ -220,13 +225,10 @@ echo "INFO: get ${#member_ids[@]} members for owner"
 
 ### Get all owner files
 true > $TMPFILE
-true > $TMPFILE2
-if [ -s "$owned_cids_file" ]; then
-    cat $owned_cids_file > $TMPFILE2
-else
+if [ ! -e "$owned_cids_file" ]; then
     rm $prev_meta_file &>/dev/null
 fi
-trap 'rm $TMPFILE $TMPFILE2' EXIT
+trap 'rm $TMPFILE' EXIT
 echo "INFO: get files from subsquid..."
 member_acc=0
 file_num=0
@@ -246,7 +248,6 @@ fi
 for id in ${member_ids[@]}; do
     if ! echo ${member_ids[@]} | grep $id &>/dev/null; then
         rm -rf $spower_dir &>/dev/null
-        true > $TMPFILE2
         unset id_2_lblk
         declare -A id_2_lblk
     fi
@@ -301,7 +302,9 @@ for id in ${member_ids[@]}; do
             exist=false
             if [ x"${acc_map[$el]}" != x"" ]; then
                 cid=$(echo $el | xxd -r -p)
-                echo $cid >> $TMPFILE2
+                if ! grep $cid $owned_cids_file &>/dev/null; then
+                    echo $cid >> $owned_cids_file
+                fi
                 exist=true
             fi
         elif $exist; then
@@ -318,7 +321,6 @@ for id in ${member_ids[@]}; do
     fetched_lest_order_blk=$(max $fetched_lest_order_blk $lest_order_blk)
     fetched_lest_report_blk=$(max $fetched_lest_report_blk $lest_report_blk)
 done
-cat $TMPFILE2 | sort | uniq > $owned_cids_file
 # In case of chain unstability
 fetched_lest_order_blk=$(min $fetched_lest_order_blk $fetched_lest_report_blk)
 if [ x"$fetch_start_blk_n" = x"" ]; then
@@ -338,7 +340,6 @@ new_order_size=0
 enough=false
 declare -A id_2_cids
 declare -A id_2_size
-true > $add_files_script
 if [ $break_cond -eq 0 ]; then
     cond="{_gt:\\\"$fetch_start_blk_n\\\"}},order_by:{blockNumber:asc}"
     echo "INFO: search newer order from block:$fetch_start_blk_n"
@@ -440,7 +441,6 @@ EOF
 fi
 chmod +x $add_files_script
 {
-    true > $prev_meta_file
     for id in ${!id_2_lblk[@]}; do
         echo "id_2_lblk[$id]=${id_2_lblk[$id]}"
     done
