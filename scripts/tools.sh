@@ -18,6 +18,7 @@ Crust tools usage:
     ipfs {...}                                                 ipfs command, for example 'ipfs pin ls', 'ipfs swarm peers'
     watch-chain                                                generate watch chain node docker-compose file and show help
     set-sworker-debug {true|false}                             set sworker debug
+    spower                                                     get spower script
 EOF
 }
 
@@ -478,6 +479,11 @@ PS:
 EOF
 }
 
+spower()
+{
+    $basedir/scripts/add_spower.sh $@
+}
+
 tools()
 {
     case "$1" in
@@ -515,6 +521,10 @@ tools()
         ipfs)
             shift
             ipfs_cmd $@
+            ;;
+        spower)
+            shift
+            spower $@
             ;;
         *)
             tools_help
