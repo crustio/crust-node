@@ -69,6 +69,22 @@ function upgrade_docker_image()
     return 0
 }
 
+function getSGXENCLAVEMODE()
+{
+    if ! dpkg -l | grep cpuid &>/dev/null; then
+        apt-get install -y cpuid
+    fi
+    local sgx_type="epid"
+    for el in $(cpuid | grep -i "sgx2 supported" | awk '{print $NF}'); do
+        sgx_type="ecdsa"
+        if [ x"$el" != x"true" ]; then
+            sgx_type="epid"
+            break
+        fi
+    done
+    echo $sgx_type
+}
+
 check_port() {
     local port=$1
     local grep_port=`netstat -tlpn | grep "\b$port\b"`
