@@ -237,6 +237,10 @@ start_sworker()
     fi
 
     if [ -d "$builddir/sworker" ]; then
+        local sgx_type=$(getSGXENCLAVEMODE) 
+        if [ x"$sgx_type" = x"ecdsa" ]; then
+            sed -i 's/isgx/sgx/g' $composeyaml
+        fi
         local a_or_b=`cat $basedir/etc/sWorker.ab`
         check_docker_status crust-sworker-$a_or_b
         if [ $? -eq 0 ]; then
@@ -256,7 +260,11 @@ start_sworker()
             fi
         fi
 
-        if [ ! -e "/dev/isgx" ]; then
+        local device_path="/dev/isgx"
+        if [ x"$sgx_type" = x"ecdsa" ]; then
+            device_path="/dev/sgx"
+        fi
+        if [ ! -e "$device_path" ]; then
             log_err "Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
             return 1
         fi

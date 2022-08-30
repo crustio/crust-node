@@ -93,5 +93,11 @@ function log_err()
 install_sgx_driver
 install_docker
 
-docker run -it --rm=true --device=/dev/isgx registry.cn-hangzhou.aliyuncs.com/crustio/sgx-detect:latest
+sgx_type=$(getSGXENCLAVEMODE)
+device_path="/dev/isgx"
+if [ x"$sgx_type" = x"ecdsa" ]; then
+    device_path="/dev/sgx"
+fi
+
+docker run -it --rm=true --device=$device_path registry.cn-hangzhou.aliyuncs.com/crustio/sgx-detect:latest
 exit $?
