@@ -132,8 +132,22 @@ install_crust_node()
         cp $localbasedir/etc/watch-chain.yaml $installdir/etc/watch-chain.yaml
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
-            echo "Uninstall old crust node"
-            $installdir/scripts/uninstall.sh
+            echo "An existing crust node is found, uninstall it would need to re-configure the node from beginning."
+            echo "If you just want to update the crust node scripts but keep the current configuration, please rerun the script with --update option."
+
+            read -p "Do you want to uninstall the existing crust node? [Y/n]" response
+            if [[ $response =~ ^[Yy]$ ]]; then
+                echo "Backup old crust node to ./bak"
+                rm -rf $localbasedir/bak
+                mkdir -p $localbasedir/bak
+                cp -r $installdir $localbasedir/bak/
+
+                echo "Uninstall old crust node"
+                $installdir/scripts/uninstall.sh
+            else
+                echo "Exiting"
+                exit 0
+            fi
         fi
 
         echo "Install new crust node"
