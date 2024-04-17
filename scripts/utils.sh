@@ -1,7 +1,7 @@
 #!/bin/bash
 
 node_type="mainnet"
-node_version="v1.0.0"
+node_version="v1.1.0"
 aliyun_address="registry.cn-hangzhou.aliyuncs.com"
 
 basedir=/opt/crust/crust-node
@@ -75,7 +75,7 @@ function getSGXENCLAVEMODE()
         apt-get install -y cpuid
     fi
     local sgx_type="epid"
-    for el in $(cpuid | grep -i "sgx2 supported" | awk '{print $NF}'); do
+    for el in $(cpuid | grep -i "SGX launch config" | awk '{print $NF}'); do
         sgx_type="ecdsa"
         if [ x"$el" != x"true" ]; then
             sgx_type="epid"
