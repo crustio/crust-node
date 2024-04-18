@@ -12,6 +12,10 @@ async function genSworkerConfig(config, outputCfg) {
     base_path: "/opt/crust/data/sworker",
     base_url: "http://127.0.0.1:12222/api/v0",
     chain: getSharedChainConfig(config),
+    dcap: {
+      base_url: "https://dcap-attestation.crust.network",
+      report_path: "/attestation/report"
+    },
     data_path: dataPaths,
     ipfs_url: "http://127.0.0.1:5001/api/v0",
   }
