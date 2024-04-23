@@ -85,6 +85,22 @@ function getSGXENCLAVEMODE()
     echo $sgx_type
 }
 
+# Linux Kernel >= 5.11 has included the SGXDriver by default
+function checkKernelSupportSGXDriver()
+{
+    local kernel_version=`uname -r`
+    local kernel_major=`echo $kernel_version | awk -F. '{print $1}'`
+    local kernel_minor=`echo $kernel_version | awk -F. '{print $2}'`
+
+    if [ $kernel_major -gt 5 ] || [ $kernel_major -eq 5 -a $kernel_minor -ge 11 ]; then
+        if [ -e "/dev/sgx_enclave" ] && [ -e "/dev/sgx_provision" ]; then 
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
 check_port() {
     local port=$1
     local grep_port=`netstat -tlpn | grep "\b$port\b"`
