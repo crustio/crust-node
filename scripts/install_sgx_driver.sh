@@ -2,6 +2,12 @@
 
 source /opt/crust/crust-node/scripts/utils.sh
 
+# If the kernel supports SGXDriver by default, then skip install sgx driver
+if checkKernelSupportSGXDriver; then
+   echo "Kernel supports SGXDriver by default, skip install sgx driver"
+   exit 0
+fi
+
 is_16=`cat /etc/issue | grep 16.04`
 is_18=`cat /etc/issue | grep 18.04`
 is_20=`cat /etc/issue | grep 20.04`
@@ -50,7 +56,7 @@ if [ $? -ne 0 ]; then
 fi
 
 log_info "Installing denpendencies..."
-apt-get install -y wget build-essential kmod linux-headers-`uname -r`
+apt-get install -y wget build-essential kmod dkms linux-headers-`uname -r`
 if [ $? -ne 0 ]; then
     log_err "Install sgx driver dependencies failed"
     exit 1
