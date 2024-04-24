@@ -237,10 +237,6 @@ start_sworker()
     fi
 
     if [ -d "$builddir/sworker" ]; then
-        local sgx_type=$(getSGXENCLAVEMODE) 
-        if [ x"$sgx_type" = x"ecdsa" ]; then
-            sed -i 's/isgx/sgx/g' $composeyaml
-        fi
         local a_or_b=`cat $basedir/etc/sWorker.ab`
         check_docker_status crust-sworker-$a_or_b
         if [ $? -eq 0 ]; then
@@ -252,23 +248,62 @@ start_sworker()
             return 1
         fi
 
-        if [ -f "$scriptdir/install_sgx_driver.sh" ]; then
-            $scriptdir/install_sgx_driver.sh
-            if [ $? -ne 0 ]; then
-                log_err "Install sgx dirver failed"
+        # Check the sgx driver status
+        local attestation_mode=$(getSGXAttestationMode)
+        local kernel_sgx_driver=false
+        local driver_exists=false
+        if [ x"$attestation_mode" = x"ecdsa" ]; then
+            if checkKernelSupportSGXDriver; then
+                driver_exists=true
+                kernel_sgx_driver=true
+            else
+                # Kernel doesn't support SGX DCAP driver, check Github version SGX driver
+                /sbin/modinfo intel_sgx &> /dev/null
+                if [ $? == "0" ] && [ -e "/dev/sgx" ]; then
+                    driver_exists=true
+                fi
+        else
+            # Check SGX OOT driver for EPID mode
+            /sbin/modinfo isgx &> /dev/null
+            if [ $? == "0" ] && [ -e "/dev/isgx" ]; then
+                driver_exists=true
+            fi
+        fi
+
+        if ! $driver_exists; then
+            # Driver not exists, install it
+            if [ -f "$scriptdir/install_sgx_driver.sh" ]; then
+                $scriptdir/install_sgx_driver.sh
+                if [ $? -ne 0 ]; then
+                    log_err "Install SGX driver failed, please check your CPU and BIOS to determine if they support SGX."
+                    return 1
+                fi
+            else
+                log_err "SGX driver doesn't exists but install_sgx_driver.sh script is missing"
                 return 1
             fi
         fi
 
-        local device_path="/dev/isgx"
-        if [ x"$sgx_type" = x"ecdsa" ]; then
-            device_path="/dev/sgx"
+        # Update the docker-compose file
+        # Remove all devices mappings first
+        sed -i '/devices:/,/volumes:/ { /^ *- /d }' $composeyaml
+        # Add the new devices mappings per different mode
+        if [ x"$attestation_mode" = x"ecdsa" ]; then
+            if $kernel_sgx_driver; then
+                sed -i '/devices:/a \ \ \ \ \ \ - \x27/dev/sgx_enclave:/dev/sgx_enclave\x27\n\ \ \ \ \ \ - \x27/dev/sgx_provision:/dev/sgx_provision\x27' $composeyaml
+            else
+                sed -i '/devices:/a \ \ \ \ \ \ - \x27/dev/sgx:/dev/sgx\x27' $composeyaml
+            fi
+        else
+            sed -i '/devices:/a \ \ \ \ \ \ - \x27/dev/isgx:/dev/isgx\x27' $composeyaml
         fi
-        if [ ! -e "$device_path" ]; then
-            log_err "Your device can't install sgx dirver, please check your CPU and BIOS to determine if they support SGX."
-            return 1
+
+        sworker_args=$@
+        if [ x"$attestation_mode" = x"ecdsa" ]; then
+            sworker_args=$@" --ecdsa"
         fi
-        EX_SWORKER_ARGS=$@ docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
+
+        EX_SWORKER_ARGS=$sworker_args docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
         if [ $? -ne 0 ]; then
             log_err "Start crust-sworker-$a_or_b failed"
             return 1

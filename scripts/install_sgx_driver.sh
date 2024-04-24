@@ -2,16 +2,19 @@
 
 source /opt/crust/crust-node/scripts/utils.sh
 
-# If the kernel supports SGXDriver by default, then skip install sgx driver
-if checkKernelSupportSGXDriver; then
-   echo "Kernel supports SGXDriver by default, skip install sgx driver"
-   exit 0
-fi
-
 is_16=`cat /etc/issue | grep 16.04`
 is_18=`cat /etc/issue | grep 18.04`
 is_20=`cat /etc/issue | grep 20.04`
-sgx_type=$(getSGXENCLAVEMODE)
+
+attestation_mode=$(getSGXAttestationMode)
+if [ x"$attestation_mode" = x"ecdsa" ]; then
+    # If the kernel supports SGX DCAP driver, then skip install sgx driver
+    if checkKernelSupportSGXDriver; then
+        echo "Kernel supports SGX DCAP driver by default, skip install sgx driver"
+        exit 0
+    fi
+fi
+
 if [ x"$is_16" != x"" ]; then
     if [ x"$sgx_type" = x"ecdsa" ]; then
         driverbin=sgx_linux_x64_driver_1.36.2.bin
@@ -66,7 +69,7 @@ log_info "Give sgx driver executable permission"
 chmod +x $driverbin
 
 log_info "Installing sgx driver..."
-if [ x"$sgx_type" = x"ecdsa" ]; then
+if [ x"$attestation_mode" = x"ecdsa" ]; then
     # The ecdsa driver would fail with 'kernel module is in use' if a previous ecdsa driver or oot driver is still running
     # So we need to uninstall the previous driver first
     for mod in $(lsmod | grep -i sgx | awk '{print $1}'); do
