@@ -312,13 +312,26 @@ sworker_ab_upgrade()
         done
     fi
 
-    # Get code from sworker
+    # Get id_info from sworker
     local id_info=`curl --max-time 30 $sworker_base_url/enclave/id_info 2>/dev/null`
     if [ x"$id_info" = x"" ]; then
         log_err "Please check sworker logs to find more information"
         return 1
     fi
 
+    # Check attestation mode compatibility
+    local running_attestation_mode=`echo $id_info | jq .attestation_mode`
+    if [ x"$running_attestation_mode" = x"" ] || [ x"$running_attestation_mode" = x"null" ]; then
+        running_attestation_mode="epid"
+    fi
+    local config_attestation_mode=$(getSGXAttestationMode)
+    if [ x"$running_attestation_mode" != x"$config_attestation_mode" ]; then
+        log_err "Cannot run sworker-ab-upgrade between EPID mode and ECDSA mode, because SGX OOT driver and DCAP driver cannot run simultaneously."
+        log_err "Please check your sWorker.attestation_mode configuration."
+        return 1
+    fi
+    
+    # Get code from sworker
     local mrenclave=`echo $id_info | jq .mrenclave`
     if [ x"$mrenclave" = x"" ] || [ ! ${#mrenclave} -eq 66 ]; then
         log_err "Please check sworker logs to find more information"
@@ -403,11 +416,17 @@ sworker_ab_upgrade()
     if [ $resa -eq 0 ] && [ $resb -eq 0 ] ; then
         log_info "sWorker A/B upgrade is already in progress"
     else
+        # The new sworker should run under the same attestion mode as the old sworker during ab-upgrade
+        local ecdsa_option=""
+        if [ x"$running_attestation_mode" = x"ecdsa" ] ; then
+            ecdsa_option="--ecdsa"
+        fi
+
         docker stop crust-sworker-$a_or_b &>/dev/null
         docker rm crust-sworker-$a_or_b &>/dev/null
 
         shift
-        EX_SWORKER_ARGS="--upgrade $@" docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
+        EX_SWORKER_ARGS="--upgrade $ecdsa_option $@" docker-compose -f $composeyaml up -d crust-sworker-$a_or_b
         
         if [ $? -ne 0 ]; then
             log_err "Setup new sWorker failed"
