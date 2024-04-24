@@ -87,7 +87,7 @@ function getSGXENCLAVEMODE()
 
 function getSGXAttestationMode()
 {
-    local attestation_mode=`cat $basedir/etc/sWorker.attestation_mode`
+    local attestation_mode=`cat $basedir/etc/sWorker.attestation_mode 2>/dev/null`
 
     if [ x"$attestation_mode" = x"" ]; then
         attestation_mode="epid"
