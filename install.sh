@@ -5,6 +5,7 @@ localscriptdir=$localbasedir/scripts
 installdir=/opt/crust/crust-node
 disksdir=/opt/crust/disks
 datadir=/opt/crust/data
+bin_file=/usr/bin/crust
 source $localscriptdir/utils.sh
 
 help()
@@ -121,7 +122,6 @@ create_node_paths()
 install_crust_node()
 {
     log_info "--------------Install crust node-------------"
-    local bin_file=/usr/bin/crust
      
     if [ -d "$installdir" ] && [ -f "$bin_file" ] && [ x"$update" == x"true" ]; then
         echo "Update crust node"
@@ -132,9 +132,9 @@ install_crust_node()
         cp $localbasedir/etc/watch-chain.yaml $installdir/etc/watch-chain.yaml
     else
         if [ -f "$installdir/scripts/uninstall.sh" ]; then
-            echo "An existing crust node is found, uninstall it would need to re-configure the node from beginning."
-            echo "If you just want to update the crust node scripts but keep the current configuration, please rerun the script with --update option."
-
+            log_info "[WARN] An existing crust node is found, uninstall it would need to re-configure the node from beginning."
+            log_info "[WARN] If you just want to update the crust node scripts but keep the current configuration, please rerun the script with --update option."
+        
             read -p "Do you want to uninstall the existing crust node? [Y/n]" response
             if [[ $response =~ ^[Yy]$ ]]; then
                 echo "Backup old crust node to ./bak"
@@ -160,6 +160,10 @@ install_crust_node()
 
         echo "Change crust node configurations"
         sed -i 's/en/'$region'/g' $installdir/etc/region.conf
+
+        echo "Set default SGX Attestation mode"
+        local default_attestation_mode=$(getSGXENCLAVEMODE)
+        echo $default_attestation_mode > $installdir/etc/sWorker.attestation_mode
     fi
 
     echo "Install crust command line tool"
@@ -187,6 +191,10 @@ while true ; do
             shift 2
             ;;
         --update)
+            if [ ! -d "$installdir" ] || [ ! -f "$bin_file" ]; then
+                log_err "Crust node is not installed, --update option is not applicable."
+                exit 1
+            fi
             update="true"
             shift 1
             ;;

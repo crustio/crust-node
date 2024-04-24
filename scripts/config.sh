@@ -12,12 +12,17 @@ Crust config usage:
     generate                              generate new configurations
     chain-port {port}                     set chain port and generate new configuration, default is 30888
     conn-chain {ws}                       set conneted chain ws and generate new configuration, default is ws://127.0.0.1:19944
+    attestation-mode {epid/ecdsa}         set sworker attestation mode
 EOF
 }
 
 config_show()
 {
     cat $configfile
+
+    echo ""
+    local attestation_mode=$(getSGXAttestationMode)
+    echo "attestation mode: $attestation_mode"
 }
 
 config_set_all()
@@ -114,6 +119,26 @@ config_set_all()
     sed -i '17c \\  password: "'$identity_password'"' $configfile &>/dev/null
 
     log_success "Set password successfully"
+
+    local attestation_mode=""
+    local default_attestation_mode=$(getSGXENCLAVEMODE)
+    while true
+    do
+        read -p "Enter sworker attestation mode from 'epid/ecdsa'(default:$default_attestation_mode): " attestation_mode
+        
+        attestation_mode=`echo "$attestation_mode"`
+        if [ x"$attestation_mode" == x"" ]; then
+            attestation_mode=$default_attestation_mode
+            break
+        elif [ x"$attestation_mode" == x"epid" ] || [ x"$attestation_mode" == x"ecdsa" ]; then
+            break
+        else
+            log_err "Input error, please input epid/ecdsa"
+        fi
+    done
+    echo $attestation_mode > $basedir/etc/sWorker.attestation_mode
+    log_success "Set sworker attestation mode successfully"
+
     log_success "Set configurations successfully"
     
     # Generate configurations
@@ -143,6 +168,17 @@ config_chain_port()
     sed -i "24c \\  port: '$1'" $configfile &>/dev/null
     log_success "Set chain port '$1' successfully"
     config_generate
+}
+
+config_attestation_mode()
+{
+    if [ x"$1" = x"" ] || [[ x"$1" != x"epid" && x"$1" != x"ecdsa" ]]; then
+        log_err "Please give sworker attestation mode(epid/ecdsa)."
+        config_help
+        return 1
+    fi
+    echo $1 > $basedir/etc/sWorker.attestation_mode
+    log_success "Set attestation mode '$1' successfully"
 }
 
 config_generate()
@@ -219,6 +255,10 @@ config()
         chain-port)
             shift
             config_chain_port $@
+            ;;
+        attestation-mode)
+            shift
+            config_attestation_mode $@
             ;;
         generate)
             config_generate

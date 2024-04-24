@@ -85,6 +85,17 @@ function getSGXENCLAVEMODE()
     echo $sgx_type
 }
 
+function getSGXAttestationMode()
+{
+    local attestation_mode=`cat $basedir/etc/sWorker.attestation_mode`
+
+    if [ x"$attestation_mode" = x"" ]; then
+        attestation_mode="epid"
+    fi
+
+    echo $attestation_mode
+}
+
 # Linux Kernel >= 5.11 has included the SGXDriver by default
 function checkKernelSupportSGXDriver()
 {
