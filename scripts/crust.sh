@@ -262,6 +262,7 @@ start_sworker()
                 if [ $? == "0" ] && [ -e "/dev/sgx" ]; then
                     driver_exists=true
                 fi
+            fi
         else
             # Check SGX OOT driver for EPID mode
             /sbin/modinfo isgx &> /dev/null
