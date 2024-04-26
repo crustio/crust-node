@@ -16,7 +16,7 @@ if [ x"$attestation_mode" = x"ecdsa" ]; then
 fi
 
 if [ x"$is_16" != x"" ]; then
-    if [ x"$sgx_type" = x"ecdsa" ]; then
+    if [ x"$attestation_mode" = x"ecdsa" ]; then
         driverbin=sgx_linux_x64_driver_1.36.2.bin
         driverurl=https://download.01.org/intel-sgx/sgx-dcap/1.9/linux/distro/ubuntu16.04-server/$driverbin
     else
@@ -25,7 +25,7 @@ if [ x"$is_16" != x"" ]; then
     fi
     log_info "Current system is ubuntu 16.04"
 elif [ x"$is_18" != x"" ]; then
-    if [ x"$sgx_type" = x"ecdsa" ]; then
+    if [ x"$attestation_mode" = x"ecdsa" ]; then
         driverbin=sgx_linux_x64_driver_1.36.2.bin
         driverurl=https://download.01.org/intel-sgx/sgx-dcap/1.9/linux/distro/ubuntu18.04-server/$driverbin
     else
@@ -34,7 +34,7 @@ elif [ x"$is_18" != x"" ]; then
     fi
     log_info "Current system is ubuntu 18.04"
 elif [ x"$is_20" != x"" ]; then
-    if [ x"$sgx_type" = x"ecdsa" ]; then
+    if [ x"$attestation_mode" = x"ecdsa" ]; then
         driverbin=sgx_linux_x64_driver_1.36.2.bin
         driverurl=https://download.01.org/intel-sgx/sgx-dcap/1.9/linux/distro/ubuntu20.04-server/$driverbin
     else
@@ -71,11 +71,14 @@ chmod +x $driverbin
 log_info "Uninstall existing sgx driver..."
 # If both OOT driver the DCAP driver exists, sgx_init_enclave would fail to open sgx driver
 for mod in $(lsmod | grep -i sgx | awk '{print $1}'); do
+    log_info "Uninstall mod '$mod'..."
+
     rm -f $(find /lib/modules -name $mod.ko)
     /sbin/depmod
     sed -i '/^$mod$/d' /etc/modules
     rm -f /etc/sysconfig/modules/$mod.modules
     rm -f /etc/modules-load.d/$mod.conf
+    /opt/intel/sgxdriver/uninstall.sh
 done
 
 log_info "Installing sgx driver..."
