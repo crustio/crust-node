@@ -68,18 +68,17 @@ fi
 log_info "Give sgx driver executable permission"
 chmod +x $driverbin
 
+log_info "Uninstall existing sgx driver..."
+# If both OOT driver the DCAP driver exists, sgx_init_enclave would fail to open sgx driver
+for mod in $(lsmod | grep -i sgx | awk '{print $1}'); do
+    rm -f $(find /lib/modules -name $mod.ko)
+    /sbin/depmod
+    sed -i '/^$mod$/d' /etc/modules
+    rm -f /etc/sysconfig/modules/$mod.modules
+    rm -f /etc/modules-load.d/$mod.conf
+done
+
 log_info "Installing sgx driver..."
-if [ x"$attestation_mode" = x"ecdsa" ]; then
-    # The ecdsa driver would fail with 'kernel module is in use' if a previous ecdsa driver or oot driver is still running
-    # So we need to uninstall the previous driver first
-    for mod in $(lsmod | grep -i sgx | awk '{print $1}'); do
-        rm -f $(find /lib/modules -name $mod.ko)
-        /sbin/depmod
-        sed -i '/^$mod$/d' /etc/modules
-        rm -f /etc/sysconfig/modules/$mod.modules
-        rm -f /etc/modules-load.d/$mod.conf
-    done
-fi
 ./$driverbin
 if [ $? -ne 0 ]; then
     log_err "Install sgx dirver bin failed"
