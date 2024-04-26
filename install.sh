@@ -21,7 +21,7 @@ exit 0
 
 install_depenencies()
 {
-    if [ x"$update" == x"true" ]; then
+    if [[ x"$update" == x"true" || x"$update_ecdsa" == x"true" ]]; then
         return 0
     fi
 
@@ -63,7 +63,8 @@ install_depenencies()
 
 download_docker_images()
 {
-    if [ x"$update" == x"true" ]; then
+    # --update-ecdsa option need to pull new docker images, so don't check update_ecdsa flag here
+    if [ x"$update" == x"true" ] ; then
         return 0
     fi
 
@@ -122,8 +123,32 @@ create_node_paths()
 install_crust_node()
 {
     log_info "--------------Install crust node-------------"
-     
-    if [ -d "$installdir" ] && [ -f "$bin_file" ] && [ x"$update" == x"true" ]; then
+
+    if [[ (-d "$installdir") && (-f "$bin_file") && (x"$update" == x"true" || x"$update_ecdsa" == x"true") ]]; then
+        if [ x"$update_ecdsa" == x"true" ]; then
+            log_info "[ATTENTION] --update-ecdsa option would need to stop sworker and remove sworker data and disk path!"
+            log_info "[ATTENTION] /opt/crust/data/sworker and /opt/crust/disks will be removed!"
+            log_info "[ATTENTION] It would reset this member's storage power to 0!"
+
+            echo ""
+            read -p "Are you sure to continue? [Y/n]" response
+            if [[ $response =~ ^[Yy]$ ]]; then
+                echo "crust stop sworker..."
+                crust stop sworker
+
+                echo "rm -rf /opt/crust/data/sworker..."
+                rm -rf /opt/crust/data/sworker
+
+                echo "rm -rf /opt/crust/disks..."
+                rm -rf /opt/crust/disks
+
+                log_info "Data purge is done, start upgrading..."
+            else
+                echo "Exiting"
+                exit 0
+            fi
+        fi
+        
         echo "Update crust node"
         rm $bin_file
         rm -rf $installdir/scripts
@@ -160,11 +185,10 @@ install_crust_node()
 
         echo "Change crust node configurations"
         sed -i 's/en/'$region'/g' $installdir/etc/region.conf
-
-        echo "Set default SGX Attestation mode"
-        local default_attestation_mode=$(getSGXENCLAVEMODE)
-        echo $default_attestation_mode > $installdir/etc/sWorker.attestation_mode
     fi
+
+    echo "Set default SGX Attestation mode" 
+    echo $default_attestation_mode > $installdir/etc/sWorker.attestation_mode
 
     echo "Install crust command line tool"
     cp $localscriptdir/crust.sh /usr/bin/crust
@@ -180,6 +204,8 @@ fi
 
 region="en"
 update="false"
+update_ecdsa="false"
+default_attestation_mode=$(getSGXENCLAVEMODE)
 
 while true ; do
     case "$1" in
@@ -196,6 +222,18 @@ while true ; do
                 exit 1
             fi
             update="true"
+            shift 1
+            ;;
+        --update-ecdsa)
+            if [ ! -d "$installdir" ] || [ ! -f "$bin_file" ]; then
+                log_err "Crust node is not installed, --update-ecdsa option is not applicable."
+                exit 1
+            fi
+            if [ x"$default_attestation_mode" != x"ecdsa" ]; then
+                log_err "This server doesn't support ECDSA-based DCAP attestation. --update-ecdsa option is not applicable."
+                exit 1
+            fi
+            update_ecdsa="true"
             shift 1
             ;;
         "")
