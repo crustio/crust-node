@@ -1,7 +1,7 @@
 #!/bin/bash
 
 node_type="mainnet"
-node_version="v2.0.0"
+node_version="v2.0.1"
 aliyun_address="registry.cn-hangzhou.aliyuncs.com"
 
 basedir=/opt/crust/crust-node
