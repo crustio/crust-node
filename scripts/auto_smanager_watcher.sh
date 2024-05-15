@@ -2,7 +2,7 @@
 
 source /opt/crust/crust-node/scripts/utils.sh
 
-local upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/auto_smanager.sh" | grep -v grep | awk '{print $2}')
+upgrade_pid=$(ps -ef | grep "/opt/crust/crust-node/scripts/auto_smanager.sh" | grep -v grep | awk '{print $2}')
 if [ x"$upgrade_pid" = x"" ]; then
     log_info "[WARN] auto_smanager.sh script is not running! Run it now"
 
