@@ -72,7 +72,7 @@ function upgrade_docker_image()
 function getSGXENCLAVEMODE()
 {
     if ! dpkg -l | grep cpuid &>/dev/null; then
-        apt-get install -y cpuid
+        apt-get install -y cpuid > /dev/null 2>&1
     fi
     local sgx_type="epid"
     for el in $(cpuid | grep -i "SGX launch config" | awk '{print $NF}'); do
