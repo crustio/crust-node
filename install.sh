@@ -33,7 +33,7 @@ install_depenencies()
     fi
 
     log_info "------------Install depenencies--------------"
-    apt install -y git jq curl wget build-essential kmod linux-headers-`uname -r` vim
+    apt install -y git jq curl wget build-essential kmod net-tools linux-headers-`uname -r` vim
 
     if [ $? -ne 0 ]; then
         log_err "Install libs failed"
