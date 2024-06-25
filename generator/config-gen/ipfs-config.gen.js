@@ -32,7 +32,7 @@ async function genIpfsComposeConfig(config) {
         "max-size": "500m"
       }
     },
-    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs config Datastore.StorageMax 250GB && /usr/local/bin/start_ipfs bootstrap add /ip4/101.33.32.103/tcp/4001/p2p/12D3KooWEVFe1uGbgsDCgt9GV5sAC864RNPPDJLTnX9phoWHuV2d && /usr/local/bin/start_ipfs daemon --enable-gc --migrate=true"',
+    command: '/bin/sh -c "/usr/local/bin/start_ipfs config Addresses.Gateway /ip4/0.0.0.0/tcp/37773 && /usr/local/bin/start_ipfs config Datastore.StorageMax 250GB && /usr/local/bin/start_ipfs bootstrap add /ip4/101.33.32.103/tcp/4001/p2p/12D3KooWEVFe1uGbgsDCgt9GV5sAC864RNPPDJLTnX9phoWHuV2d && /usr/local/bin/start_ipfs bootstrap add /dns4/gw1.crust.network/tcp/4001/p2p/12D3KooWAEw4RBa1oRyqMXUCzyAbwgvDduRFvi1KzaahSb5Pk61q && /usr/local/bin/start_ipfs bootstrap add /dns4/gw2.crust.network/tcp/14001/p2p/12D3KooWMcAHcs97R49PLZjGUKDbP1fr9iijeepod8fkktHTLCgN && /usr/local/bin/start_ipfs daemon --enable-gc --migrate=true"',
   }
 }
 
