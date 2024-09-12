@@ -15,6 +15,7 @@ Usage:
     help                            show help information
     --update                        update crust node
     --registry {cn|en}              use registry to accelerate docker pull
+    --apiKey                        subscan api key
 EOF
 exit 0
 }
@@ -192,6 +193,9 @@ install_crust_node()
 
     echo "Install crust command line tool"
     cp $localscriptdir/crust.sh /usr/bin/crust
+    if [ x"$SUBSCANAPIKEY" != x"" ]; then
+        sed -i "/%SUBSCANAPIKEY%/ c SUBSCANAPIKEY=$SUBSCANAPIKEY" $installdir/scripts/add_spower.sh
+    fi
 
     log_success "------------Install success-------------"
 }
@@ -214,6 +218,13 @@ while true ; do
                 help
             fi
             region=$2
+            shift 2
+            ;;
+        --apiKey)
+            if [ x"$2" == x"" ]; then
+                help
+            fi
+            SUBSCANAPIKEY=$2
             shift 2
             ;;
         --update)
